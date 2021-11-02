@@ -1,179 +1,224 @@
 package edu.byu.cs.tweeter.client.model.service;
 
-import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.os.Message;
-import android.util.Log;
 
-import java.io.IOException;
-import java.io.Serializable;
 import java.util.List;
 
-import edu.byu.cs.tweeter.client.model.net.ServerFacade;
+import edu.byu.cs.tweeter.client.cache.Cache;
+import edu.byu.cs.tweeter.client.model.service.backgroundTask.FollowTask;
+import edu.byu.cs.tweeter.client.model.service.backgroundTask.GetFollowersCountTask;
+import edu.byu.cs.tweeter.client.model.service.backgroundTask.GetFollowersTask;
+import edu.byu.cs.tweeter.client.model.service.backgroundTask.GetFollowingCountTask;
+import edu.byu.cs.tweeter.client.model.service.backgroundTask.GetFollowingTask;
+import edu.byu.cs.tweeter.client.model.service.backgroundTask.IsFollowerTask;
+import edu.byu.cs.tweeter.client.model.service.backgroundTask.UnfollowTask;
 import edu.byu.cs.tweeter.model.domain.User;
-import edu.byu.cs.tweeter.model.net.TweeterRemoteException;
-import edu.byu.cs.tweeter.model.net.request.FollowingRequest;
-import edu.byu.cs.tweeter.model.net.response.FollowingResponse;
 
-/**
- * Contains the business logic for getting the users a user is following.
- */
 public class FollowService {
+    private static final int PAGE_SIZE = 10;
 
-    static final String URL_PATH = "/getfollowing";
+    //GET FOLLOWING
 
-    private final Observer observer;
+    public interface GetFollowingObserver extends ServiceObserver {
+        void followSucceeded(List<User> users, boolean hasMorePages, User lastFollowee);
+    }
 
-    private ServerFacade serverFacade;
-
-    /**
-     * An observer interface to be implemented by observers who want to be notified when
-     * asynchronous operations complete.
-     */
-    public interface Observer {
-        void handleSuccess(List<User> followees, boolean hasMorePages);
-        void handleFailure(String message);
-        void handleException(Exception exception);
+    public void getFollowing(User targetUser, int limit, User lastFollowee, GetFollowingObserver observer) {
+        GetFollowingTask getFollowingTask = new GetFollowingTask(Cache.getInstance().getCurrUserAuthToken(), targetUser, limit, lastFollowee, new GetFollowingHandler(observer));
+        new ExecuteTask<>(getFollowingTask);
     }
 
     /**
-     * Creates an instance.
-     *
-     * @param observer the observer who wants to be notified when any asynchronous operations complete.
+     * Message handler (i.e., observer) for GetFollowingTask.
      */
-    public FollowService(Observer observer) {
-        // An assertion would be better, but Android doesn't support Java assertions
-        if(observer == null) {
-            throw new NullPointerException();
+    private class GetFollowingHandler extends BackgroundTaskHandler {
+        public GetFollowingHandler(GetFollowingObserver observer) {
+            super(observer);
         }
 
-        this.observer = observer;
-    }
 
-    /**
-     * Requests the users that the user specified in the request is following.
-     * Limits the number of followees returned and returns the next set of
-     * followees after any that were returned in a previous request.
-     * This is an asynchronous operation.
-     *
-     * @param followingRequest a request for a page of followees.
-     */
-    public void getFollowees(FollowingRequest followingRequest) {
-        GetFollowingTask followingTask = getGetFollowingTask(followingRequest);
-        BackgroundTaskUtils.runTask(followingTask);
-    }
+        @Override
+        protected void handleSuccessMessage(Message msg) {
+            List<User> followees = (List<User>) msg.getData().getSerializable(GetFollowingTask.ITEMS_KEY);
+            boolean hasMorePages = msg.getData().getBoolean(GetFollowingTask.MORE_PAGES_KEY);
+            User lastFollowee = (followees.size() > 0) ? followees.get(followees.size() - 1) : null;
 
-    /**
-     * Returns an instance of {@link ServerFacade}. Allows mocking of the ServerFacade class for
-     * testing purposes. All usages of ServerFacade should get their instance from this method to
-     * allow for proper mocking.
-     *
-     * @return the instance.
-     */
-    public ServerFacade getServerFacade() {
-        if(serverFacade == null) {
-            serverFacade = new ServerFacade();
+            ((GetFollowingObserver)observer).followSucceeded(followees, hasMorePages, lastFollowee);
         }
+    }
 
-        return serverFacade;
+
+    //GET FOLLOWERS
+
+    public interface GetFollowersObserver extends ServiceObserver {
+        void followSucceeded(List<User> followers, boolean hasMorePages, User lastFollower);
+    }
+
+    public static void getFollowers(GetFollowersObserver observer, User user, User lastFollower) {
+        GetFollowersTask getFollowersTask = new GetFollowersTask(Cache.getInstance().getCurrUserAuthToken(),
+                user, PAGE_SIZE, lastFollower, new GetFollowersHandler(observer));
+        new ExecuteTask<>(getFollowersTask);
     }
 
     /**
-     * Returns an instance of {@link GetFollowingTask}. Allows mocking of the
-     * GetFollowingTask class for testing purposes. All usages of GetFollowingTask
-     * should get their instance from this method to allow for proper mocking.
-     *
-     * @return the instance.
+     * Message handler (i.e., observer) for GetFollowersTask.
      */
-    // This method is public so it can be accessed by test cases
-    public GetFollowingTask getGetFollowingTask(FollowingRequest request) {
-        return new GetFollowingTask(request,
-                new MessageHandler(Looper.getMainLooper(), observer));
-    }
-
-    /**
-     * Handles messages from the background task indicating that the task is done, by invoking
-     * methods on the observer.
-     */
-    public static class MessageHandler extends Handler {
-
-        private final Observer observer;
-
-        public MessageHandler(Looper looper, Observer observer) {
-            super(looper);
-            this.observer = observer;
+    private static class GetFollowersHandler extends BackgroundTaskHandler {
+        GetFollowersHandler(GetFollowersObserver observer) {
+            super(observer);
         }
 
         @Override
-        public void handleMessage(Message message) {
-            Bundle bundle = message.getData();
-            boolean success = bundle.getBoolean(GetFollowingTask.SUCCESS_KEY);
-            if (success) {
-                List<User> followees = (List<User>) bundle.getSerializable(GetFollowingTask.FOLLOWEES_KEY);
-                boolean hasMorePages = bundle.getBoolean(GetFollowingTask.MORE_PAGES_KEY);
-                observer.handleSuccess(followees, hasMorePages);
-            } else if (bundle.containsKey(GetFollowingTask.MESSAGE_KEY)) {
-                String errorMessage = bundle.getString(GetFollowingTask.MESSAGE_KEY);
-                observer.handleFailure(errorMessage);
-            } else if (bundle.containsKey(GetFollowingTask.EXCEPTION_KEY)) {
-                Exception ex = (Exception) bundle.getSerializable(GetFollowingTask.EXCEPTION_KEY);
-                observer.handleException(ex);
-            }
+        protected void handleSuccessMessage(Message msg) {
+            List<User> followers = (List<User>) msg.getData().getSerializable(GetFollowersTask.ITEMS_KEY);
+            boolean hasMorePages = msg.getData().getBoolean(GetFollowersTask.MORE_PAGES_KEY);
+            User lastFollower = (followers.size() > 0) ? followers.get(followers.size() - 1) : null;
+
+            ((GetFollowersObserver)observer).followSucceeded(followers, hasMorePages, lastFollower);
         }
     }
 
-    /**
-     * Background task that retrieves a page of other users being followed by a specified user.
-     */
-    public class GetFollowingTask extends BackgroundTask {
 
-        private static final String LOG_TAG = "GetFollowingTask";
+    //FOLLOW
 
-        public static final String FOLLOWEES_KEY = "followees";
-        public static final String MORE_PAGES_KEY = "more-pages";
+    public interface FollowObserver extends ServiceObserver {
+        void follow(User user);
+        void setFollowButton(boolean enabled);
+        void updateFollowButton(boolean removed);
+        void callUpdateSelectedUserFollowingAndFollowers(User user);
+    }
 
-        private final FollowingRequest request;
+    private User selectedUser;
 
-        public GetFollowingTask(FollowingRequest request, Handler messageHandler) {
-            super(messageHandler);
-            this.request = request;
-        }
+    public void follow(FollowService.FollowObserver observer, User selectedUser) {
+        this.selectedUser = selectedUser;
+        FollowTask followTask = new FollowTask(Cache.getInstance().getCurrUserAuthToken(),
+                selectedUser, new FollowService.FollowHandler(observer));
+        new ExecuteTask<>(followTask);
+    }
 
-        protected void sendSuccessMessage(List<User> followees, boolean hasMorePages) {
-            sendSuccessMessage(new BundleLoader() {
-                @Override
-                public void load(Bundle msgBundle) {
-                    msgBundle.putSerializable(FOLLOWEES_KEY, (Serializable) followees);
-                    msgBundle.putBoolean(MORE_PAGES_KEY, hasMorePages);
-                }
-            });
+    private class FollowHandler extends BackgroundTaskHandler {
+        public FollowHandler(FollowService.FollowObserver observer) {
+            super(observer);
         }
 
         @Override
-        protected void runTask() {
-            try {
-                FollowingResponse response = getServerFacade().getFollowees(request, URL_PATH);
-
-                if(response.isSuccess()) {
-                    loadImages(response.getFollowees());
-                    sendSuccessMessage(response.getFollowees(), response.getHasMorePages());
-                }
-                else {
-                    sendFailedMessage(response.getMessage());
-                }
-            } catch (IOException | TweeterRemoteException ex) {
-                Log.e(LOG_TAG, "Failed to get followees", ex);
-                sendExceptionMessage(ex);
-            }
-        }
-
-        // This method is public so it can be accessed by test cases
-        public void loadImages(List<User> followees) throws IOException {
-            for (User u : followees) {
-                BackgroundTaskUtils.loadImage(u);
-            }
+        protected void handleSuccessMessage(Message msg) {
+            ((FollowObserver)observer).callUpdateSelectedUserFollowingAndFollowers(selectedUser);
+            ((FollowObserver)observer).updateFollowButton(false);
+            ((FollowObserver)observer).setFollowButton(true);
         }
     }
 
+    public void updateSelectedUserFollowingAndFollowers(FollowerCountObserver followerCountObserver,
+                                                        FollowingCountObserver followingCountObserver,
+                                                        User selectedUser) {
+        // Get count of most recently selected user's followers.
+        GetFollowersCountTask followersCountTask = new GetFollowersCountTask(Cache.getInstance().getCurrUserAuthToken(),
+                selectedUser, new FollowService.GetFollowersCountHandler(followerCountObserver));
+
+        // Get count of most recently selected user's followees (who they are following)
+        GetFollowingCountTask followingCountTask = new GetFollowingCountTask(Cache.getInstance().getCurrUserAuthToken(),
+                selectedUser, new FollowService.GetFollowingCountHandler(followingCountObserver));
+
+        new ExecuteTask<>(followersCountTask, followingCountTask);
+    }
+
+
+    //UNFOLLOW
+
+    public interface UnfollowObserver extends ServiceObserver {
+        void setFollowButton(boolean enabled);
+        void updateFollowButton(boolean removed);
+        void callUpdateSelectedUserFollowingAndFollowers(User user);
+    }
+
+    public void unfollow(FollowService.UnfollowObserver observer, User selectedUser) {
+        this.selectedUser = selectedUser;
+        UnfollowTask unfollowTask = new UnfollowTask(Cache.getInstance().getCurrUserAuthToken(),
+                selectedUser, new UnfollowHandler(observer));
+        new ExecuteTask<>(unfollowTask);
+    }
+
+    private class UnfollowHandler extends BackgroundTaskHandler {
+        public UnfollowHandler(UnfollowObserver observer) {
+            super(observer);
+        }
+
+        @Override
+        protected void handleSuccessMessage(Message msg) {
+            ((UnfollowObserver)observer).callUpdateSelectedUserFollowingAndFollowers(selectedUser);
+            ((UnfollowObserver)observer).updateFollowButton(true);
+            ((UnfollowObserver)observer).setFollowButton(true);
+        }
+    }
+
+
+    //FOLLOWER COUNT
+
+    public interface FollowerCountObserver extends ServiceObserver {
+        void setFollowerCount(int count);
+    }
+
+    private class GetFollowersCountHandler extends BackgroundTaskHandler {
+        public GetFollowersCountHandler(FollowerCountObserver observer) {
+            super(observer);
+        }
+
+        @Override
+        protected void handleSuccessMessage(Message msg) {
+            int count = msg.getData().getInt(GetFollowersCountTask.COUNT_KEY);
+            ((FollowerCountObserver)observer).setFollowerCount(count);
+        }
+    }
+
+
+    //FOLLOWING COUNT
+
+    public interface FollowingCountObserver extends ServiceObserver {
+        void setFollowingCount(int count);
+    }
+
+    private class GetFollowingCountHandler extends BackgroundTaskHandler {
+        public GetFollowingCountHandler(FollowingCountObserver observer) {
+            super(observer);
+        }
+
+        @Override
+        protected void handleSuccessMessage(Message msg) {
+            int count = msg.getData().getInt(GetFollowingCountTask.COUNT_KEY);
+            ((FollowingCountObserver)observer).setFollowingCount(count);
+        }
+    }
+
+
+    //IS FOLLOWER
+
+    public interface IsFollowerObserver extends ServiceObserver {
+        void setIsFollowerButton();
+        void setIsNotFollowerButton();
+    }
+
+    public void isFollower(IsFollowerObserver observer) {
+        IsFollowerTask isFollowerTask = new IsFollowerTask(Cache.getInstance().getCurrUserAuthToken(),
+                Cache.getInstance().getCurrUser(), selectedUser, new IsFollowerHandler(observer));
+        new ExecuteTask<>(isFollowerTask);
+    }
+
+    private class IsFollowerHandler extends BackgroundTaskHandler {
+        public IsFollowerHandler(IsFollowerObserver observer) {
+            super(observer);
+        }
+
+        @Override
+        protected void handleSuccessMessage(Message msg) {
+            boolean isFollower = msg.getData().getBoolean(IsFollowerTask.IS_FOLLOWER_KEY);
+            // If logged-in user is a follower of the selected user, display the follow button as "following"
+            if (isFollower) {
+                ((IsFollowerObserver)observer).setIsFollowerButton();
+            } else {
+                ((IsFollowerObserver)observer).setIsNotFollowerButton();
+            }
+        }
+    }
 }

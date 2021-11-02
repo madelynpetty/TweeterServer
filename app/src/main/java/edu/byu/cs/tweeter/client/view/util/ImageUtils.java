@@ -11,14 +11,17 @@ import android.graphics.drawable.Drawable;
  */
 public class ImageUtils {
 
+    private static final String LOG_TAG = "ImageUtils";
+
     /**
      * Creates a drawable from the bytes read from an image file.
      *
      * @param bytes the bytes.
      * @return the drawable.
      */
-    public static Drawable drawableFromByteArray(byte [] bytes) {
+    public static Drawable drawableFromByteArray(byte[] bytes) {
         Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
         return new BitmapDrawable(Resources.getSystem(), bitmap);
     }
+
 }

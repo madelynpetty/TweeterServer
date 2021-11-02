@@ -1,10 +1,6 @@
-package edu.byu.cs.tweeter.client.model.service;
+package edu.byu.cs.tweeter.client.model.service.backgroundTask;
 
 import android.util.Log;
-
-import java.io.IOException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import edu.byu.cs.tweeter.client.util.ByteArrayUtils;
 import edu.byu.cs.tweeter.model.domain.User;
@@ -21,19 +17,12 @@ public class BackgroundTaskUtils {
      *
      * @param user the user whose profile image is to be loaded.
      */
-    public static void loadImage(User user) throws IOException {
+    public static void loadImage(User user) {
         try {
             byte[] bytes = ByteArrayUtils.bytesFromUrl(user.getImageUrl());
             user.setImageBytes(bytes);
         } catch (Exception e) {
             Log.e(LOG_TAG, e.toString(), e);
-            throw e;
         }
     }
-
-    public static void runTask(Runnable task) {
-        ExecutorService executor = Executors.newSingleThreadExecutor();
-        executor.execute(task);
-    }
-
 }

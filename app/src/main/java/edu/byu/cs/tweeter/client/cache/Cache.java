@@ -7,7 +7,7 @@ import edu.byu.cs.tweeter.model.domain.User;
  * The Cache class stores globally accessible data.
  */
 public class Cache {
-    private static final Cache instance = new Cache();
+    private static Cache instance = new Cache();
 
     public static Cache getInstance() {
         return instance;
@@ -49,5 +49,13 @@ public class Cache {
 
     public void setCurrUserAuthToken(AuthToken currUserAuthToken) {
         this.currUserAuthToken = currUserAuthToken;
+    }
+
+    /**
+     * Porvides a way for tests to inject a mock cache instance
+     * @param cache the cache
+     */
+    public static void setInstance(Cache cache) {
+        Cache.instance = cache;
     }
 }
