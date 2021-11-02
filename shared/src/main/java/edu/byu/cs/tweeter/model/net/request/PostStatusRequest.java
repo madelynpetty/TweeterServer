@@ -1,13 +1,15 @@
 package edu.byu.cs.tweeter.model.net.request;
 
-import javax.swing.text.html.ImageView;
+import edu.byu.cs.tweeter.model.domain.AuthToken;
+import edu.byu.cs.tweeter.model.domain.Status;
 
 /**
  * Contains all the information needed to make a login request.
  */
 public class PostStatusRequest {
 
-    private String post;
+    private AuthToken authToken;
+    private Status post;
 
     /**
      * Allows construction of the object from Json. Private so it won't be called in normal code.
@@ -19,16 +21,16 @@ public class PostStatusRequest {
      *
      * @param post the post.
      */
-    public PostStatusRequest(String post) {
+    public PostStatusRequest(Status post) {
         this.post = post;
     }
 
     /**
-     * Returns the post to be posted by this request.
+     * Returns the status to be posted by this request.
      *
      * @return the post.
      */
-    public String getPost() {
+    public Status getPost() {
         return post;
     }
 
@@ -37,7 +39,7 @@ public class PostStatusRequest {
      *
      * @param post the post.
      */
-    public void setPost(String post) {
+    public void setPost(Status post) {
         this.post = post;
     }
 }

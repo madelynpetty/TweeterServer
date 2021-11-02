@@ -1,7 +1,5 @@
 package edu.byu.cs.tweeter.model.net.request;
 
-import javax.print.MultiDocPrintService;
-
 import edu.byu.cs.tweeter.model.domain.AuthToken;
 
 /**

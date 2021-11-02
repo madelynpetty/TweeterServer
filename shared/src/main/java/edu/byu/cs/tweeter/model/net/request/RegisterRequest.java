@@ -1,7 +1,5 @@
 package edu.byu.cs.tweeter.model.net.request;
 
-import javax.swing.text.html.ImageView;
-
 /**
  * Contains all the information needed to make a login request.
  */
@@ -11,7 +9,7 @@ public class RegisterRequest {
     private String lastName;
     private String username;
     private String password;
-    private ImageView image;
+    private String image;
 
     /**
      * Allows construction of the object from Json. Private so it won't be called in normal code.
@@ -24,7 +22,7 @@ public class RegisterRequest {
      * @param username the username of the user to be logged in.
      * @param password the password of the user to be logged in.
      */
-    public RegisterRequest(String firstName, String lastName, String username, String password, ImageView image) {
+    public RegisterRequest(String firstName, String lastName, String username, String password, String image) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.username = username;
@@ -109,7 +107,7 @@ public class RegisterRequest {
      *
      * @return the image.
      */
-    public ImageView getImage() {
+    public String getImage() {
         return image;
     }
 
@@ -118,7 +116,7 @@ public class RegisterRequest {
      *
      * @param image the imgae.
      */
-    public void setImage(ImageView image) {
+    public void setImage(String image) {
         this.image = image;
     }
 }
