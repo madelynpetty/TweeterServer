@@ -84,8 +84,8 @@ public class ServerFacade {
         }
     }
 
-    public FeedResponse getFeed(FeedRequest request, String urlPath) throws IOException, TweeterRemoteException {
-        FeedResponse response = clientCommunicator.doPost(urlPath, request, null, FeedResponse.class);
+    public PagedResponse getFeed(FeedRequest request, String urlPath) throws IOException, TweeterRemoteException {
+        PagedResponse response = clientCommunicator.doPost(urlPath, request, null, FeedResponse.class);
 
         if(response.isSuccess()) {
             return response;
@@ -94,8 +94,8 @@ public class ServerFacade {
         }
     }
 
-    public StoryResponse getStory(StoryRequest request, String urlPath) throws IOException, TweeterRemoteException {
-        StoryResponse response = clientCommunicator.doPost(urlPath, request, null, StoryResponse.class);
+    public PagedResponse getStory(StoryRequest request, String urlPath) throws IOException, TweeterRemoteException {
+        PagedResponse response = clientCommunicator.doPost(urlPath, request, null, StoryResponse.class);
 
         if(response.isSuccess()) {
             return response;

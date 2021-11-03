@@ -2,24 +2,30 @@ package edu.byu.cs.tweeter.client.model.service.backgroundTask;
 
 import android.os.Handler;
 
+import java.io.IOException;
 import java.util.List;
 
-import edu.byu.cs.tweeter.model.domain.AuthToken;
+import edu.byu.cs.tweeter.client.model.service.FollowService;
 import edu.byu.cs.tweeter.model.domain.Status;
 import edu.byu.cs.tweeter.model.domain.User;
+import edu.byu.cs.tweeter.model.net.TweeterRemoteException;
+import edu.byu.cs.tweeter.model.net.request.FeedRequest;
+import edu.byu.cs.tweeter.model.net.response.FeedResponse;
 import edu.byu.cs.tweeter.model.net.response.PagedResponse;
-import edu.byu.cs.tweeter.model.util.Pair;
 
 /**
  * Background task that retrieves a page of statuses from a user's feed.
  */
 public class GetFeedTask extends PagedStatusTask {
     private static final String LOG_TAG = "GetFeedTask";
+    private static final String URL_PATH = "/getfeed";
 
-    public static final String STATUSES_KEY = "statuses";
-    public GetFeedTask(AuthToken authToken, User targetUser, int limit, Status lastStatus,
-                       Handler messageHandler) {
-        super(authToken, targetUser, limit, lastStatus, messageHandler);
+    private FeedRequest feedRequest;
+    private PagedResponse feedResponse;
+
+    public GetFeedTask(FeedRequest feedRequest, User targetUser, Status lastStatus, Handler messageHandler) {
+        super(feedRequest.getAuthToken(), targetUser, feedRequest.getLimit(), lastStatus, messageHandler);
+        this.feedRequest = feedRequest;
     }
 
     @Override
@@ -29,7 +35,12 @@ public class GetFeedTask extends PagedStatusTask {
 
     @Override
     protected PagedResponse getResponse() {
-        //TODO WRITE THIS
-        return null;
+        try {
+            feedResponse = new FollowService().getServerFacade().getFeed(feedRequest, URL_PATH);
+        } catch (IOException | TweeterRemoteException e) {
+            e.printStackTrace();
+        }
+
+        return feedResponse;
     }
 }

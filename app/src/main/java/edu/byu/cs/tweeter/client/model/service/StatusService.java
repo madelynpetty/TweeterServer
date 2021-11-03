@@ -17,6 +17,8 @@ import edu.byu.cs.tweeter.client.model.service.backgroundTask.GetStoryTask;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.PostStatusTask;
 import edu.byu.cs.tweeter.model.domain.Status;
 import edu.byu.cs.tweeter.model.domain.User;
+import edu.byu.cs.tweeter.model.net.request.FeedRequest;
+import edu.byu.cs.tweeter.model.net.request.StoryRequest;
 
 public class StatusService {
 
@@ -36,8 +38,9 @@ public class StatusService {
     }
 
     public static void getFeed(FeedObserver observer, User user, Status lastStatus) {
-        GetFeedTask getFeedTask = new GetFeedTask(Cache.getInstance().getCurrUserAuthToken(),
-                user, PAGE_SIZE, lastStatus, new GetFeedHandler(observer));
+        FeedRequest feedRequest = new FeedRequest(Cache.getInstance().getCurrUserAuthToken(),
+                user.getAlias(), PAGE_SIZE, lastStatus);
+        GetFeedTask getFeedTask = new GetFeedTask(feedRequest, user, lastStatus, new GetFeedHandler(observer));
         new ExecuteTask<>(getFeedTask);
     }
 
@@ -66,8 +69,9 @@ public class StatusService {
     }
 
     public static void getStory(StoryObserver observer, User user, Status lastStatus) {
-        GetStoryTask getStoryTask = new GetStoryTask(Cache.getInstance().getCurrUserAuthToken(),
-                user, PAGE_SIZE, lastStatus, new GetStoryHandler(observer));
+        StoryRequest storyRequest = new StoryRequest(Cache.getInstance().getCurrUserAuthToken(),
+                user.getAlias(), PAGE_SIZE, lastStatus);
+        GetStoryTask getStoryTask = new GetStoryTask(storyRequest, user, lastStatus, new GetStoryHandler(observer));
         new ExecuteTask<>(getStoryTask);
     }
 
