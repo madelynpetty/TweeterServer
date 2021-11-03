@@ -6,7 +6,6 @@ import edu.byu.cs.tweeter.model.domain.AuthToken;
  * Contains all the information needed to make a request to have the server return the next page of
  * followers for a specified follower.
  */
-//TODO there may be a few issues here
 public class FollowerRequest {
 
     private AuthToken authToken;
