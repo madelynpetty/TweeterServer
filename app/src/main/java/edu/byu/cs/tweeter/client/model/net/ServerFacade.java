@@ -21,6 +21,7 @@ import edu.byu.cs.tweeter.model.net.response.FollowerResponse;
 import edu.byu.cs.tweeter.model.net.response.FollowingResponse;
 import edu.byu.cs.tweeter.model.net.response.LoginResponse;
 import edu.byu.cs.tweeter.model.net.response.LogoutResponse;
+import edu.byu.cs.tweeter.model.net.response.PagedResponse;
 import edu.byu.cs.tweeter.model.net.response.PostStatusResponse;
 import edu.byu.cs.tweeter.model.net.response.RegisterResponse;
 import edu.byu.cs.tweeter.model.net.response.StoryResponse;
@@ -112,10 +113,8 @@ public class ServerFacade {
      *                other information required to satisfy the request.
      * @return the followees.
      */
-    public FollowingResponse getFollowees(FollowingRequest request, String urlPath)
-            throws IOException, TweeterRemoteException {
-
-        FollowingResponse response = clientCommunicator.doPost(urlPath, request, null, FollowingResponse.class);
+    public PagedResponse getFollowing(FollowingRequest request, String urlPath) throws IOException, TweeterRemoteException {
+        PagedResponse response = clientCommunicator.doPost(urlPath, request, null, FollowingResponse.class);
 
         if(response.isSuccess()) {
             return response;
@@ -124,10 +123,8 @@ public class ServerFacade {
         }
     }
 
-    public FollowerResponse getFollowers(FollowerRequest request, String urlPath)
-            throws IOException, TweeterRemoteException {
-
-        FollowerResponse response = clientCommunicator.doPost(urlPath, request, null, FollowerResponse.class);
+    public PagedResponse getFollowers(FollowerRequest request, String urlPath) throws IOException, TweeterRemoteException {
+        PagedResponse response = clientCommunicator.doPost(urlPath, request, null, FollowerResponse.class);
 
         if(response.isSuccess()) {
             return response;

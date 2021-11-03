@@ -9,6 +9,7 @@ import java.util.List;
 
 import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.User;
+import edu.byu.cs.tweeter.model.net.response.PagedResponse;
 import edu.byu.cs.tweeter.model.util.Pair;
 
 public abstract class PagedTask<T> extends AuthenticatedTask {
@@ -31,10 +32,11 @@ public abstract class PagedTask<T> extends AuthenticatedTask {
 
     @Override
     protected final boolean runTask() throws IOException {
-        Pair<List<T>, Boolean> pageOfItems = getItems();
+        PagedResponse response = getResponse();
+        List<T> pageOfItems = getItems();
 
-        items = pageOfItems.getFirst();
-        hasMorePages = pageOfItems.getSecond();
+        items = pageOfItems;
+        hasMorePages = response.getHasMorePages();
 
         for(User user : getUsersForItems(items)) {
             BackgroundTaskUtils.loadImage(user);
@@ -42,7 +44,8 @@ public abstract class PagedTask<T> extends AuthenticatedTask {
         return true;
     }
 
-    protected abstract Pair<List<T>, Boolean> getItems();
+    protected abstract List<T> getItems();
+    protected abstract PagedResponse getResponse();
 
     protected abstract List<User> getUsersForItems(List<T> items);
 

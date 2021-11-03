@@ -5,6 +5,7 @@ import android.os.Message;
 import java.util.List;
 
 import edu.byu.cs.tweeter.client.cache.Cache;
+import edu.byu.cs.tweeter.client.model.net.ServerFacade;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.FollowTask;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.GetFollowersCountTask;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.GetFollowersTask;
@@ -13,9 +14,20 @@ import edu.byu.cs.tweeter.client.model.service.backgroundTask.GetFollowingTask;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.IsFollowerTask;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.UnfollowTask;
 import edu.byu.cs.tweeter.model.domain.User;
+import edu.byu.cs.tweeter.model.net.request.FollowerRequest;
+import edu.byu.cs.tweeter.model.net.request.FollowingRequest;
 
 public class FollowService {
     private static final int PAGE_SIZE = 10;
+
+    private static ServerFacade serverFacade;
+
+    public ServerFacade getServerFacade() {
+        if (serverFacade == null) {
+            serverFacade = new ServerFacade();
+        }
+        return serverFacade;
+    }
 
     //GET FOLLOWING
 
@@ -24,7 +36,18 @@ public class FollowService {
     }
 
     public void getFollowing(User targetUser, int limit, User lastFollowee, GetFollowingObserver observer) {
-        GetFollowingTask getFollowingTask = new GetFollowingTask(Cache.getInstance().getCurrUserAuthToken(), targetUser, limit, lastFollowee, new GetFollowingHandler(observer));
+        FollowingRequest followingRequest;
+
+        if (lastFollowee == null) {
+            followingRequest = new FollowingRequest(Cache.getInstance().getCurrUserAuthToken(),
+                    targetUser.getAlias(), limit, null);
+        }
+        else {
+            followingRequest = new FollowingRequest(Cache.getInstance().getCurrUserAuthToken(),
+                    targetUser.getAlias(), limit, lastFollowee.getAlias());
+        }
+
+        GetFollowingTask getFollowingTask = new GetFollowingTask(followingRequest, targetUser, lastFollowee, new GetFollowingHandler(observer));
         new ExecuteTask<>(getFollowingTask);
     }
 
@@ -55,8 +78,18 @@ public class FollowService {
     }
 
     public static void getFollowers(GetFollowersObserver observer, User user, User lastFollower) {
-        GetFollowersTask getFollowersTask = new GetFollowersTask(Cache.getInstance().getCurrUserAuthToken(),
-                user, PAGE_SIZE, lastFollower, new GetFollowersHandler(observer));
+        FollowerRequest followerRequest;
+        if (lastFollower == null) {
+            followerRequest = new FollowerRequest(Cache.getInstance().getCurrUserAuthToken(),
+                    user.getAlias(), PAGE_SIZE, null);
+        }
+        else {
+            followerRequest = new FollowerRequest(Cache.getInstance().getCurrUserAuthToken(),
+                    user.getAlias(), PAGE_SIZE, lastFollower.getAlias());
+        }
+
+        GetFollowersTask getFollowersTask = new GetFollowersTask(followerRequest, user,
+                lastFollower, new GetFollowersHandler(observer));
         new ExecuteTask<>(getFollowersTask);
     }
 

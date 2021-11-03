@@ -224,4 +224,58 @@ public class FakeData {
         return allStatuses;
     }
 
+    //MADDIE CREATED THIS METHOD
+    public List<User> getPageOfUsersItem(User lastUser, int limit, User omit) {
+        List<User> result = new ArrayList<User>();
+
+        int index = 0;
+        List<User> fakeUsers = getFakeUsers();
+
+        if (lastUser != null) {
+            for (int i = 0; i < fakeUsers.size(); ++i) {
+                User curUser = fakeUsers.get(i);
+                if (curUser.getAlias().equals(lastUser.getAlias())) {
+                    index = i + 1;
+                    break;
+                }
+            }
+        }
+
+        for (int count = 0; index < fakeUsers.size() && count < limit; ++count, ++index) {
+            User curUser = fakeUsers.get(index);
+            if (omit == null || !curUser.getAlias().equals(omit.getAlias())) {
+                result.add(curUser);
+            }
+        }
+
+        return result;
+    }
+
+    //MADDIE CREATED THIS METHOD
+    public List<Status> getPageOfStatusItem(Status lastStatus, int limit) {
+
+        List<Status> result = new ArrayList<Status>();
+
+        int index = 0;
+        List<Status> fakeStatuses = getFakeStatuses();
+
+        if (lastStatus != null) {
+            for (int i = 0; i < fakeStatuses.size(); ++i) {
+                Status curStatus = fakeStatuses.get(i);
+                if (curStatus.getUser().getAlias().equals(lastStatus.getUser().getAlias()) &&
+                        curStatus.getDate().equals(lastStatus.getDate())) {
+                    index = i + 1;
+                    break;
+                }
+            }
+        }
+
+        for (int count = 0; index < fakeStatuses.size() && count < limit; ++count, ++index) {
+            Status curStatus = fakeStatuses.get(index);
+            result.add(curStatus);
+        }
+
+        return result;
+    }
+
 }
