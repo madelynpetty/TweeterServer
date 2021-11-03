@@ -4,19 +4,32 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Message;
 import android.util.Base64;
+import android.util.Log;
 import android.widget.ImageView;
 
 import java.io.ByteArrayOutputStream;
 
 import edu.byu.cs.tweeter.client.cache.Cache;
+import edu.byu.cs.tweeter.client.model.net.ServerFacade;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.GetUserTask;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.LoginTask;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.LogoutTask;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.RegisterTask;
 import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.User;
+import edu.byu.cs.tweeter.model.net.request.LoginRequest;
+import edu.byu.cs.tweeter.model.net.request.RegisterRequest;
 
 public class UserService {
+
+    private static ServerFacade serverFacade;
+
+    public ServerFacade getServerFacade() {
+        if (serverFacade == null) {
+            serverFacade = new ServerFacade();
+        }
+        return serverFacade;
+    }
 
     //GET USER
 
@@ -51,7 +64,7 @@ public class UserService {
         void registerSucceeded(AuthToken authToken, User user);
     }
 
-    public void register(String alias, String password, String firstName, String lastName, ImageView imageToUpload, UserService.RegisterObserver observer) {
+    public void register(String firstName, String lastName, String alias, String password, ImageView imageToUpload, UserService.RegisterObserver observer) {
         // Convert image to byte array.
         Bitmap image = ((BitmapDrawable) imageToUpload.getDrawable()).getBitmap();
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -60,7 +73,8 @@ public class UserService {
         String imageBytesBase64 = Base64.encodeToString(imageBytes, Base64.NO_WRAP);
 
         // Send register request.
-        RegisterTask registerTask = new RegisterTask(firstName, lastName, alias, password, imageBytesBase64, new RegisterHandler(observer));
+        RegisterRequest registerRequest = new RegisterRequest(firstName, lastName, alias, password, imageBytesBase64);
+        RegisterTask registerTask = new RegisterTask(registerRequest, new RegisterHandler(observer));
         new ExecuteTask<>(registerTask);
     }
 
@@ -90,7 +104,8 @@ public class UserService {
 
     public void login(String alias, String password, LoginObserver observer) {
         // Send the login request.
-        LoginTask loginTask = new LoginTask(alias, password, new LoginHandler(observer));
+        LoginRequest loginRequest = new LoginRequest(alias, password);
+        LoginTask loginTask = new LoginTask(loginRequest, new LoginHandler(observer));
         new ExecuteTask<>(loginTask);
     }
 

@@ -7,6 +7,9 @@ import java.io.IOException;
 
 import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.User;
+import edu.byu.cs.tweeter.model.net.request.AuthenticateRequest;
+import edu.byu.cs.tweeter.model.net.response.AuthenticateResponse;
+import edu.byu.cs.tweeter.model.net.response.LoginResponse;
 import edu.byu.cs.tweeter.model.util.Pair;
 
 public abstract class AuthenticateTask extends BackgroundTask {
@@ -20,23 +23,22 @@ public abstract class AuthenticateTask extends BackgroundTask {
     protected User user;
     protected AuthToken authToken;
 
-    protected AuthenticateTask(String username, String password, Handler messageHandler) {
+    protected AuthenticateTask(AuthenticateRequest request, Handler messageHandler) {
         super(messageHandler);
-        this.username = username;
-        this.password = password;
+        this.username = request.getUsername();
+        this.password = request.getPassword();
     }
 
     @Override
     protected final boolean runTask() throws IOException {
-        Pair<User, AuthToken> loginResult = runAuthenticationTask();
-        user = loginResult.getFirst();
-        authToken = loginResult.getSecond();
+        AuthenticateResponse response = runAuthenticationTask();
+        user = response.getUser();
+        authToken = response.getAuthToken();
         BackgroundTaskUtils.loadImage(user);
         return true;
     }
 
-    protected abstract Pair<User, AuthToken> runAuthenticationTask();
-
+    protected abstract AuthenticateResponse runAuthenticationTask();
 
     @Override
     protected void loadSuccessBundle(Bundle msgBundle) {

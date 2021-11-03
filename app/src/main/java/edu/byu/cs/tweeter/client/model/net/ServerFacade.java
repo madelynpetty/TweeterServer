@@ -3,6 +3,7 @@ package edu.byu.cs.tweeter.client.model.net;
 import java.io.IOException;
 
 import edu.byu.cs.tweeter.model.net.TweeterRemoteException;
+import edu.byu.cs.tweeter.model.net.request.AuthenticateRequest;
 import edu.byu.cs.tweeter.model.net.request.FeedRequest;
 import edu.byu.cs.tweeter.model.net.request.FollowRequest;
 import edu.byu.cs.tweeter.model.net.request.FollowerRequest;
@@ -13,6 +14,7 @@ import edu.byu.cs.tweeter.model.net.request.PostStatusRequest;
 import edu.byu.cs.tweeter.model.net.request.RegisterRequest;
 import edu.byu.cs.tweeter.model.net.request.StoryRequest;
 import edu.byu.cs.tweeter.model.net.request.UnfollowRequest;
+import edu.byu.cs.tweeter.model.net.response.AuthenticateResponse;
 import edu.byu.cs.tweeter.model.net.response.FeedResponse;
 import edu.byu.cs.tweeter.model.net.response.FollowResponse;
 import edu.byu.cs.tweeter.model.net.response.FollowerResponse;
@@ -35,8 +37,8 @@ public class ServerFacade {
 
     private final ClientCommunicator clientCommunicator = new ClientCommunicator(SERVER_URL);
 
-    public RegisterResponse register(RegisterRequest request, String urlPath) throws IOException, TweeterRemoteException {
-        RegisterResponse response = clientCommunicator.doPost(urlPath, request, null, RegisterResponse.class);
+    public AuthenticateResponse register(AuthenticateRequest request, String urlPath) throws IOException, TweeterRemoteException {
+        AuthenticateResponse response = clientCommunicator.doPost(urlPath, request, null, RegisterResponse.class);
 
         if(response.isSuccess()) {
             return response;
@@ -51,8 +53,8 @@ public class ServerFacade {
      * @param request contains all information needed to perform a login.
      * @return the login response.
      */
-    public LoginResponse login(LoginRequest request, String urlPath) throws IOException, TweeterRemoteException {
-        LoginResponse response = clientCommunicator.doPost(urlPath, request, null, LoginResponse.class);
+    public AuthenticateResponse login(AuthenticateRequest request, String urlPath) throws IOException, TweeterRemoteException {
+        AuthenticateResponse response = clientCommunicator.doPost(urlPath, request, null, LoginResponse.class);
 
         if(response.isSuccess()) {
             return response;
