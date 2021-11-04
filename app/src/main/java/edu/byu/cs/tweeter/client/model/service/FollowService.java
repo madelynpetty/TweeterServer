@@ -19,6 +19,7 @@ import edu.byu.cs.tweeter.model.net.request.FollowerCountRequest;
 import edu.byu.cs.tweeter.model.net.request.FollowerRequest;
 import edu.byu.cs.tweeter.model.net.request.FollowingCountRequest;
 import edu.byu.cs.tweeter.model.net.request.FollowingRequest;
+import edu.byu.cs.tweeter.model.net.request.UnfollowRequest;
 
 public class FollowService {
     private static final int PAGE_SIZE = 10;
@@ -176,8 +177,8 @@ public class FollowService {
 
     public void unfollow(FollowService.UnfollowObserver observer, User selectedUser) {
         this.selectedUser = selectedUser;
-        UnfollowTask unfollowTask = new UnfollowTask(Cache.getInstance().getCurrUserAuthToken(),
-                selectedUser, new UnfollowHandler(observer));
+        UnfollowRequest unfollowRequest = new UnfollowRequest(selectedUser, Cache.getInstance().getCurrUserAuthToken());
+        UnfollowTask unfollowTask = new UnfollowTask(unfollowRequest, new UnfollowHandler(observer));
         new ExecuteTask<>(unfollowTask);
     }
 

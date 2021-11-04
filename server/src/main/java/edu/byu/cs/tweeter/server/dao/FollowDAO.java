@@ -11,6 +11,7 @@ import edu.byu.cs.tweeter.model.net.response.FollowerCountResponse;
 import edu.byu.cs.tweeter.model.net.response.FollowerResponse;
 import edu.byu.cs.tweeter.model.net.response.FollowingCountResponse;
 import edu.byu.cs.tweeter.model.net.response.FollowingResponse;
+import edu.byu.cs.tweeter.model.net.response.UnfollowResponse;
 import edu.byu.cs.tweeter.model.util.FakeData;
 
 /**
@@ -20,6 +21,10 @@ public class FollowDAO {
 
     public FollowResponse follow(User user) {
         return new FollowResponse();
+    }
+
+    public UnfollowResponse unfollow(User user) {
+        return new UnfollowResponse();
     }
 
     public FollowerCountResponse getFollowerCount(User follower) {

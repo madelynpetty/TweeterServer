@@ -169,8 +169,8 @@ public class ServerFacade {
         }
     }
 
-    public UnfollowResponse unfollowUser(UnfollowRequest request, String urlPath) throws IOException, TweeterRemoteException {
-        UnfollowResponse response = clientCommunicator.doPost(urlPath, request, null, UnfollowResponse.class);
+    public AuthenticatedResponse unfollowUser(UnfollowRequest request, String urlPath) throws IOException, TweeterRemoteException {
+        AuthenticatedResponse response = clientCommunicator.doPost(urlPath, request, null, UnfollowResponse.class);
 
         if(response.isSuccess()) {
             return response;

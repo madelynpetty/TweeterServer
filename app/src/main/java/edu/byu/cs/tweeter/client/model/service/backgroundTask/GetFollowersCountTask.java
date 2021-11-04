@@ -33,7 +33,6 @@ public class GetFollowersCountTask extends GetCountTask {
     protected CountResponse runCountTask() {
         try {
             response = new FollowService().getServerFacade().getFollowerCount(request, URL_PATH);
-            System.out.println("hi");
         } catch (IOException | TweeterRemoteException e) {
             e.printStackTrace();
         }
