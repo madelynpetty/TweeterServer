@@ -21,8 +21,9 @@ public class PostStatusRequest {
      *
      * @param post the post.
      */
-    public PostStatusRequest(Status post) {
+    public PostStatusRequest(Status post, AuthToken authToken) {
         this.post = post;
+        this.authToken = authToken;
     }
 
     /**
@@ -41,5 +42,13 @@ public class PostStatusRequest {
      */
     public void setPost(Status post) {
         this.post = post;
+    }
+
+    public AuthToken getAuthToken() {
+        return authToken;
+    }
+
+    public void setAuthToken(AuthToken authToken) {
+        this.authToken = authToken;
     }
 }

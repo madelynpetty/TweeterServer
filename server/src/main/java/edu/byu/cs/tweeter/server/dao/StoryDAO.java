@@ -8,10 +8,12 @@ import edu.byu.cs.tweeter.model.domain.User;
 import edu.byu.cs.tweeter.model.net.request.FeedRequest;
 import edu.byu.cs.tweeter.model.net.request.FollowerRequest;
 import edu.byu.cs.tweeter.model.net.request.FollowingRequest;
+import edu.byu.cs.tweeter.model.net.request.PostStatusRequest;
 import edu.byu.cs.tweeter.model.net.request.StoryRequest;
 import edu.byu.cs.tweeter.model.net.response.FeedResponse;
 import edu.byu.cs.tweeter.model.net.response.FollowerResponse;
 import edu.byu.cs.tweeter.model.net.response.FollowingResponse;
+import edu.byu.cs.tweeter.model.net.response.PostStatusResponse;
 import edu.byu.cs.tweeter.model.net.response.StoryResponse;
 import edu.byu.cs.tweeter.model.util.FakeData;
 
@@ -96,5 +98,10 @@ public class StoryDAO {
         }
 
         return new StoryResponse(responseStatuses, hasMorePages);
+    }
+
+    public PostStatusResponse postStatus(PostStatusRequest request) {
+        //TODO actually post
+        return new PostStatusResponse();
     }
 }

@@ -18,6 +18,7 @@ import edu.byu.cs.tweeter.client.model.service.backgroundTask.PostStatusTask;
 import edu.byu.cs.tweeter.model.domain.Status;
 import edu.byu.cs.tweeter.model.domain.User;
 import edu.byu.cs.tweeter.model.net.request.FeedRequest;
+import edu.byu.cs.tweeter.model.net.request.PostStatusRequest;
 import edu.byu.cs.tweeter.model.net.request.StoryRequest;
 
 public class StatusService {
@@ -102,8 +103,8 @@ public class StatusService {
     public void postStatus(String post, StatusService.PostStatusObserver observer) throws ParseException {
         Status newStatus = new Status(post, Cache.getInstance().getCurrUser(), getFormattedDateTime(),
                 parseURLs(post), parseMentions(post));
-        PostStatusTask statusTask = new PostStatusTask(Cache.getInstance().getCurrUserAuthToken(),
-                newStatus, new PostStatusHandler(observer));
+        PostStatusRequest request = new PostStatusRequest(newStatus, Cache.getInstance().getCurrUserAuthToken());
+        PostStatusTask statusTask = new PostStatusTask(request, new PostStatusHandler(observer));
         new ExecuteTask<>(statusTask);
     }
 

@@ -82,8 +82,8 @@ public class ServerFacade {
         }
     }
 
-    public PostStatusResponse postStatus(PostStatusRequest request, String urlPath) throws IOException, TweeterRemoteException {
-        PostStatusResponse response = clientCommunicator.doPost(urlPath, request, null, PostStatusResponse.class);
+    public AuthenticatedResponse postStatus(PostStatusRequest request, String urlPath) throws IOException, TweeterRemoteException {
+        AuthenticatedResponse response = clientCommunicator.doPost(urlPath, request, null, PostStatusResponse.class);
 
         if(response.isSuccess()) {
             return response;
