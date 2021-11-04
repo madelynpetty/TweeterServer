@@ -14,7 +14,9 @@ import edu.byu.cs.tweeter.client.model.service.backgroundTask.GetFollowingTask;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.IsFollowerTask;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.UnfollowTask;
 import edu.byu.cs.tweeter.model.domain.User;
+import edu.byu.cs.tweeter.model.net.request.FollowerCountRequest;
 import edu.byu.cs.tweeter.model.net.request.FollowerRequest;
+import edu.byu.cs.tweeter.model.net.request.FollowingCountRequest;
 import edu.byu.cs.tweeter.model.net.request.FollowingRequest;
 
 public class FollowService {
@@ -147,12 +149,16 @@ public class FollowService {
                                                         FollowingCountObserver followingCountObserver,
                                                         User selectedUser) {
         // Get count of most recently selected user's followers.
-        GetFollowersCountTask followersCountTask = new GetFollowersCountTask(Cache.getInstance().getCurrUserAuthToken(),
-                selectedUser, new FollowService.GetFollowersCountHandler(followerCountObserver));
+        FollowerCountRequest followerCountRequest = new FollowerCountRequest(
+                Cache.getInstance().getCurrUserAuthToken(), selectedUser);
+        GetFollowersCountTask followersCountTask = new GetFollowersCountTask(followerCountRequest,
+                new FollowService.GetFollowersCountHandler(followerCountObserver));
 
         // Get count of most recently selected user's followees (who they are following)
-        GetFollowingCountTask followingCountTask = new GetFollowingCountTask(Cache.getInstance().getCurrUserAuthToken(),
-                selectedUser, new FollowService.GetFollowingCountHandler(followingCountObserver));
+        FollowingCountRequest followingCountRequest = new FollowingCountRequest(
+                Cache.getInstance().getCurrUserAuthToken(), selectedUser);
+        GetFollowingCountTask followingCountTask = new GetFollowingCountTask(
+                followingCountRequest, new FollowService.GetFollowingCountHandler(followingCountObserver));
 
         new ExecuteTask<>(followersCountTask, followingCountTask);
     }

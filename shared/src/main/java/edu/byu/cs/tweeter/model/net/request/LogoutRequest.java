@@ -17,7 +17,9 @@ public class LogoutRequest {
     /**
      * Creates an instance.
      */
-    public LogoutRequest(AuthToken authToken) {}
+    public LogoutRequest(AuthToken authToken) {
+        this.authToken = authToken;
+    }
 
     public void setAuthToken(AuthToken authToken) {
         this.authToken = authToken;

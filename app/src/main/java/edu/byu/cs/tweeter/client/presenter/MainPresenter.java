@@ -42,7 +42,6 @@ public class MainPresenter implements StatusService.PostStatusObserver,
     }
 
     public void logout() {
-        Cache.getInstance().clearCache();
         view.displayInfoMessage("Logging Out...");
         new UserService().logout(this);
     }
@@ -74,6 +73,7 @@ public class MainPresenter implements StatusService.PostStatusObserver,
 
     @Override
     public void logoutSucceeded() {
+        Cache.getInstance().clearCache();
         view.logout();
     }
 

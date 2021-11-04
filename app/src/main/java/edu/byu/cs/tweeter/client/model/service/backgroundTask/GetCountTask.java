@@ -5,6 +5,8 @@ import android.os.Handler;
 
 import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.User;
+import edu.byu.cs.tweeter.model.net.request.CountRequest;
+import edu.byu.cs.tweeter.model.net.response.CountResponse;
 
 public abstract class GetCountTask extends AuthenticatedTask {
     private static final String LOG_TAG = "GetCountTask";
@@ -22,8 +24,6 @@ public abstract class GetCountTask extends AuthenticatedTask {
         return targetUser;
     }
 
-    protected abstract int runCountTask();
-
     @Override
     protected void loadSuccessBundle(Bundle msgBundle) {
         msgBundle.putInt(COUNT_KEY, count);
@@ -31,7 +31,10 @@ public abstract class GetCountTask extends AuthenticatedTask {
 
     @Override
     protected boolean runTask() {
-        count = runCountTask();
+        CountResponse countResponse = runCountTask();
+        count = countResponse.getCount();
         return true;
     }
+
+    protected abstract CountResponse runCountTask();
 }

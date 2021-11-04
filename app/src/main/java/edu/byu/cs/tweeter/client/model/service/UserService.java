@@ -18,6 +18,7 @@ import edu.byu.cs.tweeter.client.model.service.backgroundTask.RegisterTask;
 import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.User;
 import edu.byu.cs.tweeter.model.net.request.LoginRequest;
+import edu.byu.cs.tweeter.model.net.request.LogoutRequest;
 import edu.byu.cs.tweeter.model.net.request.RegisterRequest;
 
 public class UserService {
@@ -138,7 +139,8 @@ public class UserService {
     }
 
     public void logout(UserService.LogoutObserver observer) {
-        LogoutTask logoutTask = new LogoutTask(Cache.getInstance().getCurrUserAuthToken(), new UserService.LogoutHandler(observer));
+        LogoutRequest logoutRequest = new LogoutRequest(Cache.getInstance().getCurrUserAuthToken());
+        LogoutTask logoutTask = new LogoutTask(logoutRequest, new UserService.LogoutHandler(observer));
         new ExecuteTask<>(logoutTask);
     }
 
