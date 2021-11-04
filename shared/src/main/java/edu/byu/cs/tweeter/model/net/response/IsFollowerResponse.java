@@ -5,7 +5,7 @@ import edu.byu.cs.tweeter.model.net.request.LoginRequest;
 /**
  * A response for a {@link LoginRequest}.
  */
-public class IsFollowerResponse extends Response {
+public class IsFollowerResponse extends AuthenticatedResponse {
 
     private boolean isFollower;
 
@@ -15,16 +15,11 @@ public class IsFollowerResponse extends Response {
      * @param message a message describing why the request was unsuccessful.
      */
     public IsFollowerResponse(String message) {
-        super(false, message);
+        super(message);
     }
 
-    /**
-     * Creates a response indicating that the corresponding request was successful.
-     *
-     * @param isFollower whether the user is a follower or not.
-     */
-    public IsFollowerResponse(Boolean isFollower) {
-        super(true, null);
+    public IsFollowerResponse() {
+        super();
         this.isFollower = isFollower;
     }
 
