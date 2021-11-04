@@ -32,7 +32,6 @@ public class UserService {
 // TODO: Generates dummy data. Replace with a real implementation.
 //        FakeData fakeData = new FakeData();
 //        AuthToken authToken = fakeData.getAuthToken();
-        AuthToken authToken = request.getAuthToken();
-        return new LogoutResponse(authToken.toString());
+        return new LogoutResponse();
     }
 }
