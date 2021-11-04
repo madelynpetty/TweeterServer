@@ -17,6 +17,7 @@ import edu.byu.cs.tweeter.client.model.service.backgroundTask.LogoutTask;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.RegisterTask;
 import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.User;
+import edu.byu.cs.tweeter.model.net.request.GetUserRequest;
 import edu.byu.cs.tweeter.model.net.request.LoginRequest;
 import edu.byu.cs.tweeter.model.net.request.LogoutRequest;
 import edu.byu.cs.tweeter.model.net.request.RegisterRequest;
@@ -39,7 +40,8 @@ public class UserService {
     }
 
     public static void getUsers(AuthToken authtoken, String alias, GetUserObserver observer) {
-        GetUserTask getUserTask = new GetUserTask(authtoken, alias, new GetUserHandler(observer));
+        GetUserRequest request = new GetUserRequest(authtoken, alias);
+        GetUserTask getUserTask = new GetUserTask(request, new GetUserHandler(observer));
         new ExecuteTask<>(getUserTask);
     }
 

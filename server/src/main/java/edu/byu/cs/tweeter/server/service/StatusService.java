@@ -3,11 +3,13 @@ package edu.byu.cs.tweeter.server.service;
 import edu.byu.cs.tweeter.model.net.request.FeedRequest;
 import edu.byu.cs.tweeter.model.net.request.FollowerRequest;
 import edu.byu.cs.tweeter.model.net.request.FollowingRequest;
+import edu.byu.cs.tweeter.model.net.request.GetUserRequest;
 import edu.byu.cs.tweeter.model.net.request.PostStatusRequest;
 import edu.byu.cs.tweeter.model.net.request.StoryRequest;
 import edu.byu.cs.tweeter.model.net.response.FeedResponse;
 import edu.byu.cs.tweeter.model.net.response.FollowerResponse;
 import edu.byu.cs.tweeter.model.net.response.FollowingResponse;
+import edu.byu.cs.tweeter.model.net.response.GetUserResponse;
 import edu.byu.cs.tweeter.model.net.response.PostStatusResponse;
 import edu.byu.cs.tweeter.model.net.response.StoryResponse;
 import edu.byu.cs.tweeter.server.dao.FeedDAO;
@@ -25,6 +27,10 @@ public class StatusService {
 
     public PostStatusResponse postStatus(PostStatusRequest request) {
         return getStoryDAO().postStatus(request);
+    }
+
+    public GetUserResponse getUser(GetUserRequest request) {
+        return getStoryDAO().getUser(request);
     }
 
     StoryDAO getStoryDAO() {
