@@ -7,6 +7,7 @@ import java.io.IOException;
 
 import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.User;
+import edu.byu.cs.tweeter.model.net.response.AuthenticatedResponse;
 import edu.byu.cs.tweeter.model.net.response.PagedResponse;
 
 /**
@@ -30,9 +31,9 @@ public class UnfollowTask extends AuthenticatedTask {
     }
 
     @Override
-    protected boolean runTask() throws IOException {
+    protected AuthenticatedResponse runAuthenticationTask() {
         //TODO
-        return false;
+        return null;
     }
 
     @Override

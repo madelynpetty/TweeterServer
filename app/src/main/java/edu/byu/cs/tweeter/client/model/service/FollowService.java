@@ -14,6 +14,7 @@ import edu.byu.cs.tweeter.client.model.service.backgroundTask.GetFollowingTask;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.IsFollowerTask;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.UnfollowTask;
 import edu.byu.cs.tweeter.model.domain.User;
+import edu.byu.cs.tweeter.model.net.request.FollowRequest;
 import edu.byu.cs.tweeter.model.net.request.FollowerCountRequest;
 import edu.byu.cs.tweeter.model.net.request.FollowerRequest;
 import edu.byu.cs.tweeter.model.net.request.FollowingCountRequest;
@@ -127,8 +128,9 @@ public class FollowService {
 
     public void follow(FollowService.FollowObserver observer, User selectedUser) {
         this.selectedUser = selectedUser;
-        FollowTask followTask = new FollowTask(Cache.getInstance().getCurrUserAuthToken(),
-                selectedUser, new FollowService.FollowHandler(observer));
+        FollowRequest followRequest = new FollowRequest(selectedUser,
+                Cache.getInstance().getCurrUserAuthToken());
+        FollowTask followTask = new FollowTask(followRequest, new FollowService.FollowHandler(observer));
         new ExecuteTask<>(followTask);
     }
 

@@ -10,6 +10,7 @@ import edu.byu.cs.tweeter.model.domain.User;
 import edu.byu.cs.tweeter.model.net.TweeterRemoteException;
 import edu.byu.cs.tweeter.model.net.request.FollowerCountRequest;
 import edu.byu.cs.tweeter.model.net.request.FollowingCountRequest;
+import edu.byu.cs.tweeter.model.net.response.AuthenticatedResponse;
 import edu.byu.cs.tweeter.model.net.response.CountResponse;
 import edu.byu.cs.tweeter.model.net.response.FollowerCountResponse;
 
@@ -38,5 +39,10 @@ public class GetFollowersCountTask extends GetCountTask {
         }
 
         return response;
+    }
+
+    @Override
+    protected AuthenticatedResponse runAuthenticationTask() {
+        return null; //TODO this may become a problem
     }
 }

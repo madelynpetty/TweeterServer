@@ -10,6 +10,7 @@ import edu.byu.cs.tweeter.model.domain.Status;
 import edu.byu.cs.tweeter.model.domain.User;
 import edu.byu.cs.tweeter.model.net.TweeterRemoteException;
 import edu.byu.cs.tweeter.model.net.request.StoryRequest;
+import edu.byu.cs.tweeter.model.net.response.AuthenticatedResponse;
 import edu.byu.cs.tweeter.model.net.response.PagedResponse;
 import edu.byu.cs.tweeter.model.net.response.StoryResponse;
 
@@ -42,5 +43,10 @@ public class GetStoryTask extends PagedStatusTask {
         }
 
         return storyResponse;
+    }
+
+    @Override
+    protected AuthenticatedResponse runAuthenticationTask() {
+        return null; //TODO this may become a problem
     }
 }

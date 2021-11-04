@@ -10,6 +10,7 @@ import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.User;
 import edu.byu.cs.tweeter.model.net.TweeterRemoteException;
 import edu.byu.cs.tweeter.model.net.request.FollowerRequest;
+import edu.byu.cs.tweeter.model.net.response.AuthenticatedResponse;
 import edu.byu.cs.tweeter.model.net.response.FollowerResponse;
 import edu.byu.cs.tweeter.model.net.response.PagedResponse;
 import edu.byu.cs.tweeter.model.util.Pair;
@@ -44,5 +45,10 @@ public class GetFollowersTask extends PagedUserTask {
         }
 
         return followerResponse;
+    }
+
+    @Override
+    protected AuthenticatedResponse runAuthenticationTask() {
+        return null; //TODO this may become a problem
     }
 }

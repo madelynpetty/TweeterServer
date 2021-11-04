@@ -1,6 +1,6 @@
 package edu.byu.cs.tweeter.model.net.response;
 
-public class LogoutResponse extends Response {
+public class LogoutResponse extends AuthenticatedResponse {
 
     /**
      * Creates a response indicating that the corresponding request was unsuccessful.
@@ -8,13 +8,13 @@ public class LogoutResponse extends Response {
      * @param message a message describing why the request was unsuccessful.
      */
     public LogoutResponse(String message) {
-        super(false, message);
+        super(message);
     }
 
     /**
      * Creates a response indicating that the corresponding request was successful.
      */
     public LogoutResponse() {
-        super(true, null);
+        super();
     }
 }

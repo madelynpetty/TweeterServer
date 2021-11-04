@@ -10,6 +10,7 @@ import edu.byu.cs.tweeter.client.model.service.UserService;
 import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.net.TweeterRemoteException;
 import edu.byu.cs.tweeter.model.net.request.LogoutRequest;
+import edu.byu.cs.tweeter.model.net.response.AuthenticatedResponse;
 import edu.byu.cs.tweeter.model.net.response.LogoutResponse;
 
 /**
@@ -28,7 +29,7 @@ public class LogoutTask extends AuthenticatedTask {
     }
 
     @Override
-    protected boolean runTask() {
+    protected AuthenticatedResponse runAuthenticationTask() {
         // We could do this from the presenter, without a task and handler, but we will
         // eventually remove the auth token from  the DB and will need this then.
         try {
@@ -37,7 +38,7 @@ public class LogoutTask extends AuthenticatedTask {
             e.printStackTrace();
         }
 
-        return logoutResponse.isSuccess();
+        return logoutResponse;
     }
 
 //    @Override

@@ -1,5 +1,6 @@
 package edu.byu.cs.tweeter.model.net.request;
 
+import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.User;
 
 /**
@@ -9,6 +10,7 @@ import edu.byu.cs.tweeter.model.domain.User;
 public class FollowRequest {
 
     private User user;
+    private AuthToken authToken;
 
     /**
      * Allows construction of the object from Json. Private so it won't be called in normal code.
@@ -20,8 +22,9 @@ public class FollowRequest {
      *
      * @param user the user
      */
-    public FollowRequest(User user) {
+    public FollowRequest(User user, AuthToken authToken) {
         this.user = user;
+        this.authToken = authToken;
     }
 
     /**
@@ -40,5 +43,13 @@ public class FollowRequest {
      */
     public void setUser(User user) {
         this.user = user;
+    }
+
+    public AuthToken getAuthToken() {
+        return authToken;
+    }
+
+    public void setAuthToken(AuthToken authToken) {
+        this.authToken = authToken;
     }
 }
