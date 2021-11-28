@@ -42,6 +42,10 @@ public class AuthenticateResponse extends Response {
         return user;
     }
 
+    public void setUser(User user) {
+        this.user = user;
+    }
+
     /**
      * Returns the auth token.
      *
@@ -49,5 +53,9 @@ public class AuthenticateResponse extends Response {
      */
     public AuthToken getAuthToken() {
         return authToken;
+    }
+
+    public void setAuthToken(AuthToken authToken) {
+        this.authToken = authToken;
     }
 }

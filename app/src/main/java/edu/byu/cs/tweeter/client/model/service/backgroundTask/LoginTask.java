@@ -21,10 +21,10 @@ public class LoginTask extends AuthenticateTask {
     private static final String LOG_TAG = "LoginTask";
     private static final String URL_PATH = "/login";
 
-    private LoginRequest loginRequest;
+    private AuthenticateRequest loginRequest;
     private AuthenticateResponse loginResponse;
 
-    public LoginTask(LoginRequest loginRequest, Handler messageHandler) {
+    public LoginTask(AuthenticateRequest loginRequest, Handler messageHandler) {
         super(loginRequest, messageHandler);
         this.loginRequest = loginRequest;
     }

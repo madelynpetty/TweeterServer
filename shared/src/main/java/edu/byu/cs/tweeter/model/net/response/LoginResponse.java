@@ -17,5 +17,14 @@ public class LoginResponse extends AuthenticateResponse {
      */
     public LoginResponse(User user, AuthToken authToken) {
         super(user, authToken);
+        System.out.println("---------------");
+        System.out.println("HIT LOGIN RESPONSE");
+        if (user != null) {
+            System.out.println("USERNAME " + user.getAlias());
+        }
+        else {
+            System.out.println("USER IS NULL");
+        }
+        System.out.println("---------------");
     }
 }

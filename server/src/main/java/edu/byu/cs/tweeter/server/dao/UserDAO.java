@@ -7,10 +7,13 @@ import com.amazonaws.services.dynamodbv2.document.Item;
 import com.amazonaws.services.dynamodbv2.document.Table;
 import com.amazonaws.services.dynamodbv2.model.AttributeValue;
 import com.amazonaws.services.dynamodbv2.model.DuplicateItemException;
+import com.amazonaws.services.dynamodbv2.model.QueryRequest;
+import com.amazonaws.services.dynamodbv2.model.QueryResult;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import edu.byu.cs.tweeter.model.domain.AuthToken;
@@ -34,9 +37,76 @@ public class UserDAO {
     private Table userTable = dynamoDB.getTable(tableName);
 
     public LoginResponse login(LoginRequest request) {
+//        Map<String, String> attrNames = new HashMap<String, String>();
+//        attrNames.put("#a", ":alias");
+////        attrNames.put("#password", ":passwordVal");
+//
+//        Map<String, AttributeValue> attrValues = new HashMap<>();
+//        attrValues.put(":alias", new AttributeValue().withS(request.getAlias()));
+////        attrValues.put(":passwordVal", new AttributeValue().withS(request.getPassword()));
+//
+//        QueryRequest queryRequest = new QueryRequest()
+//                .withTableName(tableName)
+//                .withIndexName(indexName)
+//                .withKeyConditionExpression("#a = :alias")
+//                .withExpressionAttributeNames(attrNames)
+//                .withExpressionAttributeValues(attrValues);
+//
+//        QueryResult queryResult = amazonDynamoDB.query(queryRequest);
+//        List<Map<String, AttributeValue>> items = queryResult.getItems();
+//
+//        User user = null;
+//        if (items != null) {
+//            for (Map<String, AttributeValue> item : items) {
+//                String password = item.get("password").getS();
+//                if (password == request.getPassword()) {
+//                    String firstName = item.get("firstName").getS();
+//                    String lastName = item.get("lastName").getS();
+//                    String imageUrl = item.get("imageUrl").getS();
+//                    user =  new User(firstName, lastName, imageUrl);
+//                    break;
+//                }
+//            }
+//        }
+
+        Item item = userTable.getItem("alias", request.getAlias());
+        User user = null;
+
+        if (item == null) {
+            System.out.println("------------------");
+            System.out.println("Username does not exist");
+            System.out.println("------------------");
+        }
+        else {
+            String password = item.getString("password");
+            System.out.println("------------------");
+            System.out.println("PASSWORD FROM DATABASE: " + password);
+            System.out.println("------------------");
+            if (password.equals(request.getPassword())) {
+                String firstName = item.getString("firstName");
+                String lastName = item.getString("lastName");
+                String imageUrl = item.getString("image");
+                System.out.println("IMAGEURL FROM DATABASE: " + imageUrl);
+                user = new User(firstName, lastName, request.getAlias(), imageUrl);
+            }
+        }
+
+        if (user == null) {
+            System.out.println("------------------");
+            System.out.println("Username and password combination do not match");
+            System.out.println("------------------");
+        }
+        else {
+            System.out.println("User exists.");
+            System.out.println("Username: " + user.getAlias());
+            System.out.println("firstName: " + user.getFirstName());
+            System.out.println("lastName: " + user.getLastName());
+            System.out.println("imageUrl: " + user.getImageUrl());
+        }
+
         FakeData fakeData = new FakeData();
-        User user = fakeData.getFirstUser();
-        return new LoginResponse(user, getAuthTokenDAO().getAuthToken());
+        AuthToken authToken = fakeData.getAuthToken();
+        return new LoginResponse(user, authToken);
     }
 
     public LogoutResponse logout(LogoutRequest request) {
@@ -105,8 +175,7 @@ public class UserDAO {
     }
 
     public GetUserResponse getUser(GetUserRequest request) {
-        //TODO actually get the correct user
-
+        //I believe this is already giving me the correct user even without using the request?
         return new GetUserResponse();
     }
 

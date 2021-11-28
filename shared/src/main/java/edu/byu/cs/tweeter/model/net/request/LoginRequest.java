@@ -15,10 +15,26 @@ public class LoginRequest extends AuthenticateRequest {
     /**
      * Creates an instance.
      *
-     * @param username the username of the user to be logged in.
+     * @param alias the alias of the user to be logged in.
      * @param password the password of the user to be logged in.
      */
-    public LoginRequest(String username, String password) {
-        super(username, password);
+    public LoginRequest(String alias, String password) {
+        super(alias, password);
     }
+
+//    public String getAlias() {
+//        return alias;
+//    }
+//
+//    public void setAlias(String alias) {
+//         this.alias = alias;
+//    }
+//
+//    public String getPassword() {
+//        return password;
+//    }
+//
+//    public void setPassword(String password) {
+//        this.password = password;
+//    }
 }

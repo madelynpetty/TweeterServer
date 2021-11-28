@@ -1,7 +1,5 @@
 package edu.byu.cs.tweeter.server.service;
 
-import edu.byu.cs.tweeter.model.domain.AuthToken;
-import edu.byu.cs.tweeter.model.domain.User;
 import edu.byu.cs.tweeter.model.net.request.GetUserRequest;
 import edu.byu.cs.tweeter.model.net.request.LoginRequest;
 import edu.byu.cs.tweeter.model.net.request.LogoutRequest;
@@ -10,15 +8,12 @@ import edu.byu.cs.tweeter.model.net.response.GetUserResponse;
 import edu.byu.cs.tweeter.model.net.response.LoginResponse;
 import edu.byu.cs.tweeter.model.net.response.LogoutResponse;
 import edu.byu.cs.tweeter.model.net.response.RegisterResponse;
-import edu.byu.cs.tweeter.model.util.FakeData;
-import edu.byu.cs.tweeter.server.dao.StoryDAO;
 import edu.byu.cs.tweeter.server.dao.UserDAO;
 
 public class UserService {
 
     public LoginResponse login(LoginRequest request) {
-        LoginResponse response = getUserDAO().login(request);
-        return response;
+        return getUserDAO().login(request);
     }
 
     public RegisterResponse register(RegisterRequest request) {
