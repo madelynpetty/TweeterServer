@@ -5,7 +5,7 @@ package edu.byu.cs.tweeter.model.net.request;
  */
 public class AuthenticateRequest {
 
-    private String username;
+    private String alias;
     private String password;
 
     /**
@@ -16,31 +16,32 @@ public class AuthenticateRequest {
     /**
      * Creates an instance.
      *
-     * @param username the username of the user to be logged in.
+     * @param alias the username of the user to be logged in.
      * @param password the password of the user to be logged in.
      */
-    public AuthenticateRequest(String username, String password) {
-        this.username = username;
+    public AuthenticateRequest(String alias, String password) {
+        this.alias = alias;
         this.password = password;
     }
 
     /**
-     * Returns the username of the user to be logged in by this request.
+     * Returns the alias of the user to be logged in by this request.
      *
-     * @return the username.
+     * @return the alias.
      */
-    public String getUsername() {
-        return username;
+    public String getAlias() {
+        return alias;
     }
 
     /**
-     * Sets the username.
+     * Sets the alias.
      *
-     * @param username the username.
+     * @param alias the alias.
      */
-    public void setUsername(String username) {
-        this.username = username;
+    public void setAlias(String alias) {
+        this.alias = alias;
     }
+
     /**
      * Returns the password of the user to be logged in by this request.
      *

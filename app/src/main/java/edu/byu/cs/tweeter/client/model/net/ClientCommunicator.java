@@ -72,7 +72,6 @@ class ClientCommunicator {
             throws IOException, TweeterRemoteException {
 
         HttpURLConnection connection = null;
-
         try {
             URL url = getUrl(urlPath);
             connection = (HttpURLConnection) url.openConnection();
@@ -87,9 +86,14 @@ class ClientCommunicator {
 
             requestStrategy.sendRequest(connection);
 
+            String responseString = getResponse(connection.getInputStream());
+            System.out.println("------------------");
+            System.out.println("RESPONSE STRING: " + responseString);
+            System.out.println("------------------");
+
             switch (connection.getResponseCode()) {
                 case HttpURLConnection.HTTP_OK:
-                    String responseString = getResponse(connection.getInputStream());
+//                    String responseString = getResponse(connection.getInputStream());
                     return JsonSerializer.deserialize(responseString, returnType);
                 case HttpURLConnection.HTTP_BAD_REQUEST:
                     ErrorResponse errorResponse = getErrorResponse(connection);

@@ -7,7 +7,7 @@ public class RegisterRequest extends AuthenticateRequest {
 
     private String firstName;
     private String lastName;
-    private String image;
+    private String imageUrl;
 
     /**
      * Allows construction of the object from Json. Private so it won't be called in normal code.
@@ -19,14 +19,14 @@ public class RegisterRequest extends AuthenticateRequest {
     /**
      * Creates an instance.
      *
-     * @param username the username of the user to be logged in.
+     * @param alias the username of the user to be logged in.
      * @param password the password of the user to be logged in.
      */
-    public RegisterRequest(String firstName, String lastName, String username, String password, String image) {
-        super(username, password);
+    public RegisterRequest(String firstName, String lastName, String alias, String password, String imageUrl) {
+        super(alias, password);
         this.firstName = firstName;
         this.lastName = lastName;
-        this.image = image;
+        this.imageUrl = imageUrl;
     }
 
     /**
@@ -68,18 +68,18 @@ public class RegisterRequest extends AuthenticateRequest {
     /**
      * Returns the image of the user to be logged in by this request.
      *
-     * @return the image.
+     * @return the imageUrl.
      */
-    public String getImage() {
-        return image;
+    public String getImageUrl() {
+        return imageUrl;
     }
 
     /**
      * Sets the image.
      *
-     * @param image the imgae.
+     * @param imageUrl the imageUrl.
      */
-    public void setImage(String image) {
-        this.image = image;
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
     }
 }

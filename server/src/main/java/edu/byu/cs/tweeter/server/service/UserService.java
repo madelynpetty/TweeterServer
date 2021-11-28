@@ -2,36 +2,38 @@ package edu.byu.cs.tweeter.server.service;
 
 import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.User;
+import edu.byu.cs.tweeter.model.net.request.GetUserRequest;
 import edu.byu.cs.tweeter.model.net.request.LoginRequest;
 import edu.byu.cs.tweeter.model.net.request.LogoutRequest;
 import edu.byu.cs.tweeter.model.net.request.RegisterRequest;
+import edu.byu.cs.tweeter.model.net.response.GetUserResponse;
 import edu.byu.cs.tweeter.model.net.response.LoginResponse;
 import edu.byu.cs.tweeter.model.net.response.LogoutResponse;
 import edu.byu.cs.tweeter.model.net.response.RegisterResponse;
 import edu.byu.cs.tweeter.model.util.FakeData;
+import edu.byu.cs.tweeter.server.dao.StoryDAO;
+import edu.byu.cs.tweeter.server.dao.UserDAO;
 
 public class UserService {
 
     public LoginResponse login(LoginRequest request) {
-        // TODO: Generates dummy data. Replace with a real implementation.
-        FakeData fakeData = new FakeData();
-        User user = fakeData.getFirstUser();
-        AuthToken authToken = fakeData.getAuthToken();
-        return new LoginResponse(user, authToken);
+        LoginResponse response = getUserDAO().login(request);
+        return response;
     }
 
     public RegisterResponse register(RegisterRequest request) {
-        // TODO: Generates dummy data. Replace with a real implementation.
-        FakeData fakeData = new FakeData();
-        User user = fakeData.getFirstUser();
-        AuthToken authToken = fakeData.getAuthToken();
-        return new RegisterResponse(user, authToken);
+        return getUserDAO().register(request);
     }
 
     public LogoutResponse logout(LogoutRequest request) {
-// TODO: Generates dummy data. Replace with a real implementation.
-//        FakeData fakeData = new FakeData();
-//        AuthToken authToken = fakeData.getAuthToken();
-        return new LogoutResponse();
+        return getUserDAO().logout(request);
+    }
+
+    public GetUserResponse getUser(GetUserRequest request) {
+        return getUserDAO().getUser(request);
+    }
+
+    UserDAO getUserDAO() {
+        return new UserDAO();
     }
 }

@@ -43,8 +43,6 @@ import edu.byu.cs.tweeter.model.net.response.UnfollowResponse;
 public class ServerFacade {
 
     private static final String SERVER_URL = "https://sqgu9hq6bd.execute-api.us-west-2.amazonaws.com/dev";
-    // "Insert your API invoke URL here";
-
     private final ClientCommunicator clientCommunicator = new ClientCommunicator(SERVER_URL);
 
     public AuthenticateResponse register(AuthenticateRequest request, String urlPath) throws IOException, TweeterRemoteException {

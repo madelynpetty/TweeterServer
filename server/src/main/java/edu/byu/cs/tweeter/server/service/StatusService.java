@@ -29,10 +29,6 @@ public class StatusService {
         return getStoryDAO().postStatus(request);
     }
 
-    public GetUserResponse getUser(GetUserRequest request) {
-        return getStoryDAO().getUser(request);
-    }
-
     StoryDAO getStoryDAO() {
         return new StoryDAO();
     }

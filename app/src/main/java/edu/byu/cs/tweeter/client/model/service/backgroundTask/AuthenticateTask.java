@@ -25,7 +25,7 @@ public abstract class AuthenticateTask extends BackgroundTask {
 
     protected AuthenticateTask(AuthenticateRequest request, Handler messageHandler) {
         super(messageHandler);
-        this.username = request.getUsername();
+        this.username = request.getAlias();
         this.password = request.getPassword();
     }
 

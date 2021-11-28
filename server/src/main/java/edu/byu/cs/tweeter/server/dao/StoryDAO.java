@@ -106,9 +106,4 @@ public class StoryDAO {
         //TODO actually post
         return new PostStatusResponse();
     }
-
-    public GetUserResponse getUser(GetUserRequest request) {
-        //TODO actually get the correct user
-        return new GetUserResponse();
-    }
 }

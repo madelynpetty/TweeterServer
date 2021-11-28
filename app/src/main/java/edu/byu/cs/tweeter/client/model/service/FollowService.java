@@ -33,6 +33,13 @@ public class FollowService {
         return serverFacade;
     }
 
+    //for tests
+    public GetFollowersTask getGetFollowerTask(FollowerRequest followerRequest, User user,
+                                               User lastFollower, GetFollowersObserver observer) {
+        return new GetFollowersTask(followerRequest, user,
+                lastFollower, new GetFollowersHandler(observer));
+    }
+
     //GET FOLLOWING
 
     public interface GetFollowingObserver extends ServiceObserver {
@@ -85,11 +92,11 @@ public class FollowService {
         FollowerRequest followerRequest;
         if (lastFollower == null) {
             followerRequest = new FollowerRequest(Cache.getInstance().getCurrUserAuthToken(),
-                    user.getAlias(), PAGE_SIZE, null);
+                    user, PAGE_SIZE, null);
         }
         else {
             followerRequest = new FollowerRequest(Cache.getInstance().getCurrUserAuthToken(),
-                    user.getAlias(), PAGE_SIZE, lastFollower.getAlias());
+                    user, PAGE_SIZE, lastFollower);
         }
 
         GetFollowersTask getFollowersTask = new GetFollowersTask(followerRequest, user,

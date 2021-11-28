@@ -144,7 +144,7 @@ public class FollowDAO {
     public FollowerResponse getFollowers(FollowerRequest request) {
         // TODO: Generates dummy data. Replace with a real implementation.
         assert request.getLimit() > 0;
-        assert request.getFollowerAlias() != null;
+        assert request.getFollower().getAlias() != null;
 
         List<User> allFollowers = getDummyFollows();
         List<User> responseFollowers = new ArrayList<>(request.getLimit());
@@ -153,7 +153,7 @@ public class FollowDAO {
 
         if(request.getLimit() > 0) {
             if (allFollowers != null) {
-                int followeesIndex = getFollowStartingIndex(request.getLastFollowerAlias(), allFollowers);
+                int followeesIndex = getFollowStartingIndex(request.getLastFollower().getAlias(), allFollowers);
 
                 for(int limitCounter = 0; followeesIndex < allFollowers.size() && limitCounter < request.getLimit(); followeesIndex++, limitCounter++) {
                     responseFollowers.add(allFollowers.get(followeesIndex));
