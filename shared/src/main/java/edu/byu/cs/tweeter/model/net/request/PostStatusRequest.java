@@ -10,6 +10,7 @@ public class PostStatusRequest {
 
     private AuthToken authToken;
     private Status post;
+    private String currUserAlias;
 
     /**
      * Allows construction of the object from Json. Private so it won't be called in normal code.
@@ -21,8 +22,9 @@ public class PostStatusRequest {
      *
      * @param post the post.
      */
-    public PostStatusRequest(Status post, AuthToken authToken) {
+    public PostStatusRequest(Status post, String currUserAlias, AuthToken authToken) {
         this.post = post;
+        this.currUserAlias = currUserAlias;
         this.authToken = authToken;
     }
 
@@ -50,5 +52,13 @@ public class PostStatusRequest {
 
     public void setAuthToken(AuthToken authToken) {
         this.authToken = authToken;
+    }
+
+    public String getCurrUserAlias() {
+        return currUserAlias;
+    }
+
+    public void setCurrUserAlias(String currUserAlias) {
+        this.currUserAlias = currUserAlias;
     }
 }

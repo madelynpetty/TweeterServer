@@ -4,5 +4,5 @@ dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 }
 
-sourceCompatibility = "11"
-targetCompatibility = "11"
+sourceCompatibility = "1.8" //todo changed both of these from 11
+targetCompatibility = "1.8"

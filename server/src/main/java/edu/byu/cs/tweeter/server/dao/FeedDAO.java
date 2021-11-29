@@ -10,10 +10,14 @@ import com.amazonaws.services.dynamodbv2.model.DuplicateItemException;
 import com.amazonaws.services.dynamodbv2.model.QueryRequest;
 import com.amazonaws.services.dynamodbv2.model.QueryResult;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import edu.byu.cs.tweeter.model.domain.Status;
 import edu.byu.cs.tweeter.model.domain.User;
@@ -37,10 +41,10 @@ public class FeedDAO {
             .standard().withRegion("us-west-2").build();
     private static DynamoDB dynamoDB = new DynamoDB(amazonDynamoDB);
     private final String tableName = "feed";
-    private final String indexName = "feed-index";
-    private Table feedTable = dynamoDB.getTable(tableName);
+    private final String indexName = "receiverAlias-feedtime-index";
+//    private Table feedTable = dynamoDB.getTable(tableName);
     private static final String partitionKey = "receiverAlias";
-    private static final String sortKey = "timestamp";
+    private static final String sortKey = "feedtime";
 
     public FeedResponse getFeed(FeedRequest request) {
         assert request.getLimit() > 0;
@@ -88,19 +92,25 @@ public class FeedDAO {
 
     List<Status> getFollowsStatuses(FeedRequest request) {
         Map<String, String> attrNames = new HashMap<String, String>();
-        attrNames.put("#a", ":" + partitionKey);
-        attrNames.put("#t", ":" + sortKey);
+        attrNames.put("#aliasName", partitionKey);
+        attrNames.put("#timeName", sortKey);
+
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
+        LocalDateTime now = LocalDateTime.now();
 
         Map<String, AttributeValue> attrValues = new HashMap<>();
         attrValues.put(":" + partitionKey, new AttributeValue().withS(request.getUserAlias()));
-        attrValues.put(":" + sortKey, new AttributeValue());
+        attrValues.put(":" + sortKey, new AttributeValue().withS(dtf.format(now)));
 
         QueryRequest queryRequest = new QueryRequest()
                 .withTableName(tableName)
                 .withIndexName(indexName)
-                .withKeyConditionExpression("#a = :" + partitionKey)
+                .withKeyConditionExpression("#aliasName = :" + partitionKey +
+                        " AND #timeName < :" + sortKey)
                 .withExpressionAttributeNames(attrNames)
                 .withExpressionAttributeValues(attrValues);
+
+        queryRequest.setScanIndexForward(true);
 
         QueryResult queryResult = amazonDynamoDB.query(queryRequest);
         List<Map<String, AttributeValue>> items = queryResult.getItems();
@@ -115,8 +125,9 @@ public class FeedDAO {
 
                 String post = item.get("post").getS();
                 String datetime = item.get("datetime").getS();
-                List<String> urls = item.get("urls").getNS();
-                List<String> mentions = item.get("mentions").getNS();
+
+                List<String> urls = getUrlsInPost(post);
+                List<String> mentions = getMentionsInPost(post);
 
                 status =  new Status(post, user, datetime, urls, mentions);
                 statuses.add(status);
@@ -128,5 +139,47 @@ public class FeedDAO {
         }
 
         return statuses;
+    }
+
+    private static final Pattern urlPattern = Pattern.compile(
+            "(?:^|[\\W])((ht|f)tp(s?):\\/\\/|www\\.)"
+                    + "(([\\w\\-]+\\.){1,}?([\\w\\-.~]+\\/?)*"
+                    + "[\\p{Alnum}.,%_=?&#\\-+()\\[\\]\\*$~@!:/{};']*)",
+            Pattern.CASE_INSENSITIVE | Pattern.MULTILINE | Pattern.DOTALL);
+
+    private List<String> getUrlsInPost(String post) {
+        List<String> urls = new ArrayList<>();
+        Matcher matcher = urlPattern.matcher(post);
+
+        while (matcher.find()) {
+            int matchStart = matcher.start(1);
+            int matchEnd = matcher.end();
+            urls.add(post.substring(matchStart, matchEnd));
+        }
+
+        System.out.println("URLS: ");
+        for (String s : urls) {
+            System.out.println("URL: " + s);
+        }
+
+        return urls;
+    }
+
+    private List<String> getMentionsInPost(String post) {
+        List<String> mentions = new ArrayList<>();
+        String[] words = post.split(" ");
+
+        for (String s : words) {
+            if (s.charAt(0) == '@') {
+                mentions.add(s);
+            }
+        }
+
+        System.out.println("MENTIONS: ");
+        for (String s : mentions) {
+            System.out.println("MENTION: " + s);
+        }
+
+        return mentions;
     }
 }

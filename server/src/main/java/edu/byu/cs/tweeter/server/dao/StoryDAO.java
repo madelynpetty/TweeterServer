@@ -43,10 +43,10 @@ public class StoryDAO {
             .standard().withRegion("us-west-2").build();
     private static DynamoDB dynamoDB = new DynamoDB(amazonDynamoDB);
     private final String tableName = "story";
-    private final String indexName = "story-index";
+    private final String indexName = "senderAlias-storytime-index";
     private Table storyTable = dynamoDB.getTable(tableName);
     private static final String partitionKey = "senderAlias";
-    private static final String sortKey = "timestamp";
+    private static final String sortKey = "storytime";
 
     public StoryResponse getStory(StoryRequest request) {
         assert request.getLimit() > 0;
@@ -94,19 +94,25 @@ public class StoryDAO {
 
     List<Status> getFollowsStatuses(StoryRequest request) {
         Map<String, String> attrNames = new HashMap<String, String>();
-        attrNames.put("#a", ":" + partitionKey);
-        attrNames.put("#t", ":" + sortKey);
+        attrNames.put("#aliasName", partitionKey);
+        attrNames.put("#timeName", sortKey);
+
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
+        LocalDateTime now = LocalDateTime.now();
 
         Map<String, AttributeValue> attrValues = new HashMap<>();
         attrValues.put(":" + partitionKey, new AttributeValue().withS(request.getUserAlias()));
-        attrValues.put(":" + sortKey, new AttributeValue());
+        attrValues.put(":" + sortKey, new AttributeValue().withS(dtf.format(now)));
 
         QueryRequest queryRequest = new QueryRequest()
                 .withTableName(tableName)
                 .withIndexName(indexName)
-                .withKeyConditionExpression("#a = :" + partitionKey)
+                .withKeyConditionExpression("#aliasName = :" + partitionKey +
+                        " AND #timeName < :" + sortKey)
                 .withExpressionAttributeNames(attrNames)
                 .withExpressionAttributeValues(attrValues);
+
+        queryRequest.setScanIndexForward(true);
 
         QueryResult queryResult = amazonDynamoDB.query(queryRequest);
         List<Map<String, AttributeValue>> items = queryResult.getItems();
@@ -130,7 +136,7 @@ public class StoryDAO {
             }
         }
         else {
-            System.out.println("There are no statuses to show in the user's feed. They may not " +
+            System.out.println("There are no statuses to show in the user's story. They may not " +
                     "be following anyone.");
         }
 
@@ -164,20 +170,21 @@ public class StoryDAO {
 
     public PostStatusResponse postStatus(PostStatusRequest request) {
         try {
-            Map<String, String> attrNames = new HashMap<String, String>();
-            attrNames.put("#a", ":" + partitionKey);
+//            Map<String, String> attrNames = new HashMap<String, String>();
+//            attrNames.put("#post", partitionKey);
+//
+//            Map<String, AttributeValue> attrValues = new HashMap<>();
+//            attrValues.put(":" + partitionKey, new AttributeValue()
+//                    .withS(UserDAO.getLoggedInUser().getAlias()));
 
-            Map<String, AttributeValue> attrValues = new HashMap<>();
-            attrValues.put(":" + partitionKey, new AttributeValue()
-                    .withS(UserDAO.getLoggedInUser().getAlias()));
 
             DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
             LocalDateTime now = LocalDateTime.now();
 
             Item item = new Item()
-                    .withPrimaryKey("alias", UserDAO.getLoggedInUser().getAlias())
+                    .withPrimaryKey(partitionKey, request.getCurrUserAlias())
                     .withString("post", request.getPost().getPost())
-                    .withString("datetime", dtf.format(now));
+                    .withString(sortKey, dtf.format(now));
 //                    .withList("urls", getUrlsInPost(request.getPost().getPost()))
 //                    .withList("mentions", getMentionsInPost(request.getPost().getPost()));
 
@@ -185,6 +192,7 @@ public class StoryDAO {
         }
         catch (DuplicateItemException e) {
             System.out.println("Duplicate Item Exception: " + e.getMessage());
+            return new PostStatusResponse("Duplicate Item Exception:" + e.getMessage());
         }
         return new PostStatusResponse();
     }
