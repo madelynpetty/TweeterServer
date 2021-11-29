@@ -32,9 +32,10 @@ public class UserDAO {
     private static AmazonDynamoDB amazonDynamoDB = AmazonDynamoDBClientBuilder
             .standard().withRegion("us-west-2").build();
     private static DynamoDB dynamoDB = new DynamoDB(amazonDynamoDB);
-    private final String tableName = "user";
+    private static final String tableName = "user";
     private final String indexName = "alias-index";
-    private Table userTable = dynamoDB.getTable(tableName);
+    private static final Table userTable = dynamoDB.getTable(tableName);
+    private static User loggedInUser;
 
     public LoginResponse login(LoginRequest request) {
 //        Map<String, String> attrNames = new HashMap<String, String>();
@@ -106,6 +107,8 @@ public class UserDAO {
 
         FakeData fakeData = new FakeData();
         AuthToken authToken = fakeData.getAuthToken();
+        loggedInUser = user;
+
         return new LoginResponse(user, authToken);
     }
 
@@ -169,6 +172,7 @@ public class UserDAO {
 //        List<Map<String, AttributeValue>> items = queryResult.getItems();
 
         User user = new User(request.getFirstName(), request.getLastName(), request.getAlias(), imageUrl);
+        loggedInUser = user;
         FakeData fakeData = new FakeData();
         AuthToken authToken = fakeData.getAuthToken();
         return new RegisterResponse(user, authToken); //getAuthTokenDAO().getAuthToken()
@@ -181,6 +185,21 @@ public class UserDAO {
 
     private AuthTokenDAO getAuthTokenDAO() {
         return new AuthTokenDAO();
+    }
+
+    public static User getUserFromAlias(String alias) {
+        Item item = userTable.getItem("alias", alias);
+        if (item != null) {
+            String firstName = item.getString("firstName");
+            String lastName = item.getString("lastName");
+            String imageUrl = item.getString("image");
+            return new User(firstName, lastName, alias, imageUrl);
+        }
+        return null;
+    }
+
+    public static User getLoggedInUser() {
+        return loggedInUser;
     }
 
 //    public void createTable() throws Exception {

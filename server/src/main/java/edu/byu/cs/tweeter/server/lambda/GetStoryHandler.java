@@ -20,6 +20,6 @@ public class GetStoryHandler implements RequestHandler<StoryRequest, StoryRespon
     @Override
     public StoryResponse handleRequest(StoryRequest request, Context context) {
         StatusService service = new StatusService();
-        return service.getStories(request);
+        return service.getStory(request);
     }
 }

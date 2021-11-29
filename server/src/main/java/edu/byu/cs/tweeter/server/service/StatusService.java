@@ -21,20 +21,20 @@ import edu.byu.cs.tweeter.server.dao.StoryDAO;
  */
 public class StatusService {
 
-    public StoryResponse getStories(StoryRequest request) {
-        return getStoryDAO().getStories(request);
+    public StoryResponse getStory(StoryRequest request) {
+        return getStoryDAO().getStory(request);
     }
 
     public PostStatusResponse postStatus(PostStatusRequest request) {
         return getStoryDAO().postStatus(request);
     }
 
-    StoryDAO getStoryDAO() {
-        return new StoryDAO();
-    }
-
     public FeedResponse getFeed(FeedRequest request) {
         return getFeedDAO().getFeed(request);
+    }
+
+    StoryDAO getStoryDAO() {
+        return new StoryDAO();
     }
 
     FeedDAO getFeedDAO() {
