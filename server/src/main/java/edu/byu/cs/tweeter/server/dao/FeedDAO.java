@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -36,6 +37,7 @@ public class FeedDAO {
     private static final String partitionKey = "receiverAlias";
     private static final String sortKey = "feedtime";
 
+    //coming back with a response with the correct object in it, but getting a gson exception
     public FeedResponse getFeed(FeedRequest request) {
         assert request.getLimit() > 0;
         assert request.getUserAlias() != null;
@@ -110,11 +112,11 @@ public class FeedDAO {
 
         if (items != null) {
             for (Map<String, AttributeValue> item : items) {
-                String userAlias = item.get("alias").getS();
+                String userAlias = item.get(partitionKey).getS();
                 User user = UserDAO.getUserFromAlias(userAlias);
 
                 String post = item.get("post").getS();
-                String datetime = item.get("datetime").getS();
+                String datetime = item.get(sortKey).getS();
 
                 List<String> urls = getUrlsInPost(post);
                 List<String> mentions = getMentionsInPost(post);
@@ -135,11 +137,11 @@ public class FeedDAO {
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
         LocalDateTime now = LocalDateTime.now();
 
-        int currUserFollowees = 20; //todo fix this by calling FeedDAO
+        List<User> currUserFolloweeList = getFollowDAO().getFollowingList(senderAlias);
 
-        for (int i = 0; i < currUserFollowees; i++) {
+        for (User user : currUserFolloweeList) {
             Item item = new Item()
-                    .withPrimaryKey(partitionKey, "" + i + "" /* receiverAlias */)
+                    .withPrimaryKey(partitionKey, user.getAlias())
                     .withString("post", post)
                     .withString("senderAlias", senderAlias)
                     .withString(sortKey, dtf.format(now));
@@ -187,5 +189,13 @@ public class FeedDAO {
         }
 
         return mentions;
+    }
+
+    private static FollowDAO followDAO;
+    private static FollowDAO getFollowDAO() {
+        if (followDAO != null) {
+            return followDAO;
+        }
+        return new FollowDAO();
     }
 }

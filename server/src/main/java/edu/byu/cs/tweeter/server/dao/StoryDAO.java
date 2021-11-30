@@ -113,11 +113,11 @@ public class StoryDAO {
 
         if (items != null) {
             for (Map<String, AttributeValue> item : items) {
-                String userAlias = item.get("alias").getS();
+                String userAlias = item.get(partitionKey).getS();
                 User user = UserDAO.getUserFromAlias(userAlias);
 
                 String post = item.get("post").getS();
-                String datetime = item.get("datetime").getS();
+                String datetime = item.get(sortKey).getS();
 
                 List<String> urls = getUrlsInPost(post);
                 List<String> mentions = getMentionsInPost(post);
@@ -133,31 +133,6 @@ public class StoryDAO {
 
         return statuses;
     }
-
-//    public StoryResponse getStatuses(StoryRequest request) {
-//        // TODO: Generates dummy data. Replace with a real implementation.
-//        assert request.getLimit() > 0;
-//        assert request.getLastStatus() != null;
-//
-//        List<Status> allStatuses = getDummyFollows();
-//        List<Status> responseStatuses = new ArrayList<>(request.getLimit());
-//
-//        boolean hasMorePages = false;
-//
-//        if(request.getLimit() > 0) {
-//            if (allStatuses != null) {
-//                int statusesIndex = getStoryStartingIndex(request.getLastStatus().post, allStatuses);
-//
-//                for(int limitCounter = 0; statusesIndex < allStatuses.size() && limitCounter < request.getLimit(); statusesIndex++, limitCounter++) {
-//                    responseStatuses.add(allStatuses.get(statusesIndex));
-//                }
-//
-//                hasMorePages = statusesIndex < allStatuses.size();
-//            }
-//        }
-//
-//        return new StoryResponse(responseStatuses, hasMorePages);
-//    }
 
     public PostStatusResponse postStatus(PostStatusRequest request) {
         try {
