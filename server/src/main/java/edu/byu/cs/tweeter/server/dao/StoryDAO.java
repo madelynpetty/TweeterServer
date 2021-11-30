@@ -21,19 +21,10 @@ import java.util.regex.Pattern;
 
 import edu.byu.cs.tweeter.model.domain.Status;
 import edu.byu.cs.tweeter.model.domain.User;
-import edu.byu.cs.tweeter.model.net.request.FeedRequest;
-import edu.byu.cs.tweeter.model.net.request.FollowerRequest;
-import edu.byu.cs.tweeter.model.net.request.FollowingRequest;
-import edu.byu.cs.tweeter.model.net.request.GetUserRequest;
 import edu.byu.cs.tweeter.model.net.request.PostStatusRequest;
 import edu.byu.cs.tweeter.model.net.request.StoryRequest;
-import edu.byu.cs.tweeter.model.net.response.FeedResponse;
-import edu.byu.cs.tweeter.model.net.response.FollowerResponse;
-import edu.byu.cs.tweeter.model.net.response.FollowingResponse;
-import edu.byu.cs.tweeter.model.net.response.GetUserResponse;
 import edu.byu.cs.tweeter.model.net.response.PostStatusResponse;
 import edu.byu.cs.tweeter.model.net.response.StoryResponse;
-import edu.byu.cs.tweeter.model.util.FakeData;
 
 /**
  * A DAO for accessing 'following' data from the database.
@@ -170,14 +161,6 @@ public class StoryDAO {
 
     public PostStatusResponse postStatus(PostStatusRequest request) {
         try {
-//            Map<String, String> attrNames = new HashMap<String, String>();
-//            attrNames.put("#post", partitionKey);
-//
-//            Map<String, AttributeValue> attrValues = new HashMap<>();
-//            attrValues.put(":" + partitionKey, new AttributeValue()
-//                    .withS(UserDAO.getLoggedInUser().getAlias()));
-
-
             DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
             LocalDateTime now = LocalDateTime.now();
 
@@ -185,10 +168,9 @@ public class StoryDAO {
                     .withPrimaryKey(partitionKey, request.getCurrUserAlias())
                     .withString("post", request.getPost().getPost())
                     .withString(sortKey, dtf.format(now));
-//                    .withList("urls", getUrlsInPost(request.getPost().getPost()))
-//                    .withList("mentions", getMentionsInPost(request.getPost().getPost()));
 
             storyTable.putItem(item);
+            FeedDAO.postedStatus(request.getPost().getPost(), request.getCurrUserAlias());
         }
         catch (DuplicateItemException e) {
             System.out.println("Duplicate Item Exception: " + e.getMessage());

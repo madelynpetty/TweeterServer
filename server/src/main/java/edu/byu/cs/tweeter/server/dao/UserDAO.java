@@ -7,16 +7,10 @@ import com.amazonaws.services.dynamodbv2.document.Item;
 import com.amazonaws.services.dynamodbv2.document.Table;
 import com.amazonaws.services.dynamodbv2.model.AttributeValue;
 import com.amazonaws.services.dynamodbv2.model.DuplicateItemException;
-import com.amazonaws.services.dynamodbv2.model.QueryRequest;
-import com.amazonaws.services.dynamodbv2.model.QueryResult;
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
-import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.User;
 import edu.byu.cs.tweeter.model.net.request.GetUserRequest;
 import edu.byu.cs.tweeter.model.net.request.LoginRequest;
@@ -26,7 +20,6 @@ import edu.byu.cs.tweeter.model.net.response.GetUserResponse;
 import edu.byu.cs.tweeter.model.net.response.LoginResponse;
 import edu.byu.cs.tweeter.model.net.response.LogoutResponse;
 import edu.byu.cs.tweeter.model.net.response.RegisterResponse;
-import edu.byu.cs.tweeter.model.util.FakeData;
 
 public class UserDAO {
     private static AmazonDynamoDB amazonDynamoDB = AmazonDynamoDBClientBuilder
@@ -57,10 +50,7 @@ public class UserDAO {
             throw new RuntimeException("Username and password combination do not match");
         }
 
-        FakeData fakeData = new FakeData();
-        AuthToken authToken = fakeData.getAuthToken();
-
-        return new LoginResponse(user, authToken);
+        return new LoginResponse(user, getAuthTokenDAO().getNewAuthToken(user.getAlias()));
     }
 
     public LogoutResponse logout(LogoutRequest request) {
@@ -97,9 +87,7 @@ public class UserDAO {
         }
 
         User user = new User(request.getFirstName(), request.getLastName(), request.getAlias(), imageUrl);
-        FakeData fakeData = new FakeData();
-        AuthToken authToken = fakeData.getAuthToken();
-        return new RegisterResponse(user, authToken); //getAuthTokenDAO().getAuthToken()
+        return new RegisterResponse(user, getAuthTokenDAO().getNewAuthToken(user.getAlias()));
     }
 
     public GetUserResponse getUser(GetUserRequest request) {

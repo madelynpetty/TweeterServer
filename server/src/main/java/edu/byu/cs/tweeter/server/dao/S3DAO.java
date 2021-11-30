@@ -18,10 +18,6 @@ public class S3DAO {
         InputStream inputStream = new ByteArrayInputStream(byteArray);
         s3.putObject(new PutObjectRequest("maddiepettytweeterbucket", alias,
                 inputStream, new ObjectMetadata()).withCannedAcl(CannedAccessControlList.PublicRead));
-
-//        ObjectMetadata metadata = new ObjectMetadata();
-//        PutObjectRequest putObjectRequest = new PutObjectRequest("s3://maddiepettytweeterbucket", alias, inputStream, metadata);
-//        s3.putObject(putObjectRequest);
     }
 
     public static String getUrl(String alias) {

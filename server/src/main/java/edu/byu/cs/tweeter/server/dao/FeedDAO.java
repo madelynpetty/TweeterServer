@@ -6,7 +6,6 @@ import com.amazonaws.services.dynamodbv2.document.DynamoDB;
 import com.amazonaws.services.dynamodbv2.document.Item;
 import com.amazonaws.services.dynamodbv2.document.Table;
 import com.amazonaws.services.dynamodbv2.model.AttributeValue;
-import com.amazonaws.services.dynamodbv2.model.DuplicateItemException;
 import com.amazonaws.services.dynamodbv2.model.QueryRequest;
 import com.amazonaws.services.dynamodbv2.model.QueryResult;
 
@@ -22,16 +21,7 @@ import java.util.regex.Pattern;
 import edu.byu.cs.tweeter.model.domain.Status;
 import edu.byu.cs.tweeter.model.domain.User;
 import edu.byu.cs.tweeter.model.net.request.FeedRequest;
-import edu.byu.cs.tweeter.model.net.request.FollowerRequest;
-import edu.byu.cs.tweeter.model.net.request.FollowingRequest;
-import edu.byu.cs.tweeter.model.net.request.LoginRequest;
-import edu.byu.cs.tweeter.model.net.request.StoryRequest;
 import edu.byu.cs.tweeter.model.net.response.FeedResponse;
-import edu.byu.cs.tweeter.model.net.response.FollowerResponse;
-import edu.byu.cs.tweeter.model.net.response.FollowingResponse;
-import edu.byu.cs.tweeter.model.net.response.LoginResponse;
-import edu.byu.cs.tweeter.model.net.response.StoryResponse;
-import edu.byu.cs.tweeter.model.util.FakeData;
 
 /**
  * A DAO for accessing 'following' data from the database.
@@ -40,9 +30,9 @@ public class FeedDAO {
     private static AmazonDynamoDB amazonDynamoDB = AmazonDynamoDBClientBuilder
             .standard().withRegion("us-west-2").build();
     private static DynamoDB dynamoDB = new DynamoDB(amazonDynamoDB);
-    private final String tableName = "feed";
+    private static final String tableName = "feed";
     private final String indexName = "receiverAlias-feedtime-index";
-//    private Table feedTable = dynamoDB.getTable(tableName);
+    private static Table feedTable = dynamoDB.getTable(tableName);
     private static final String partitionKey = "receiverAlias";
     private static final String sortKey = "feedtime";
 
@@ -139,6 +129,22 @@ public class FeedDAO {
         }
 
         return statuses;
+    }
+
+    public static void postedStatus(String post, String senderAlias) {
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
+        LocalDateTime now = LocalDateTime.now();
+
+        int currUserFollowees = 20; //todo fix this by calling FeedDAO
+
+        for (int i = 0; i < currUserFollowees; i++) {
+            Item item = new Item()
+                    .withPrimaryKey(partitionKey, "" + i + "" /* receiverAlias */)
+                    .withString("post", post)
+                    .withString("senderAlias", senderAlias)
+                    .withString(sortKey, dtf.format(now));
+            feedTable.putItem(item);
+        }
     }
 
     private static final Pattern urlPattern = Pattern.compile(
