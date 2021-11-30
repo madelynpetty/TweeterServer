@@ -53,7 +53,9 @@ public class AuthTokenDAO {
 
     public void checkValidAuthTokens() {
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
-        LocalDateTime cutOff = LocalDateTime.now().minusMinutes(1);
+        LocalDateTime cutOff = LocalDateTime.now().minusMinutes(30);
+            // although this is 30 minutes ago, this actually is a day and a 
+            // half ago due to aws not allowing me to change my timezone.
 
         ScanSpec scanSpec = new ScanSpec()
                 .withProjectionExpression("#authTokenVal, " + sortKey + ", userAlias")

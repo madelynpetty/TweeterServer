@@ -11,8 +11,6 @@ import edu.byu.cs.tweeter.model.net.request.FollowingRequest;
  */
 public class FollowingResponse extends PagedResponse {
 
-    private List<User> followees;
-
     /**
      * Creates a response indicating that the corresponding request was unsuccessful. Sets the
      * success and more pages indicators to false.
@@ -30,38 +28,6 @@ public class FollowingResponse extends PagedResponse {
      * @param hasMorePages an indicator of whether more data is available for the request.
      */
     public FollowingResponse(List<User> followees, boolean hasMorePages) {
-        super(true, hasMorePages);
-        this.followees = followees;
-    }
-
-    /**
-     * Returns the followees for the corresponding request.
-     *
-     * @return the followees.
-     */
-    public List<User> getFollowees() {
-        return followees;
-    }
-
-    @Override
-    public boolean equals(Object param) {
-        if (this == param) {
-            return true;
-        }
-
-        if (param == null || getClass() != param.getClass()) {
-            return false;
-        }
-
-        FollowingResponse that = (FollowingResponse) param;
-
-        return (Objects.equals(followees, that.followees) &&
-                Objects.equals(this.getMessage(), that.getMessage()) &&
-                this.isSuccess() == that.isSuccess());
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(followees);
+        super(true, hasMorePages, followees);
     }
 }
