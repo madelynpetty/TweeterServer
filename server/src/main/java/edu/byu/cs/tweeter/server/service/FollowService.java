@@ -43,14 +43,14 @@ public class FollowService {
     }
 
     public FollowResponse follow(FollowRequest request) {
-        return getFollowerDAO().follow(request.getUser());
+        return getFollowerDAO().follow(request);
     }
 
     public UnfollowResponse unfollow(UnfollowRequest request) {
-        return getFollowerDAO().unfollow(request.getUser());
+        return getFollowerDAO().unfollow(request);
     }
 
     public IsFollowerResponse isFollower(IsFollowerRequest request) {
-        return getFollowerDAO().isFollower(request.getFollower()); //TODO may need getFollowee here
+        return getFollowerDAO().isFollower(request);
     }
 }

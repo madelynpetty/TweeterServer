@@ -48,6 +48,6 @@ public class GetFollowingTask extends PagedUserTask {
 
     @Override
     protected AuthenticatedResponse runAuthenticationTask() {
-        return null; //TODO this may become a problem
+        return null;
     }
 }

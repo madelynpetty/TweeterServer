@@ -47,6 +47,6 @@ public class GetFeedTask extends PagedStatusTask {
 
     @Override
     protected AuthenticatedResponse runAuthenticationTask() {
-        return null; //TODO this may become a problem
+        return null;
     }
 }

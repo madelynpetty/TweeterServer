@@ -38,6 +38,6 @@ public class GetFollowingCountTask extends GetCountTask {
 
     @Override
     protected AuthenticatedResponse runAuthenticationTask() {
-        return null; //TODO this may become a problem
+        return null;
     }
 }

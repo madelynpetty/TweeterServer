@@ -13,12 +13,10 @@ public abstract class AuthenticatedTask extends BackgroundTask {
     private static final String LOG_TAG = "AuthenticatedTask";
 
     private final AuthToken authToken;
-//    private final User user;
 
     protected AuthenticatedTask(AuthToken authToken, Handler messageHandler) { //pass in user?
         super(messageHandler);
         this.authToken = authToken;
-//        this.user = user;
     }
 
     @Override
@@ -28,6 +26,4 @@ public abstract class AuthenticatedTask extends BackgroundTask {
     }
 
     protected abstract AuthenticatedResponse runAuthenticationTask();
-
-    //TODO do I need a loadSuccessBundle?
 }
