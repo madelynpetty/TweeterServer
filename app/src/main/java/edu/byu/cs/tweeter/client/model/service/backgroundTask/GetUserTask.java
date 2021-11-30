@@ -11,6 +11,7 @@ import edu.byu.cs.tweeter.model.domain.User;
 import edu.byu.cs.tweeter.model.net.TweeterRemoteException;
 import edu.byu.cs.tweeter.model.net.request.GetUserRequest;
 import edu.byu.cs.tweeter.model.net.response.AuthenticatedResponse;
+import edu.byu.cs.tweeter.model.util.FakeData;
 
 /**
  * Background task that returns the profile for a specified user.
@@ -48,6 +49,7 @@ public class GetUserTask extends AuthenticatedTask {
 
     private User getUser() {
         //TODO this should be fixed with real implementation in M4
-        return getFakeData().findUserByAlias(request.getAlias());
+        FakeData fakeData = new FakeData();
+        return fakeData.findUserByAlias(request.getAlias());
     }
 }

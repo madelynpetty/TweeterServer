@@ -35,9 +35,10 @@ public class FollowService {
 
     //for tests
     public GetFollowersTask getGetFollowerTask(FollowerRequest followerRequest, User user,
-                                               User lastFollower, GetFollowersObserver observer) {
+                                               User lastFollower, boolean hasMorePages,
+                                               GetFollowersObserver observer) {
         return new GetFollowersTask(followerRequest, user,
-                lastFollower, new GetFollowersHandler(observer));
+                lastFollower, hasMorePages, new GetFollowersHandler(observer));
     }
 
     //GET FOLLOWING
@@ -46,7 +47,7 @@ public class FollowService {
         void followSucceeded(List<User> users, boolean hasMorePages, User lastFollowee);
     }
 
-    public void getFollowing(User targetUser, int limit, User lastFollowee, GetFollowingObserver observer) {
+    public void getFollowing(User targetUser, int limit, User lastFollowee, boolean hasMorePages, GetFollowingObserver observer) {
         FollowingRequest followingRequest;
 
         if (lastFollowee == null) {
@@ -58,7 +59,8 @@ public class FollowService {
                     targetUser.getAlias(), limit, lastFollowee.getAlias());
         }
 
-        GetFollowingTask getFollowingTask = new GetFollowingTask(followingRequest, targetUser, lastFollowee, new GetFollowingHandler(observer));
+        GetFollowingTask getFollowingTask = new GetFollowingTask(followingRequest, targetUser,
+                lastFollowee, hasMorePages, new GetFollowingHandler(observer));
         new ExecuteTask<>(getFollowingTask);
     }
 
@@ -88,7 +90,8 @@ public class FollowService {
         void followSucceeded(List<User> followers, boolean hasMorePages, User lastFollower);
     }
 
-    public static void getFollowers(GetFollowersObserver observer, User user, User lastFollower) {
+    public static void getFollowers(GetFollowersObserver observer, User user, User lastFollower,
+                                    boolean hasMorePages) {
         FollowerRequest followerRequest;
         if (lastFollower == null) {
             followerRequest = new FollowerRequest(Cache.getInstance().getCurrUserAuthToken(),
@@ -100,7 +103,7 @@ public class FollowService {
         }
 
         GetFollowersTask getFollowersTask = new GetFollowersTask(followerRequest, user,
-                lastFollower, new GetFollowersHandler(observer));
+                lastFollower, hasMorePages, new GetFollowersHandler(observer));
         new ExecuteTask<>(getFollowersTask);
     }
 

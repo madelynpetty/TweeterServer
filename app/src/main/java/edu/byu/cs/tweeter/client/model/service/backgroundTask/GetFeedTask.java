@@ -24,14 +24,16 @@ public class GetFeedTask extends PagedStatusTask {
     private FeedRequest feedRequest;
     private PagedResponse feedResponse;
 
-    public GetFeedTask(FeedRequest feedRequest, User targetUser, Status lastStatus, Handler messageHandler) {
-        super(feedRequest.getAuthToken(), targetUser, feedRequest.getLimit(), lastStatus, messageHandler);
+    public GetFeedTask(FeedRequest feedRequest, User targetUser, Status lastStatus,
+                       boolean hasMorePages, Handler messageHandler) {
+        super(feedRequest.getAuthToken(), targetUser, feedRequest.getLimit(), lastStatus,
+                hasMorePages, messageHandler);
         this.feedRequest = feedRequest;
     }
 
     @Override
     protected List<Status> getItems() {
-        return getFakeData().getPageOfStatusItem(lastItem, limit);
+        return feedResponse.getItems();
     }
 
     @Override

@@ -15,6 +15,6 @@ public class StoryPresenter extends PagedPresenter<Status> {
     }
 
     public void loadItems() {
-        new StatusService().getStory(this, user, lastItem);
+        new StatusService().getStory(this, user, lastItem, hasMorePages);
     }
 }

@@ -26,14 +26,16 @@ public class GetFollowingTask extends PagedUserTask {
     private FollowingRequest followingRequest;
     private PagedResponse followingResponse;
 
-    public GetFollowingTask(FollowingRequest followingRequest, User follower, User lastFollowee, Handler messageHandler) {
-        super(followingRequest.getAuthToken(), follower, followingRequest.getLimit(), lastFollowee, messageHandler);
+    public GetFollowingTask(FollowingRequest followingRequest, User follower, User lastFollowee,
+                            boolean hasMorePages, Handler messageHandler) {
+        super(followingRequest.getAuthToken(), follower, followingRequest.getLimit(), lastFollowee,
+                hasMorePages, messageHandler);
         this.followingRequest = followingRequest;
     }
 
     @Override
     protected List<User> getItems() {
-        return getFakeData().getPageOfUsersItem(lastItem, limit, targetUser);
+        return getResponse().getItems();
     }
 
     @Override

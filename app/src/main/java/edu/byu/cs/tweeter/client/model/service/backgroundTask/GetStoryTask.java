@@ -24,14 +24,20 @@ public class GetStoryTask extends PagedStatusTask {
     private StoryRequest storyRequest;
     private PagedResponse storyResponse;
 
-    public GetStoryTask(StoryRequest storyRequest, User targetUser, Status lastStatus, Handler messageHandler) {
-        super(storyRequest.getAuthToken(), targetUser, storyRequest.getLimit(), lastStatus, messageHandler);
+    public GetStoryTask(StoryRequest storyRequest, User targetUser, Status lastStatus,
+                        boolean hasMorePages, Handler messageHandler) {
+        super(storyRequest.getAuthToken(), targetUser, storyRequest.getLimit(), lastStatus,
+                hasMorePages, messageHandler);
         this.storyRequest = storyRequest;
+        this.targetUser = targetUser;
+        this.lastItem = lastStatus;
+        this.limit = storyRequest.getLimit();
     }
 
     @Override
     protected List<Status> getItems() {
-        return getFakeData().getPageOfStatusItem(lastItem, limit);
+        return storyResponse.getItems();
+//        return getFakeData().getPageOfStatusItem(lastItem, limit);
     }
 
     @Override

@@ -65,10 +65,6 @@ public abstract class BackgroundTask implements Runnable{
         messageHandler.sendMessage(msg);
     }
 
-    protected FakeData getFakeData() {
-        return new FakeData();
-    }
-
     protected abstract boolean runTask() throws IOException;
 
     protected void loadSuccessBundle(Bundle msgBundle) {

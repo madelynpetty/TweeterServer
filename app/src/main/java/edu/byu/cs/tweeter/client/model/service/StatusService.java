@@ -38,10 +38,12 @@ public class StatusService {
         void statusSucceeded(List<Status> statuses, boolean hasMorePages, Status lastStatus) throws MalformedURLException;
     }
 
-    public static void getFeed(FeedObserver observer, User user, Status lastStatus) {
+    public static void getFeed(FeedObserver observer, User user, Status lastStatus,
+                               boolean hasMorePages) {
         FeedRequest feedRequest = new FeedRequest(Cache.getInstance().getCurrUserAuthToken(),
                 user.getAlias(), PAGE_SIZE, lastStatus);
-        GetFeedTask getFeedTask = new GetFeedTask(feedRequest, user, lastStatus, new GetFeedHandler(observer));
+        GetFeedTask getFeedTask = new GetFeedTask(feedRequest, user, lastStatus,
+                hasMorePages, new GetFeedHandler(observer));
         new ExecuteTask<>(getFeedTask);
     }
 
@@ -69,10 +71,12 @@ public class StatusService {
         void statusSucceeded(List<Status> statuses, boolean hasMorePages, Status lastStatus);
     }
 
-    public static void getStory(StoryObserver observer, User user, Status lastStatus) {
+    public static void getStory(StoryObserver observer, User user, Status lastStatus,
+                                boolean hasMorePages) {
         StoryRequest storyRequest = new StoryRequest(Cache.getInstance().getCurrUserAuthToken(),
                 user.getAlias(), PAGE_SIZE, lastStatus);
-        GetStoryTask getStoryTask = new GetStoryTask(storyRequest, user, lastStatus, new GetStoryHandler(observer));
+        GetStoryTask getStoryTask = new GetStoryTask(storyRequest, user, lastStatus,
+                hasMorePages, new GetStoryHandler(observer));
         new ExecuteTask<>(getStoryTask);
     }
 

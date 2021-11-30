@@ -23,11 +23,12 @@ public abstract class PagedTask<T> extends AuthenticatedTask {
     protected boolean hasMorePages;
 
     public PagedTask(AuthToken authToken, User targetUser, int limit, T lastItem,
-                     Handler messageHandler) {
+                     boolean hasMorePages, Handler messageHandler) {
         super(authToken, messageHandler);
         this.targetUser = targetUser;
         this.limit = limit;
         this.lastItem = lastItem;
+        this.hasMorePages = hasMorePages;
     }
 
     @Override

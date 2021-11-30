@@ -8,8 +8,9 @@ import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.User;
 
 public abstract class PagedUserTask extends PagedTask<User> {
-    protected PagedUserTask(AuthToken authToken, User targetUser, int limit, User lastItem, Handler messageHandler) {
-        super(authToken, targetUser, limit, lastItem, messageHandler);
+    protected PagedUserTask(AuthToken authToken, User targetUser, int limit, User lastItem,
+                            boolean hasMorePages, Handler messageHandler) {
+        super(authToken, targetUser, limit, lastItem, hasMorePages, messageHandler);
     }
 
     @Override
