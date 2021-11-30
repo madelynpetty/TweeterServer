@@ -9,7 +9,8 @@ import edu.byu.cs.tweeter.model.domain.User;
  */
 public class FollowRequest {
 
-    private User user;
+    private User user; //user to be followed
+    private User currUser;
     private AuthToken authToken;
 
     /**
@@ -22,8 +23,9 @@ public class FollowRequest {
      *
      * @param user the user
      */
-    public FollowRequest(User user, AuthToken authToken) {
+    public FollowRequest(User user, User currUser, AuthToken authToken) {
         this.user = user;
+        this.currUser = currUser;
         this.authToken = authToken;
     }
 
@@ -43,6 +45,24 @@ public class FollowRequest {
      */
     public void setUser(User user) {
         this.user = user;
+    }
+
+    /**
+     * Returns the current user.
+     *
+     * @return the current user.
+     */
+    public User getCurrUser() {
+        return currUser;
+    }
+
+    /**
+     * Sets the current user.
+     *
+     * @param currUser the current user.
+     */
+    public void setCurrUser(User currUser) {
+        this.currUser = currUser;
     }
 
     public AuthToken getAuthToken() {

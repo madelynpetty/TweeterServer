@@ -18,7 +18,7 @@ public class IsFollowerResponse extends AuthenticatedResponse {
         super(message);
     }
 
-    public IsFollowerResponse() {
+    public IsFollowerResponse(boolean isFollower) {
         super();
         this.isFollower = isFollower;
     }
@@ -30,5 +30,9 @@ public class IsFollowerResponse extends AuthenticatedResponse {
      */
     public boolean getIsFollower() {
         return isFollower;
+    }
+
+    public void setIsFollower(boolean isFollower) {
+        this.isFollower = isFollower;
     }
 }

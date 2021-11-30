@@ -4,14 +4,23 @@ import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
 import com.amazonaws.services.dynamodbv2.document.DynamoDB;
 import com.amazonaws.services.dynamodbv2.document.Item;
+import com.amazonaws.services.dynamodbv2.document.ItemCollection;
+import com.amazonaws.services.dynamodbv2.document.PrimaryKey;
+import com.amazonaws.services.dynamodbv2.document.ScanOutcome;
 import com.amazonaws.services.dynamodbv2.document.Table;
+import com.amazonaws.services.dynamodbv2.document.spec.DeleteItemSpec;
+import com.amazonaws.services.dynamodbv2.document.spec.ScanSpec;
+import com.amazonaws.services.dynamodbv2.document.utils.NameMap;
+import com.amazonaws.services.dynamodbv2.document.utils.ValueMap;
 import com.amazonaws.services.dynamodbv2.model.AttributeValue;
+import com.amazonaws.services.dynamodbv2.model.DeleteRequest;
 import com.amazonaws.services.dynamodbv2.model.QueryRequest;
 import com.amazonaws.services.dynamodbv2.model.QueryResult;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -42,36 +51,33 @@ public class AuthTokenDAO {
         return authToken;
     }
 
-    public void checkValidAuthTokens() { //todo call this when app starts up?
-        Map<String, String> attrNames = new HashMap<String, String>();
-        attrNames.put("#authtokenName", partitionKey);
-        attrNames.put("#timeName", sortKey);
-
+    public void checkValidAuthTokens() {
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
-        LocalDateTime now = LocalDateTime.now(); //todo not sure how to get from last week or whatever
+        LocalDateTime cutOff = LocalDateTime.now().minusMinutes(1);
 
-        Map<String, AttributeValue> attrValues = new HashMap<>();
-        attrValues.put(":" + partitionKey, new AttributeValue().withS(null /* todo not sure what to put here */));
-        attrValues.put(":" + sortKey, new AttributeValue().withS(dtf.format(now)));
+        ScanSpec scanSpec = new ScanSpec()
+                .withProjectionExpression("#authTokenVal, " + sortKey + ", userAlias")
+                .withFilterExpression("#authTokenVal < :cutOffVal")
+                .withNameMap(new NameMap().with("#authTokenVal", partitionKey))
+                .withValueMap(new ValueMap().withString(":cutOffVal", dtf.format(cutOff)));
 
-        QueryRequest queryRequest = new QueryRequest()
-                .withTableName(tableName)
-                .withIndexName(indexName)
-                .withKeyConditionExpression("#aliasName = :" + partitionKey +
-                        " AND #timeName < :" + sortKey)
-                .withExpressionAttributeNames(attrNames)
-                .withExpressionAttributeValues(attrValues);
+        try {
+            ItemCollection<ScanOutcome> items = authTokenTable.scan(scanSpec);
 
-        QueryResult queryResult = amazonDynamoDB.query(queryRequest);
-        List<Map<String, AttributeValue>> items = queryResult.getItems();
+            Iterator<Item> iter = items.iterator();
+            while (iter.hasNext()) {
+                Item item = iter.next();
+                String authTokenValue = item.getString(partitionKey);
+                String date = item.getString(sortKey);
 
-        for (Map<String, AttributeValue> item : items) {
-            Set<String> partitionSet = item.keySet();
-            for (String s : partitionSet) {
-                String partition = s;
-                AttributeValue sort = item.get(partition);
-                authTokenTable.deleteItem(partition, sort);
+                DeleteItemSpec deleteItemSpec = new DeleteItemSpec()
+                        .withPrimaryKey(new PrimaryKey(partitionKey, authTokenValue, sortKey, date));
+                authTokenTable.deleteItem(deleteItemSpec);
             }
+
+        }
+        catch (Exception e) {
+            throw new RuntimeException("Unable to scan the table: " + e.getMessage());
         }
     }
 }

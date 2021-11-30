@@ -137,6 +137,7 @@ public class FollowService {
     public void follow(FollowService.FollowObserver observer, User selectedUser) {
         this.selectedUser = selectedUser;
         FollowRequest followRequest = new FollowRequest(selectedUser,
+                Cache.getInstance().getCurrUser(),
                 Cache.getInstance().getCurrUserAuthToken());
         FollowTask followTask = new FollowTask(followRequest, new FollowService.FollowHandler(observer));
         new ExecuteTask<>(followTask);
@@ -184,7 +185,9 @@ public class FollowService {
 
     public void unfollow(FollowService.UnfollowObserver observer, User selectedUser) {
         this.selectedUser = selectedUser;
-        UnfollowRequest unfollowRequest = new UnfollowRequest(selectedUser, Cache.getInstance().getCurrUserAuthToken());
+        UnfollowRequest unfollowRequest = new UnfollowRequest(selectedUser,
+                Cache.getInstance().getCurrUser(),
+                Cache.getInstance().getCurrUserAuthToken());
         UnfollowTask unfollowTask = new UnfollowTask(unfollowRequest, new UnfollowHandler(observer));
         new ExecuteTask<>(unfollowTask);
     }

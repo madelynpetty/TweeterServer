@@ -50,11 +50,15 @@ public class UserDAO {
             throw new RuntimeException("Username and password combination do not match");
         }
 
+
+        getAuthTokenDAO().checkValidAuthTokens();
         return new LoginResponse(user, getAuthTokenDAO().getNewAuthToken(user.getAlias()));
     }
 
     public LogoutResponse logout(LogoutRequest request) {
         //todo validate request.authtoken
+
+        getAuthTokenDAO().checkValidAuthTokens();
         return new LogoutResponse();
     }
 

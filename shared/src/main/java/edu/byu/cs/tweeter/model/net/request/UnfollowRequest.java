@@ -10,6 +10,7 @@ import edu.byu.cs.tweeter.model.domain.User;
 public class UnfollowRequest {
 
     private User user;
+    private User currUser;
     private AuthToken authToken;
 
 
@@ -23,8 +24,9 @@ public class UnfollowRequest {
      *
      * @param user the user
      */
-    public UnfollowRequest(User user, AuthToken authToken) {
+    public UnfollowRequest(User user, User currUser, AuthToken authToken) {
         this.user = user;
+        this.currUser = currUser;
         this.authToken = authToken;
     }
 
@@ -44,6 +46,24 @@ public class UnfollowRequest {
      */
     public void setUser(User user) {
         this.user = user;
+    }
+
+    /**
+     * Returns the current user.
+     *
+     * @return the current user.
+     */
+    public User getCurrUser() {
+        return currUser;
+    }
+
+    /**
+     * Sets the current user.
+     *
+     * @param currUser the current user.
+     */
+    public void setCurrUser(User currUser) {
+        this.currUser = currUser;
     }
 
     public AuthToken getAuthToken() {

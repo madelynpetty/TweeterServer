@@ -1,8 +1,23 @@
 package edu.byu.cs.tweeter.server.dao;
 
-import java.util.ArrayList;
-import java.util.List;
+import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
+import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
+import com.amazonaws.services.dynamodbv2.document.DynamoDB;
+import com.amazonaws.services.dynamodbv2.document.Item;
+import com.amazonaws.services.dynamodbv2.document.Table;
+import com.amazonaws.services.dynamodbv2.model.AttributeValue;
+import com.amazonaws.services.dynamodbv2.model.QueryRequest;
+import com.amazonaws.services.dynamodbv2.model.QueryResult;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import edu.byu.cs.tweeter.model.domain.Status;
 import edu.byu.cs.tweeter.model.domain.User;
 import edu.byu.cs.tweeter.model.net.request.FollowRequest;
 import edu.byu.cs.tweeter.model.net.request.FollowerRequest;
@@ -22,32 +37,99 @@ import edu.byu.cs.tweeter.model.util.FakeData;
  * A DAO for accessing 'following' data from the database.
  */
 public class FollowDAO {
+    private static AmazonDynamoDB amazonDynamoDB = AmazonDynamoDBClientBuilder
+            .standard().withRegion("us-west-2").build();
+    private static DynamoDB dynamoDB = new DynamoDB(amazonDynamoDB);
+    private static final String tableName = "follow";
+    private final String indexName = "";
+    private static Table followTable = dynamoDB.getTable(tableName);
+    private static final String partitionKey = "userAlias";
+    private static final String secondColumnKey = "follower";
 
     public FollowResponse follow(FollowRequest request) {
-        //todo
+        Item item = new Item()
+                .withPrimaryKey(partitionKey, request.getUser().getAlias())
+                .withString("follower", request.getCurrUser().getAlias());
+
+        //todo maybe check to see if they clicked it twice? Probably shouldn't happen.
+
+        followTable.putItem(item);
         return new FollowResponse();
     }
 
     public UnfollowResponse unfollow(UnfollowRequest request) {
-        //todo
+        Map<String, String> attrNames = new HashMap<String, String>();
+        attrNames.put("#aliasName", partitionKey);
+        attrNames.put("#followerName", secondColumnKey);
+
+        Map<String, AttributeValue> attrValues = new HashMap<>();
+        attrValues.put(":" + partitionKey,
+                new AttributeValue().withS(request.getUser().getAlias()));
+        attrValues.put(":" + secondColumnKey,
+                new AttributeValue().withS(request.getCurrUser().getAlias()));
+
+        QueryRequest queryRequest = new QueryRequest()
+                .withTableName(tableName)
+                .withIndexName(indexName)
+                .withKeyConditionExpression("#aliasName = :" + partitionKey +
+                        " AND #followerName = :" + secondColumnKey)
+                .withExpressionAttributeNames(attrNames)
+                .withExpressionAttributeValues(attrValues);
+
+
+        QueryResult queryResult = amazonDynamoDB.query(queryRequest);
+        List<Map<String, AttributeValue>> items = queryResult.getItems();
+
+        for (Map<String, AttributeValue> item : items) {
+            Set<String> partitionSet = item.keySet();
+            for (String s : partitionSet) {
+                String partition = s;
+                AttributeValue secondColumn = item.get(partition);
+                followTable.deleteItem(partition, secondColumn);
+            }
+        }
+
         return new UnfollowResponse();
     }
 
     public FollowerCountResponse getFollowerCount(User follower) {
         assert follower != null;
-        FollowerCountResponse response = new FollowerCountResponse(getFollowersList().size());
+        FollowerCountResponse response = new FollowerCountResponse(
+                getFollowersList(follower.getAlias()).size());
         return response;
     }
 
-    public FollowingCountResponse getFollowingCount(User follower) {
-        assert follower != null;
-        FollowingCountResponse response = new FollowingCountResponse(getFolloweesList().size());
+    public FollowingCountResponse getFollowingCount(User followee) {
+        assert followee != null;
+        FollowingCountResponse response = new FollowingCountResponse(
+                getFollowingList(followee.getAlias()).size());
         return response;
     }
 
     public IsFollowerResponse isFollower(IsFollowerRequest request) {
-        //todo
-        return new IsFollowerResponse();
+        Map<String, String> attrNames = new HashMap<>();
+        attrNames.put("#aliasName", partitionKey);
+        attrNames.put("#followerName", secondColumnKey);
+
+        Map<String, AttributeValue> attrValues = new HashMap<>();
+        attrValues.put(":" + partitionKey, new AttributeValue().withS(request.getFollowee().getAlias()));
+        attrValues.put(":" + secondColumnKey, new AttributeValue().withS(request.getFollower().getAlias()));
+
+        QueryRequest queryRequest = new QueryRequest()
+                .withTableName(tableName)
+                .withIndexName(indexName)
+                .withKeyConditionExpression("#aliasName = :" + partitionKey +
+                        "#followerName = :" + secondColumnKey)
+                .withExpressionAttributeNames(attrNames)
+                .withExpressionAttributeValues(attrValues);
+
+        QueryResult queryResult = amazonDynamoDB.query(queryRequest);
+        List<Map<String, AttributeValue>> items = queryResult.getItems();
+        boolean isFollower = false;
+
+        if(!items.isEmpty()) isFollower = true;
+
+        return new IsFollowerResponse(isFollower);
     }
 
     /**
@@ -64,7 +146,7 @@ public class FollowDAO {
         assert request.getLimit() > 0;
         assert request.getFollowerAlias() != null;
 
-        List<User> allFollowees = getFolloweesList();
+        List<User> allFollowees = getFollowingList(request.getFollowerAlias());
         List<User> responseFollowees = new ArrayList<>(request.getLimit());
 
         boolean hasMorePages = false;
@@ -120,14 +202,64 @@ public class FollowDAO {
      *
      * @return the followees.
      */
-    List<User> getFollowersList() {
-        //todo
-        return null;
+    List<User> getFollowersList(String userAlias) {
+        Map<String, String> attrNames = new HashMap<>();
+        attrNames.put("#aliasName", partitionKey);
+
+        Map<String, AttributeValue> attrValues = new HashMap<>();
+        attrValues.put(":" + partitionKey, new AttributeValue().withS(userAlias));
+
+        QueryRequest queryRequest = new QueryRequest()
+                .withTableName(tableName)
+                .withIndexName(indexName)
+                .withKeyConditionExpression("#aliasName = :" + partitionKey)
+                .withExpressionAttributeNames(attrNames)
+                .withExpressionAttributeValues(attrValues);
+
+        QueryResult queryResult = amazonDynamoDB.query(queryRequest);
+        List<Map<String, AttributeValue>> items = queryResult.getItems();
+        List<User> followers = new ArrayList<>();
+
+        for (Map<String, AttributeValue> item : items) {
+            Set<String> partitionSet = item.keySet();
+            for (String alias : partitionSet) {
+                User user = UserDAO.getUserFromAlias(alias);
+                followers.add(user);
+            }
+        }
+
+        return followers;
     }
 
-    List<User> getFolloweesList() {
-        //todo
-        return null;
+    List<User> getFollowingList(String userAlias) {
+        //CURRENT USER IS THE FOLLOWER
+
+        Map<String, String> attrNames = new HashMap<>();
+        attrNames.put("#aliasName", secondColumnKey);
+
+        Map<String, AttributeValue> attrValues = new HashMap<>();
+        attrValues.put(":" + secondColumnKey, new AttributeValue().withS(userAlias));
+
+        QueryRequest queryRequest = new QueryRequest()
+                .withTableName(tableName)
+                .withIndexName(indexName)
+                .withKeyConditionExpression("#aliasName = :" + secondColumnKey)
+                .withExpressionAttributeNames(attrNames)
+                .withExpressionAttributeValues(attrValues);
+
+        QueryResult queryResult = amazonDynamoDB.query(queryRequest);
+        List<Map<String, AttributeValue>> items = queryResult.getItems();
+        List<User> following = new ArrayList<>();
+
+        for (Map<String, AttributeValue> item : items) {
+            Set<String> partitionSet = item.keySet();
+            for (String alias : partitionSet) {
+                User user = UserDAO.getUserFromAlias(alias);
+                following.add(user);
+            }
+        }
+
+        return following;
     }
 
     /**
@@ -141,11 +273,10 @@ public class FollowDAO {
      * @return the followees.
      */
     public FollowerResponse getFollowers(FollowerRequest request) {
-        // TODO: Generates dummy data. Replace with a real implementation.
         assert request.getLimit() > 0;
         assert request.getFollower().getAlias() != null;
 
-        List<User> allFollowers = getFollowersList();
+        List<User> allFollowers = getFollowersList(request.getFollower().getAlias());
         List<User> responseFollowers = new ArrayList<>(request.getLimit());
 
         boolean hasMorePages = false;
