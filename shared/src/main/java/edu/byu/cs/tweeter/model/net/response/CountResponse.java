@@ -7,6 +7,10 @@ public class CountResponse extends Response {
         super(false, message);
     }
 
+    public CountResponse() {
+        super();
+    }
+
     public CountResponse(int count) {
         super(true, null);
         this.count = count;
@@ -14,5 +18,9 @@ public class CountResponse extends Response {
 
     public int getCount() {
         return count;
+    }
+
+    public void setCount(int count) {
+        this.count = count;
     }
 }

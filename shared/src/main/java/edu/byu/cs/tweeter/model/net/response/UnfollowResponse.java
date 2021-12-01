@@ -14,6 +14,10 @@ public class UnfollowResponse extends AuthenticatedResponse {
     /**
      * Creates a response indicating that the corresponding request was successful.
      */
+    public UnfollowResponse(boolean success) {
+        super(success);
+    }
+
     public UnfollowResponse() {
         super();
     }

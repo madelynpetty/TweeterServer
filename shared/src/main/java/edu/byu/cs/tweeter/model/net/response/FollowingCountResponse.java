@@ -9,4 +9,8 @@ public class FollowingCountResponse extends CountResponse {
     public FollowingCountResponse(int count) {
         super(count);
     }
+
+    public FollowingCountResponse() {
+        super();
+    }
 }

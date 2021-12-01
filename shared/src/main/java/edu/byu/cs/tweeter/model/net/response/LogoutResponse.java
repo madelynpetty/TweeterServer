@@ -14,6 +14,10 @@ public class LogoutResponse extends AuthenticatedResponse {
     /**
      * Creates a response indicating that the corresponding request was successful.
      */
+    public LogoutResponse(boolean success) {
+        super(success);
+    }
+
     public LogoutResponse() {
         super();
     }

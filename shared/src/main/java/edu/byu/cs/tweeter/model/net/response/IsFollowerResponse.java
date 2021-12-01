@@ -23,6 +23,10 @@ public class IsFollowerResponse extends AuthenticatedResponse {
         this.isFollower = isFollower;
     }
 
+    public IsFollowerResponse() {
+        super();
+    }
+
     /**
      * Returns whether the user is a follower or not.
      *

@@ -9,7 +9,7 @@ import edu.byu.cs.tweeter.model.net.request.FollowingRequest;
 /**
  * A paged response for a {@link FollowingRequest}.
  */
-public class FollowingResponse extends PagedResponse {
+public class FollowingResponse extends PagedResponse<User> {
 
     /**
      * Creates a response indicating that the corresponding request was unsuccessful. Sets the
@@ -19,6 +19,10 @@ public class FollowingResponse extends PagedResponse {
      */
     public FollowingResponse(String message) {
         super(false, message, false);
+    }
+
+    public FollowingResponse() {
+        super();
     }
 
     /**

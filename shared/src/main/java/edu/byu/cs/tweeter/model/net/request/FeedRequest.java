@@ -104,7 +104,7 @@ public class FeedRequest {
      *
      * @param lastStatus the last status.
      */
-    public void setLastFollowerAlias(Status lastStatus) {
+    public void setLastStatus(Status lastStatus) {
         this.lastStatus = lastStatus;
     }
 }

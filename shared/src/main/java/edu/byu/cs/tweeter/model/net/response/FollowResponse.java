@@ -14,6 +14,10 @@ public class FollowResponse extends AuthenticatedResponse {
     /**
      * Creates a response indicating that the corresponding request was successful.
      */
+    public FollowResponse(boolean success) {
+        super(success);
+    }
+
     public FollowResponse() {
         super();
     }

@@ -60,7 +60,7 @@ public class FollowDAO {
 //                .withString("followerImage", request.getCurrUser().getImageUrl());
 
         followTable.putItem(item);
-        return new FollowResponse();
+        return new FollowResponse(true);
     }
 
     public UnfollowResponse unfollow(UnfollowRequest request) {
@@ -121,7 +121,7 @@ public class FollowDAO {
         catch (Exception e) {
             throw new RuntimeException("Unable to scan the follow table: " + e.getMessage());
         }
-        return new UnfollowResponse();
+        return new UnfollowResponse(true);
     }
 
     public FollowerCountResponse getFollowerCount(User follower) {

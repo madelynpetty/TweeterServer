@@ -21,6 +21,10 @@ public class AuthenticateResponse extends Response {
         super(false, message);
     }
 
+    public AuthenticateResponse() {
+        super();
+    }
+
     /**
      * Creates a response indicating that the corresponding request was successful.
      *

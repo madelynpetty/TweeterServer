@@ -11,7 +11,7 @@ public class AuthenticateRequest {
     /**
      * Allows construction of the object from Json. Private so it won't be called in normal code.
      */
-    private AuthenticateRequest() {}
+    public AuthenticateRequest() {}
 
     /**
      * Creates an instance.

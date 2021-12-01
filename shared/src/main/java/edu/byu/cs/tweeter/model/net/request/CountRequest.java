@@ -12,6 +12,10 @@ public class CountRequest {
         this.targetUser = targetUser;
     }
 
+    public CountRequest() {
+        super();
+    }
+
     public void setAuthToken(AuthToken authToken) {
         this.authToken = authToken;
     }

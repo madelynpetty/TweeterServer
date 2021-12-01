@@ -18,4 +18,8 @@ public class RegisterResponse extends AuthenticateResponse {
     public RegisterResponse(User user, AuthToken authToken) {
         super(user, authToken);
     }
+
+    public RegisterResponse() {
+        super();
+    }
 }

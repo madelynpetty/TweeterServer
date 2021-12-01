@@ -222,9 +222,11 @@ public class FakeData {
             }
         }
 
-        for (int count = 0; index < statuses.size() && count < limit; ++count, ++index) {
-            Status curStatus = statuses.get(index);
-            result.add(curStatus);
+        if (statuses != null) {
+            for (int count = 0; index < statuses.size() && count < limit; ++count, ++index) {
+                Status curStatus = statuses.get(index);
+                result.add(curStatus);
+            }
         }
 
         return result;

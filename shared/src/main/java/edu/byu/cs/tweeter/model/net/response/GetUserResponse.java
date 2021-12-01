@@ -13,6 +13,10 @@ public class GetUserResponse extends AuthenticatedResponse {
     /**
      * Creates a response indicating that the corresponding request was successful.
      */
+    public GetUserResponse(boolean success) {
+        super(success);
+    }
+
     public GetUserResponse() {
         super();
     }

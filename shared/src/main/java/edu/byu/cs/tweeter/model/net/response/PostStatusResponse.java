@@ -14,6 +14,10 @@ public class PostStatusResponse extends AuthenticatedResponse {
     /**
      * Creates a response indicating that the corresponding request was successful.
      */
+    public PostStatusResponse(boolean success) {
+        super(success);
+    }
+
     public PostStatusResponse() {
         super();
     }

@@ -56,7 +56,9 @@ public class StatusService {
         public void handleSuccessMessage(Message msg) {
             List<Status> statuses = (List<Status>) msg.getData().getSerializable(GetFeedTask.ITEMS_KEY);
             boolean hasMorePages = msg.getData().getBoolean(GetFeedTask.MORE_PAGES_KEY);
-            Status lastStatus = (statuses.size() > 0) ? statuses.get(statuses.size() - 1) : null;
+            Status lastStatus = null;
+            if (statuses != null)
+                lastStatus = (statuses.size() > 0) ? statuses.get(statuses.size() - 1) : null;
             try {
                 ((FeedObserver)observer).statusSucceeded(statuses, hasMorePages, lastStatus);
             } catch (MalformedURLException e) {
@@ -92,7 +94,10 @@ public class StatusService {
         protected void handleSuccessMessage(Message msg) {
             List<Status> statuses = (List<Status>) msg.getData().getSerializable(GetStoryTask.ITEMS_KEY);
             boolean hasMorePages = msg.getData().getBoolean(GetStoryTask.MORE_PAGES_KEY);
-            Status lastStatus = (statuses.size() > 0) ? statuses.get(statuses.size() - 1) : null;
+            Status lastStatus = null;
+            if (statuses != null) {
+                lastStatus = (statuses.size() > 0) ? statuses.get(statuses.size() - 1) : null;
+            }
 
             ((StoryObserver)observer).statusSucceeded(statuses, hasMorePages, lastStatus);
         }

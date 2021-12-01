@@ -13,7 +13,7 @@ public class RegisterRequest extends AuthenticateRequest {
      * Allows construction of the object from Json. Private so it won't be called in normal code.
      */
     private RegisterRequest() {
-        super(null, null);
+        super();
     }
 
     /**

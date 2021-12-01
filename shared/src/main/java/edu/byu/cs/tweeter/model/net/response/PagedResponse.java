@@ -8,7 +8,7 @@ import java.util.List;
 public class PagedResponse<T> extends Response {
 
 
-    private final boolean hasMorePages;
+    private boolean hasMorePages;
     private List<T> items;
 
     PagedResponse(boolean success, boolean hasMorePages, List<T> items) {
@@ -22,6 +22,10 @@ public class PagedResponse<T> extends Response {
         this.hasMorePages = hasMorePages;
     }
 
+    PagedResponse() {
+        super();
+    }
+
     /**
      * An indicator of whether more data is available from the server. A value of true indicates
      * that the result was limited by a maximum value in the request and an additional request
@@ -33,6 +37,10 @@ public class PagedResponse<T> extends Response {
         return hasMorePages;
     }
 
+    public void setHasMorePages(Boolean hasMorePages) {
+        this.hasMorePages = hasMorePages;
+    }
+
     /**
      * Returns the items for the corresponding request.
      *
@@ -40,5 +48,9 @@ public class PagedResponse<T> extends Response {
      */
     public List<T> getItems() {
         return items;
+    }
+
+    public void setItems(List<T> items) {
+        this.items = items;
     }
 }

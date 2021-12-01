@@ -59,7 +59,7 @@ public class UserDAO {
         //todo validate request.authtoken
 
         getAuthTokenDAO().checkValidAuthTokens();
-        return new LogoutResponse();
+        return new LogoutResponse(true);
     }
 
     public RegisterResponse register(RegisterRequest request) {
@@ -95,7 +95,7 @@ public class UserDAO {
     }
 
     public GetUserResponse getUser(GetUserRequest request) {
-        return new GetUserResponse();
+        return new GetUserResponse(true);
     }
 
     private AuthTokenDAO getAuthTokenDAO() {

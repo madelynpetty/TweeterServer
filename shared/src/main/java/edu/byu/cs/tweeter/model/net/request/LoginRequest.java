@@ -9,7 +9,7 @@ public class LoginRequest extends AuthenticateRequest {
      * Allows construction of the object from Json. Private so it won't be called in normal code.
      */
     private LoginRequest() {
-        super(null, null);
+        super();
     }
 
     /**

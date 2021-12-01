@@ -156,7 +156,7 @@ public class StoryDAO {
             System.out.println("Duplicate Item Exception: " + e.getMessage());
             return new PostStatusResponse("Duplicate Item Exception:" + e.getMessage());
         }
-        return new PostStatusResponse();
+        return new PostStatusResponse(true);
     }
 
     private static final Pattern urlPattern = Pattern.compile(

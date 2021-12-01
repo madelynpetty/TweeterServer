@@ -199,8 +199,10 @@ public class StoryFragment extends Fragment implements StoryPresenter.View {
          */
         void addItems(List<Status> newStory) {
             int startInsertPosition = story.size();
-            story.addAll(newStory);
-            this.notifyItemRangeInserted(startInsertPosition, newStory.size());
+            if (newStory != null) {
+                story.addAll(newStory);
+                this.notifyItemRangeInserted(startInsertPosition, newStory.size());
+            }
         }
 
         /**

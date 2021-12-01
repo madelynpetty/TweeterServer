@@ -9,7 +9,7 @@ import edu.byu.cs.tweeter.model.domain.User;
 /**
  * A paged response for a {@link edu.byu.cs.tweeter.model.net.request.FeedRequest}.
  */
-public class FeedResponse extends PagedResponse {
+public class FeedResponse extends PagedResponse<Status> {
     /**
      * Creates a response indicating that the corresponding request was unsuccessful. Sets the
      * success and more pages indicators to false.
@@ -18,6 +18,10 @@ public class FeedResponse extends PagedResponse {
      */
     public FeedResponse(String message) {
         super(false, message, false);
+    }
+
+    public FeedResponse() {
+        super();
     }
 
     /**

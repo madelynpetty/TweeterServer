@@ -14,6 +14,11 @@ public class AuthenticatedResponse extends Response {
      * Creates a response indicating that the corresponding request was successful.
      */
     public AuthenticatedResponse() {
-        super(true, null);
+        super();
     }
+
+    public AuthenticatedResponse(Boolean success) {
+        super(success, null);
+    }
+
 }

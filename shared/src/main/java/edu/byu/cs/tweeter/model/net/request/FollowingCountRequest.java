@@ -5,7 +5,7 @@ import edu.byu.cs.tweeter.model.domain.User;
 
 public class FollowingCountRequest extends CountRequest {
     private FollowingCountRequest() {
-        super(null, null);
+        super();
     }
 
     public FollowingCountRequest(AuthToken authToken, User targetUser) {
