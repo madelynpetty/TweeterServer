@@ -22,24 +22,26 @@ public class GetFeedTask extends PagedStatusTask {
     private static final String LOG_TAG = "GetFeedTask";
     private static final String URL_PATH = "/getfeed";
 
-    private FeedRequest feedRequest;
-    private PagedResponse feedResponse;
+    private final FeedRequest feedRequest;
+    private PagedResponse<Status> feedResponse;
 
     public GetFeedTask(FeedRequest feedRequest, User targetUser, Status lastStatus,
                        boolean hasMorePages, Handler messageHandler) {
         super(feedRequest.getAuthToken(), targetUser, feedRequest.getLimit(), lastStatus,
                 hasMorePages, messageHandler);
         this.feedRequest = feedRequest;
+        this.targetUser = targetUser;
+        this.lastItem = lastStatus;
+        this.limit = feedRequest.getLimit();
     }
 
     @Override
     protected List<Status> getItems() {
-        FakeData fakeData = new FakeData();
-        return fakeData.getPageOfStatusItem(lastItem, limit, feedResponse.getItems());
+        return getPageOfStatusItem(lastItem, limit, feedResponse.getItems());
     }
 
     @Override
-    protected PagedResponse getResponse() {
+    protected PagedResponse<Status> getResponse() {
         try {
             feedResponse = new FollowService().getServerFacade().getFeed(feedRequest, URL_PATH);
         } catch (IOException | TweeterRemoteException e) {

@@ -204,34 +204,6 @@ public class FakeData {
         return result;
     }
 
-    //MADDIE CREATED THIS METHOD
-    public List<Status> getPageOfStatusItem(Status lastStatus, int limit, List<Status> statuses) {
-
-        List<Status> result = new ArrayList<Status>();
-
-        int index = 0;;
-
-        if (lastStatus != null) {
-            for (int i = 0; i < statuses.size(); ++i) {
-                Status curStatus = statuses.get(i);
-                if (curStatus.getUser().getAlias().equals(lastStatus.getUser().getAlias()) &&
-                        curStatus.getDate().equals(lastStatus.getDate())) {
-                    index = i + 1;
-                    break;
-                }
-            }
-        }
-
-        if (statuses != null) {
-            for (int count = 0; index < statuses.size() && count < limit; ++count, ++index) {
-                Status curStatus = statuses.get(index);
-                result.add(curStatus);
-            }
-        }
-
-        return result;
-    }
-
 
     /**
      * Returns a page of statuses (story or feed)

@@ -37,7 +37,6 @@ public class FeedDAO {
     private static final String partitionKey = "receiverAlias";
     private static final String sortKey = "feedtime";
 
-    //coming back with a response with the correct object in it, but getting a gson exception
     public FeedResponse getFeed(FeedRequest request) {
         assert request.getLimit() > 0;
         assert request.getUserAlias() != null;

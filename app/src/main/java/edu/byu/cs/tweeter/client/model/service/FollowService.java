@@ -2,6 +2,7 @@ package edu.byu.cs.tweeter.client.model.service;
 
 import android.os.Message;
 
+import java.net.MalformedURLException;
 import java.util.List;
 
 import edu.byu.cs.tweeter.client.cache.Cache;
@@ -13,6 +14,7 @@ import edu.byu.cs.tweeter.client.model.service.backgroundTask.GetFollowingCountT
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.GetFollowingTask;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.IsFollowerTask;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.UnfollowTask;
+import edu.byu.cs.tweeter.model.domain.Status;
 import edu.byu.cs.tweeter.model.domain.User;
 import edu.byu.cs.tweeter.model.net.request.FollowRequest;
 import edu.byu.cs.tweeter.model.net.request.FollowerCountRequest;
@@ -77,13 +79,14 @@ public class FollowService {
         protected void handleSuccessMessage(Message msg) {
             List<User> followees = (List<User>) msg.getData().getSerializable(GetFollowingTask.ITEMS_KEY);
             boolean hasMorePages = msg.getData().getBoolean(GetFollowingTask.MORE_PAGES_KEY);
-            User lastFollowee;
-            if (followees != null) {
+            User lastFollowee = null;
+            if (followees != null)
                 lastFollowee = (followees.size() > 0) ? followees.get(followees.size() - 1) : null;
-            }
-            else {
-                lastFollowee = null;
-                hasMorePages = false;
+
+            try {
+                ((FollowService.GetFollowingObserver)observer).followSucceeded(followees, hasMorePages, lastFollowee);
+            } catch (Exception e) {
+                observer.handleException(e);
             }
 
             ((GetFollowingObserver)observer).followSucceeded(followees, hasMorePages, lastFollowee);
@@ -126,13 +129,13 @@ public class FollowService {
         protected void handleSuccessMessage(Message msg) {
             List<User> followers = (List<User>) msg.getData().getSerializable(GetFollowersTask.ITEMS_KEY);
             boolean hasMorePages = msg.getData().getBoolean(GetFollowersTask.MORE_PAGES_KEY);
-            User lastFollower;
-            if (followers != null) {
-               lastFollower = (followers.size() > 0) ? followers.get(followers.size() - 1) : null;
-            }
-            else {
-                lastFollower = null;
-                hasMorePages = false;
+            User lastFollower = null;
+            if (followers != null)
+                lastFollower = (followers.size() > 0) ? followers.get(followers.size() - 1) : null;
+            try {
+                ((FollowService.GetFollowersObserver)observer).followSucceeded(followers, hasMorePages, lastFollower);
+            } catch (Exception e) {
+                observer.handleException(e);
             }
 
             ((GetFollowersObserver)observer).followSucceeded(followers, hasMorePages, lastFollower);

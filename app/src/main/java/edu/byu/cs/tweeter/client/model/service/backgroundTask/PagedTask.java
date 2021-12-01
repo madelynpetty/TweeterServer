@@ -35,6 +35,7 @@ public abstract class PagedTask<T> extends AuthenticatedTask {
     protected final boolean runTask() throws IOException {
         PagedResponse response = getResponse();
         List<T> pageOfItems = getItems();
+        items = pageOfItems;
         hasMorePages = response.getHasMorePages();
 
         for(User user : getUsersForItems(pageOfItems)) {

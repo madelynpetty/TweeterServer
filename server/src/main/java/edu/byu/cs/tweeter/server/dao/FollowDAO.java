@@ -125,17 +125,29 @@ public class FollowDAO {
     }
 
     public FollowerCountResponse getFollowerCount(User follower) {
+        //how many people are following me, the current user
         assert follower != null;
-        FollowerCountResponse response = new FollowerCountResponse(
-                getFollowersList(follower.getAlias()).size());
-        return response;
+        List<User> followerList = getFollowersList(follower.getAlias());
+        if (followerList != null) {
+            return new FollowerCountResponse(followerList.size());
+        }
+        else {
+            return new FollowerCountResponse(0);
+        }
     }
 
     public FollowingCountResponse getFollowingCount(User followee) {
+        // how many people the logged in user is following
+
+        //todo this is giving me a null pointer exception. I have no idea why. GetFollowingCount lambda
         assert followee != null;
-        FollowingCountResponse response = new FollowingCountResponse(
-                getFollowingList(followee.getAlias()).size());
-        return response;
+        List<User> followeeList = getFollowingList(followee.getAlias());
+        if (followeeList != null) {
+            return new FollowingCountResponse(followeeList.size());
+        }
+        else {
+            return new FollowingCountResponse(0);
+        }
     }
 
     public IsFollowerResponse isFollower(IsFollowerRequest request) {
@@ -237,13 +249,42 @@ public class FollowDAO {
         return followIndex;
     }
 
-    /**
-     * Returns the list of dummy followee data. This is written as a separate method to allow
-     * mocking of the followees.
-     *
-     * @return the followees.
-     */
+    // people that I follow
+    // logged in user is in the sort key
     List<User> getFollowingList(String userAlias) {
+        List<User> followingList = new ArrayList<>();
+
+        ScanSpec scanSpec = new ScanSpec()
+                .withProjectionExpression("#userAlias, " + sortKey)
+                .withFilterExpression("#userAlias = :aliasVal")
+                .withNameMap(new NameMap().with("#userAlias", partitionKey))
+                .withValueMap(new ValueMap().withString(":aliasVal", userAlias));
+
+        try {
+            ItemCollection<ScanOutcome> items = followTable.scan(scanSpec);
+
+            for (Item item : items) {
+                String aliasVal = item.getString(sortKey);
+                System.out.println("Alias we got from database: " + aliasVal);
+                User user = UserDAO.getUserFromAlias(aliasVal);
+                if (user != null) {
+                    System.out.println("USER IS NOT NULL: " + user.getAlias());
+                    followingList.add(user);
+                } else {
+                    System.out.println("USER IS NULL");
+                }
+            }
+        }
+        catch (Exception e) {
+            throw new RuntimeException("Unable to scan the follow table: " + e.getMessage());
+        }
+        return followingList;
+    }
+
+    // people that are following me
+    // logged in user is in the primary key
+    List<User> getFollowersList(String userAlias) {
+        System.out.println("Passed in alias: " + userAlias);
         Map<String, String> attrNames = new HashMap<>();
         attrNames.put("#aliasName", partitionKey);
 
@@ -253,64 +294,29 @@ public class FollowDAO {
         QueryRequest queryRequest = new QueryRequest()
                 .withTableName(tableName)
                 .withIndexName(indexName)
-                .withKeyConditionExpression("#aliasName = :" + partitionKey)
+                .withKeyConditionExpression("#aliasName = :userAlias")
                 .withExpressionAttributeNames(attrNames)
                 .withExpressionAttributeValues(attrValues);
 
         QueryResult queryResult = amazonDynamoDB.query(queryRequest);
         List<Map<String, AttributeValue>> items = queryResult.getItems();
-        List<User> followers = new ArrayList<>();
+        List<User> followerList = new ArrayList<>();
 
-        for (Map<String, AttributeValue> item : items) {
-            Set<String> partitionSet = item.keySet();
-            for (String alias : partitionSet) {
-                User user = UserDAO.getUserFromAlias(alias);
+        if (items != null) {
+            for (Map<String, AttributeValue> item : items) {
+                System.out.println("here is the alias: " + item.get(sortKey).getS());
+                User user = UserDAO.getUserFromAlias(item.get(sortKey).getS());
 
                 if (user != null) {
                     System.out.println("USER IS NOT NULL: " + user.getAlias());
-                    followers.add(user);
-                }
-                else {
+                    followerList.add(user);
+                } else {
                     System.out.println("USER IS NULL");
                 }
             }
         }
 
-        return followers;
-    }
-
-    List<User> getFollowersList(String userAlias) {
-        //CURRENT USER IS THE FOLLOWER
-
-        List<User> followers = new ArrayList<>();
-
-        ScanSpec scanSpec = new ScanSpec()
-                .withProjectionExpression("#aliasName, " + sortKey)
-                .withFilterExpression("#aliasName = :aliasVal")
-                .withNameMap(new NameMap().with("#aliasName", partitionKey))
-                .withValueMap(new ValueMap().withString(":aliasVal", userAlias));
-
-        try {
-            ItemCollection<ScanOutcome> items = followTable.scan(scanSpec);
-
-            Iterator<Item> iter = items.iterator();
-            while (iter.hasNext()) {
-                Item item = iter.next();
-                String aliasVal = item.getString(sortKey);
-                User user = UserDAO.getUserFromAlias(aliasVal);
-                if (user != null) {
-                    System.out.println("USER IS NOT NULL: " + user.getAlias());
-                    followers.add(user);
-                }
-                else {
-                    System.out.println("USER IS NULL");
-                }
-            }
-        }
-        catch (Exception e) {
-            throw new RuntimeException("Unable to scan the follow table: " + e.getMessage());
-        }
-        return followers;
+        return followerList;
     }
 
     /**

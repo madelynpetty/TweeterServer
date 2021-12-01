@@ -32,7 +32,8 @@ public abstract class GetCountTask extends AuthenticatedTask {
     @Override
     protected boolean runTask() {
         CountResponse countResponse = runCountTask();
-        count = countResponse.getCount();
+        if (countResponse != null) count = countResponse.getCount();
+        else count = 0;
         return true;
     }
 

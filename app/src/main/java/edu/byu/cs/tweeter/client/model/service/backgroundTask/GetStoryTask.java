@@ -22,8 +22,8 @@ public class GetStoryTask extends PagedStatusTask {
     private static final String LOG_TAG = "GetStoryTask";
     private static final String URL_PATH = "/getstory";
 
-    private StoryRequest storyRequest;
-    private PagedResponse storyResponse;
+    private final StoryRequest storyRequest;
+    private PagedResponse<Status> storyResponse;
     private List<Status> items;
 
     public GetStoryTask(StoryRequest storyRequest, User targetUser, Status lastStatus,
@@ -38,12 +38,11 @@ public class GetStoryTask extends PagedStatusTask {
 
     @Override
     protected List<Status> getItems() {
-        FakeData fakeData = new FakeData();
-        return fakeData.getPageOfStatusItem(lastItem, limit, items);
+        return getPageOfStatusItem(lastItem, limit, items);
     }
 
     @Override
-    protected PagedResponse getResponse() {
+    protected PagedResponse<Status> getResponse() {
         try {
             storyResponse = new FollowService().getServerFacade().getStory(storyRequest, URL_PATH);
             this.items = storyResponse.getItems();

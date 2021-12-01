@@ -7,8 +7,12 @@ import com.amazonaws.services.dynamodbv2.document.Item;
 import com.amazonaws.services.dynamodbv2.document.Table;
 import com.amazonaws.services.dynamodbv2.model.AttributeValue;
 import com.amazonaws.services.dynamodbv2.model.DuplicateItemException;
+import com.amazonaws.services.dynamodbv2.model.QueryRequest;
+import com.amazonaws.services.dynamodbv2.model.QueryResult;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import edu.byu.cs.tweeter.model.domain.User;
@@ -103,12 +107,28 @@ public class UserDAO {
     }
 
     public static User getUserFromAlias(String alias) {
-        Item item = userTable.getItem("alias", alias);
-        if (item != null) {
-            String firstName = item.getString("firstName");
-            String lastName = item.getString("lastName");
-            String imageUrl = item.getString("image");
-            return new User(firstName, lastName, alias, imageUrl);
+        Map<String, String> attrNames = new HashMap<>();
+        attrNames.put("#aliasName", "alias");
+
+        Map<String, AttributeValue> attrValues = new HashMap<>();
+        attrValues.put(":alias", new AttributeValue().withS(alias));
+
+        QueryRequest queryRequest = new QueryRequest()
+                .withTableName(tableName)
+                .withKeyConditionExpression("#aliasName = :alias")
+                .withExpressionAttributeNames(attrNames)
+                .withExpressionAttributeValues(attrValues);
+
+        QueryResult queryResult = amazonDynamoDB.query(queryRequest);
+        List<Map<String, AttributeValue>> items = queryResult.getItems();
+
+        if (items != null) {
+            for (Map<String, AttributeValue> item: items) {
+                String firstName = item.get("firstName").getS();
+                String lastName = item.get("lastName").getS();
+                String imageUrl = item.get("image").getS();
+                return new User(firstName, lastName, alias, imageUrl);
+            }
         }
         return null;
     }
