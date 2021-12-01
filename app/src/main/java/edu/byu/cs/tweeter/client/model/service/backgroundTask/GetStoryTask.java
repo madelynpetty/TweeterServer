@@ -13,6 +13,7 @@ import edu.byu.cs.tweeter.model.net.request.StoryRequest;
 import edu.byu.cs.tweeter.model.net.response.AuthenticatedResponse;
 import edu.byu.cs.tweeter.model.net.response.PagedResponse;
 import edu.byu.cs.tweeter.model.net.response.StoryResponse;
+import edu.byu.cs.tweeter.model.util.FakeData;
 
 /**
  * Background task that retrieves a page of statuses from a user's story.
@@ -23,6 +24,7 @@ public class GetStoryTask extends PagedStatusTask {
 
     private StoryRequest storyRequest;
     private PagedResponse storyResponse;
+    private List<Status> items;
 
     public GetStoryTask(StoryRequest storyRequest, User targetUser, Status lastStatus,
                         boolean hasMorePages, Handler messageHandler) {
@@ -36,14 +38,15 @@ public class GetStoryTask extends PagedStatusTask {
 
     @Override
     protected List<Status> getItems() {
-        return storyResponse.getItems();
-//        return getFakeData().getPageOfStatusItem(lastItem, limit);
+        FakeData fakeData = new FakeData();
+        return fakeData.getPageOfStatusItem(lastItem, limit, items);
     }
 
     @Override
     protected PagedResponse getResponse() {
         try {
             storyResponse = new FollowService().getServerFacade().getStory(storyRequest, URL_PATH);
+            this.items = storyResponse.getItems();
         } catch (IOException | TweeterRemoteException e) {
             e.printStackTrace();
         }

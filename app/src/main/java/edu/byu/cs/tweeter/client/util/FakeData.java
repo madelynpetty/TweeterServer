@@ -179,15 +179,14 @@ public class FakeData {
     }
 
     //MADDIE CREATED THIS METHOD
-    public List<User> getPageOfUsersItem(User lastUser, int limit, User omit) {
+    public List<User> getPageOfUsersItem(User lastUser, int limit, User omit, List<User> users) {
         List<User> result = new ArrayList<User>();
 
         int index = 0;
-        List<User> fakeUsers = getFakeUsers();
 
         if (lastUser != null) {
-            for (int i = 0; i < fakeUsers.size(); ++i) {
-                User curUser = fakeUsers.get(i);
+            for (int i = 0; i < users.size(); ++i) {
+                User curUser = users.get(i);
                 if (curUser.getAlias().equals(lastUser.getAlias())) {
                     index = i + 1;
                     break;
@@ -195,8 +194,8 @@ public class FakeData {
             }
         }
 
-        for (int count = 0; index < fakeUsers.size() && count < limit; ++count, ++index) {
-            User curUser = fakeUsers.get(index);
+        for (int count = 0; index < users.size() && count < limit; ++count, ++index) {
+            User curUser = users.get(index);
             if (omit == null || !curUser.getAlias().equals(omit.getAlias())) {
                 result.add(curUser);
             }
@@ -206,16 +205,15 @@ public class FakeData {
     }
 
     //MADDIE CREATED THIS METHOD
-    public List<Status> getPageOfStatusItem(Status lastStatus, int limit) {
+    public List<Status> getPageOfStatusItem(Status lastStatus, int limit, List<Status> statuses) {
 
         List<Status> result = new ArrayList<Status>();
 
-        int index = 0;
-        List<Status> fakeStatuses = getFakeStatuses();
+        int index = 0;;
 
         if (lastStatus != null) {
-            for (int i = 0; i < fakeStatuses.size(); ++i) {
-                Status curStatus = fakeStatuses.get(i);
+            for (int i = 0; i < statuses.size(); ++i) {
+                Status curStatus = statuses.get(i);
                 if (curStatus.getUser().getAlias().equals(lastStatus.getUser().getAlias()) &&
                         curStatus.getDate().equals(lastStatus.getDate())) {
                     index = i + 1;
@@ -224,8 +222,8 @@ public class FakeData {
             }
         }
 
-        for (int count = 0; index < fakeStatuses.size() && count < limit; ++count, ++index) {
-            Status curStatus = fakeStatuses.get(index);
+        for (int count = 0; index < statuses.size() && count < limit; ++count, ++index) {
+            Status curStatus = statuses.get(index);
             result.add(curStatus);
         }
 

@@ -158,8 +158,10 @@ public class FollowingFragment extends Fragment implements FollowingPresenter.Vi
          */
         void addItems(List<User> newUsers) {
             int startInsertPosition = users.size();
-            users.addAll(newUsers);
-            this.notifyItemRangeInserted(startInsertPosition, newUsers.size());
+            if (newUsers != null) {
+                users.addAll(newUsers);
+                this.notifyItemRangeInserted(startInsertPosition, newUsers.size());
+            }
         }
 
         /**

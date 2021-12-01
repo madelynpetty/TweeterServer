@@ -84,6 +84,11 @@ public class StoryDAO {
     }
 
     List<Status> getFollowsStatuses(StoryRequest request) {
+        System.out.println("alias: " + request.getUserAlias());
+        System.out.println("limit: " + request.getLimit());
+        System.out.println("authtoken: " + request.getAuthToken());
+        System.out.println("last status: " + request.getLastStatus());
+
         Map<String, String> attrNames = new HashMap<String, String>();
         attrNames.put("#aliasName", partitionKey);
         attrNames.put("#timeName", sortKey);
@@ -127,7 +132,7 @@ public class StoryDAO {
             }
         }
         else {
-            System.out.println("There are no statuses to show in the user's story. They may not " +
+            throw new RuntimeException("There are no statuses to show in the user's story. They may not " +
                     "be following anyone.");
         }
 

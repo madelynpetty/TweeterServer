@@ -35,7 +35,7 @@ public class GetFollowingTask extends PagedUserTask {
 
     @Override
     protected List<User> getItems() {
-        return getResponse().getItems();
+        return followingResponse.getItems();
     }
 
     @Override

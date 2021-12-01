@@ -15,6 +15,7 @@ import com.amazonaws.services.dynamodbv2.document.utils.ValueMap;
 import com.amazonaws.services.dynamodbv2.model.AttributeValue;
 import com.amazonaws.services.dynamodbv2.model.QueryRequest;
 import com.amazonaws.services.dynamodbv2.model.QueryResult;
+import com.amazonaws.services.dynamodbv2.xspec.S;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -51,9 +52,12 @@ public class FollowDAO {
     private static final String sortKey = "follower";
 
     public FollowResponse follow(FollowRequest request) {
+        //todo add image
         Item item = new Item()
                 .withPrimaryKey(partitionKey, request.getUser().getAlias())
                 .withString(sortKey, request.getCurrUser().getAlias());
+//                .withString("userAliasImage", request.getUser().getImageUrl())
+//                .withString("followerImage", request.getCurrUser().getImageUrl());
 
         followTable.putItem(item);
         return new FollowResponse();
@@ -120,7 +124,6 @@ public class FollowDAO {
         return new UnfollowResponse();
     }
 
-    // todo Query condition missed key schema element: userAlias
     public FollowerCountResponse getFollowerCount(User follower) {
         assert follower != null;
         FollowerCountResponse response = new FollowerCountResponse(
@@ -172,8 +175,17 @@ public class FollowDAO {
      * @return the followees.
      */
     public FollowingResponse getFollowees(FollowingRequest request) {
+        System.out.println("FOLLOWER REQUEST: ");
+        System.out.println("FOLLOWER: " + request.getFollowerAlias());
+        System.out.println("LAST FOLLOWER: " + request.getLastFolloweeAlias());
+
         assert request.getLimit() > 0;
         assert request.getFollowerAlias() != null;
+
+        if (request.getLastFolloweeAlias() == null) {
+            List<User> users = new ArrayList<>();
+            return new FollowingResponse(users, false);
+        }
 
         List<User> allFollowees = getFollowingList(request.getFollowerAlias());
         List<User> responseFollowees = new ArrayList<>(request.getLimit());
@@ -253,7 +265,14 @@ public class FollowDAO {
             Set<String> partitionSet = item.keySet();
             for (String alias : partitionSet) {
                 User user = UserDAO.getUserFromAlias(alias);
-                followers.add(user);
+
+                if (user != null) {
+                    System.out.println("USER IS NOT NULL: " + user.getAlias());
+                    followers.add(user);
+                }
+                else {
+                    System.out.println("USER IS NULL");
+                }
             }
         }
 
@@ -263,32 +282,35 @@ public class FollowDAO {
     List<User> getFollowersList(String userAlias) {
         //CURRENT USER IS THE FOLLOWER
 
-        Map<String, String> attrNames = new HashMap<>();
-        attrNames.put("#aliasName", sortKey);
+        List<User> followers = new ArrayList<>();
 
-        Map<String, AttributeValue> attrValues = new HashMap<>();
-        attrValues.put(":" + sortKey, new AttributeValue().withS(userAlias));
+        ScanSpec scanSpec = new ScanSpec()
+                .withProjectionExpression("#aliasName, " + sortKey)
+                .withFilterExpression("#aliasName = :aliasVal")
+                .withNameMap(new NameMap().with("#aliasName", partitionKey))
+                .withValueMap(new ValueMap().withString(":aliasVal", userAlias));
 
-        QueryRequest queryRequest = new QueryRequest()
-                .withTableName(tableName)
-                .withIndexName(indexName)
-                .withKeyConditionExpression("#aliasName = :" + sortKey)
-                .withExpressionAttributeNames(attrNames)
-                .withExpressionAttributeValues(attrValues);
+        try {
+            ItemCollection<ScanOutcome> items = followTable.scan(scanSpec);
 
-        QueryResult queryResult = amazonDynamoDB.query(queryRequest);
-        List<Map<String, AttributeValue>> items = queryResult.getItems();
-        List<User> following = new ArrayList<>();
-
-        for (Map<String, AttributeValue> item : items) {
-            Set<String> partitionSet = item.keySet();
-            for (String alias : partitionSet) {
-                User user = UserDAO.getUserFromAlias(alias);
-                following.add(user);
+            Iterator<Item> iter = items.iterator();
+            while (iter.hasNext()) {
+                Item item = iter.next();
+                String aliasVal = item.getString(sortKey);
+                User user = UserDAO.getUserFromAlias(aliasVal);
+                if (user != null) {
+                    System.out.println("USER IS NOT NULL: " + user.getAlias());
+                    followers.add(user);
+                }
+                else {
+                    System.out.println("USER IS NULL");
+                }
             }
         }
-
-        return following;
+        catch (Exception e) {
+            throw new RuntimeException("Unable to scan the follow table: " + e.getMessage());
+        }
+        return followers;
     }
 
     /**
@@ -304,6 +326,10 @@ public class FollowDAO {
     public FollowerResponse getFollowers(FollowerRequest request) {
         assert request.getLimit() > 0;
         assert request.getFollower().getAlias() != null;
+        if (request.getLastFollower() == null) {
+            List<User> users = new ArrayList<>();
+            return new FollowerResponse(users, false);
+        }
 
         List<User> allFollowers = getFollowersList(request.getFollower().getAlias());
         List<User> responseFollowers = new ArrayList<>(request.getLimit());

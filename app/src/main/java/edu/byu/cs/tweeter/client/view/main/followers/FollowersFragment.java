@@ -152,8 +152,10 @@ public class FollowersFragment extends Fragment implements FollowerPresenter.Vie
          */
         void addItems(List<User> newUsers) {
             int startInsertPosition = users.size();
-            users.addAll(newUsers);
-            this.notifyItemRangeInserted(startInsertPosition, newUsers.size());
+            if (newUsers != null) {
+                users.addAll(newUsers);
+                this.notifyItemRangeInserted(startInsertPosition, newUsers.size());
+            }
         }
 
         /**

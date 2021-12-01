@@ -77,7 +77,14 @@ public class FollowService {
         protected void handleSuccessMessage(Message msg) {
             List<User> followees = (List<User>) msg.getData().getSerializable(GetFollowingTask.ITEMS_KEY);
             boolean hasMorePages = msg.getData().getBoolean(GetFollowingTask.MORE_PAGES_KEY);
-            User lastFollowee = (followees.size() > 0) ? followees.get(followees.size() - 1) : null;
+            User lastFollowee;
+            if (followees != null) {
+                lastFollowee = (followees.size() > 0) ? followees.get(followees.size() - 1) : null;
+            }
+            else {
+                lastFollowee = null;
+                hasMorePages = false;
+            }
 
             ((GetFollowingObserver)observer).followSucceeded(followees, hasMorePages, lastFollowee);
         }
@@ -119,7 +126,14 @@ public class FollowService {
         protected void handleSuccessMessage(Message msg) {
             List<User> followers = (List<User>) msg.getData().getSerializable(GetFollowersTask.ITEMS_KEY);
             boolean hasMorePages = msg.getData().getBoolean(GetFollowersTask.MORE_PAGES_KEY);
-            User lastFollower = (followers.size() > 0) ? followers.get(followers.size() - 1) : null;
+            User lastFollower;
+            if (followers != null) {
+               lastFollower = (followers.size() > 0) ? followers.get(followers.size() - 1) : null;
+            }
+            else {
+                lastFollower = null;
+                hasMorePages = false;
+            }
 
             ((GetFollowersObserver)observer).followSucceeded(followers, hasMorePages, lastFollower);
         }

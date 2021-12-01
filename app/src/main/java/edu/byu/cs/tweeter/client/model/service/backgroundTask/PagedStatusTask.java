@@ -2,6 +2,7 @@ package edu.byu.cs.tweeter.client.model.service.backgroundTask;
 
 import android.os.Handler;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -18,6 +19,12 @@ public abstract class PagedStatusTask extends PagedTask<Status> {
 
     @Override
     protected final List<User> getUsersForItems(List<Status> items) {
+//        List<User> users = new ArrayList<>();
+//        for (Status s : items) {
+//            users.add(s.getUser());
+//        }
+//        return users;
         return items.stream().map(x -> x.user).collect(Collectors.toList());
     }
+
 }
