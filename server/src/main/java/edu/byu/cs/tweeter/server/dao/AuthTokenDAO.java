@@ -28,9 +28,7 @@ import java.util.Set;
 import edu.byu.cs.tweeter.model.domain.AuthToken;
 
 public class AuthTokenDAO {
-    private static AmazonDynamoDB amazonDynamoDB = AmazonDynamoDBClientBuilder
-            .standard().withRegion("us-west-2").build();
-    private static DynamoDB dynamoDB = new DynamoDB(amazonDynamoDB);
+    private static DynamoDB dynamoDB = UserDAO.getDynamoDB();
     private static final String tableName = "authTokenTable";
     private final String indexName = "authToken-authTokenTimeStamp-index";
     private static Table authTokenTable = dynamoDB.getTable(tableName);
@@ -54,7 +52,7 @@ public class AuthTokenDAO {
     public void checkValidAuthTokens() {
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
         LocalDateTime cutOff = LocalDateTime.now().minusMinutes(30);
-            // although this is 30 minutes ago, this actually is a day and a 
+            // although this is 30 minutes ago, this actually is a day and a
             // half ago due to aws not allowing me to change my timezone.
 
         ScanSpec scanSpec = new ScanSpec()

@@ -18,7 +18,7 @@ public class FollowingResponse extends PagedResponse<User> {
      * @param message a message describing why the request was unsuccessful.
      */
     public FollowingResponse(String message) {
-        super(false, message, false);
+        super(false, message);
     }
 
     public FollowingResponse() {
@@ -31,7 +31,7 @@ public class FollowingResponse extends PagedResponse<User> {
      * @param followees the followees to be included in the result.
      * @param hasMorePages an indicator of whether more data is available for the request.
      */
-    public FollowingResponse(List<User> followees, boolean hasMorePages) {
-        super(true, hasMorePages, followees);
+    public FollowingResponse(List<User> followees, User lastItem, boolean hasMorePages) {
+        super(true, hasMorePages, followees, lastItem);
     }
 }

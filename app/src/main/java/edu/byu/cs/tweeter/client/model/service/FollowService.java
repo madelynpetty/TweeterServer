@@ -88,8 +88,6 @@ public class FollowService {
             } catch (Exception e) {
                 observer.handleException(e);
             }
-
-            ((GetFollowingObserver)observer).followSucceeded(followees, hasMorePages, lastFollowee);
         }
     }
 
@@ -133,12 +131,10 @@ public class FollowService {
             if (followers != null)
                 lastFollower = (followers.size() > 0) ? followers.get(followers.size() - 1) : null;
             try {
-                ((FollowService.GetFollowersObserver)observer).followSucceeded(followers, hasMorePages, lastFollower);
+                ((GetFollowersObserver)observer).followSucceeded(followers, hasMorePages, lastFollower);
             } catch (Exception e) {
                 observer.handleException(e);
             }
-
-            ((GetFollowersObserver)observer).followSucceeded(followers, hasMorePages, lastFollower);
         }
     }
 

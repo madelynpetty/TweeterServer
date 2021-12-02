@@ -37,6 +37,7 @@ public abstract class PagedTask<T> extends AuthenticatedTask {
         List<T> pageOfItems = getItems();
         items = pageOfItems;
         hasMorePages = response.getHasMorePages();
+        lastItem = (T) response.getLastItem();
 
         for(User user : getUsersForItems(pageOfItems)) {
             BackgroundTaskUtils.loadImage(user);

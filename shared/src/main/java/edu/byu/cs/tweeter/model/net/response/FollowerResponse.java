@@ -19,7 +19,7 @@ public class FollowerResponse extends PagedResponse<User> {
      * @param message a message describing why the request was unsuccessful.
      */
     public FollowerResponse(String message) {
-        super(false, message, false);
+        super(false, message);
     }
 
     public FollowerResponse() {
@@ -32,8 +32,8 @@ public class FollowerResponse extends PagedResponse<User> {
      * @param followers the followers to be included in the result.
      * @param hasMorePages an indicator of whether more data is available for the request.
      */
-    public FollowerResponse(List<User> followers, boolean hasMorePages) {
-        super(true, hasMorePages, followers);
+    public FollowerResponse(List<User> followers, User lastItem, boolean hasMorePages) {
+        super(true, hasMorePages, followers, lastItem);
     }
 
 }

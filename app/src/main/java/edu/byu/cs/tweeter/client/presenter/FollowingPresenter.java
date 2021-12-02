@@ -13,6 +13,7 @@ public class FollowingPresenter extends PagedPresenter<User> {
     public FollowingPresenter(View view, User targetUser) {
         super(view, targetUser);
         this.view = view;
+        this.user = targetUser;
     }
 
     @Override

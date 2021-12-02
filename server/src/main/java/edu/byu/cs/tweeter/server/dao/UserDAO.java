@@ -33,6 +33,14 @@ public class UserDAO {
     private final String indexName = "alias-index";
     private static final Table userTable = dynamoDB.getTable(tableName);
 
+    public static AmazonDynamoDB getAmazonDynamoDB() {
+        return amazonDynamoDB;
+    }
+
+    public static DynamoDB getDynamoDB() {
+        return dynamoDB;
+    }
+
     public LoginResponse login(LoginRequest request) {
         Item item = userTable.getItem("alias", request.getAlias());
         User user = null;

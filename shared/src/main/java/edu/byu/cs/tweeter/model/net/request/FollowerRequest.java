@@ -13,6 +13,7 @@ public class FollowerRequest {
     private User follower;
     private int limit;
     private User lastFollower;
+    private User lastItem;
 
     /**
      * Allows construction of the object from Json. Private so it won't be called in normal code.
@@ -106,5 +107,13 @@ public class FollowerRequest {
      */
     public void setLastFollower(User lastFollower) {
         this.lastFollower = lastFollower;
+    }
+
+    public User getLastItem() {
+        return lastItem;
+    }
+
+    public void setLastItem(User lastItem) {
+        this.lastItem = lastItem;
     }
 }

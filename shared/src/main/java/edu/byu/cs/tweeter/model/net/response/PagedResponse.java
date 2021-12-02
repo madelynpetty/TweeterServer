@@ -10,16 +10,18 @@ public class PagedResponse<T> extends Response {
 
     private boolean hasMorePages;
     private List<T> items;
+    private T lastItem;
 
-    PagedResponse(boolean success, boolean hasMorePages, List<T> items) {
+    PagedResponse(boolean success, boolean hasMorePages, List<T> items, T lastItem) {
         super(success);
         this.hasMorePages = hasMorePages;
         this.items = items;
+        this.lastItem = lastItem;
     }
 
-    PagedResponse(boolean success, String message, boolean hasMorePages) {
+    //unsuccessful
+    PagedResponse(boolean success, String message) {
         super(success, message);
-        this.hasMorePages = hasMorePages;
     }
 
     PagedResponse() {
@@ -52,5 +54,13 @@ public class PagedResponse<T> extends Response {
 
     public void setItems(List<T> items) {
         this.items = items;
+    }
+
+    public T getLastItem() {
+        return lastItem;
+    }
+
+    public void setLastItem(T lastItem) {
+        this.lastItem = lastItem;
     }
 }

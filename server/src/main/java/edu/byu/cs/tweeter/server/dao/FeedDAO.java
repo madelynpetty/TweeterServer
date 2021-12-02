@@ -28,9 +28,8 @@ import edu.byu.cs.tweeter.model.net.response.FeedResponse;
  * A DAO for accessing 'following' data from the database.
  */
 public class FeedDAO {
-    private static AmazonDynamoDB amazonDynamoDB = AmazonDynamoDBClientBuilder
-            .standard().withRegion("us-west-2").build();
-    private static DynamoDB dynamoDB = new DynamoDB(amazonDynamoDB);
+    private static AmazonDynamoDB amazonDynamoDB = UserDAO.getAmazonDynamoDB();
+    private static DynamoDB dynamoDB = UserDAO.getDynamoDB();
     private static final String tableName = "feed";
     private final String indexName = "receiverAlias-feedtime-index";
     private static Table feedTable = dynamoDB.getTable(tableName);
@@ -58,7 +57,7 @@ public class FeedDAO {
             }
         }
 
-        return new FeedResponse(responseStatuses, hasMorePages);
+        return new FeedResponse(responseStatuses, request.getLastStatus(), hasMorePages);
     }
 
     private int getFeedStartingIndex(String lastStatus, List<Status> allStatuses) {
