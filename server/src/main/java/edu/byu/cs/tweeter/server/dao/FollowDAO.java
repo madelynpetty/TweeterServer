@@ -51,6 +51,7 @@ public class FollowDAO {
     private static DynamoDB dynamoDB = UserDAO.getDynamoDB();
     private static final String tableName = "follow";
     private final String indexName = "follower-userAlias-index";
+    private final String indexName2 = "userAlias-follower-index";
     private static Table followTable = dynamoDB.getTable(tableName);
     private static final String partitionKey = "userAlias";
     private static final String sortKey = "follower";
@@ -193,6 +194,7 @@ public class FollowDAO {
         assert request.getLimit() > 0;
         assert request.getLoggedInUserAlias() != null;
 
+        // todo request.getLoggedInUser is null
         List<User> allFollowees = getFollowingList(request.getLoggedInUserAlias());
         List<User> responseFollowees = new ArrayList<>(request.getLimit());
 
@@ -249,6 +251,10 @@ public class FollowDAO {
     // people that I follow
     // logged in user is in the sort key
     List<User> getFollowingList(String userAlias) {
+        // todo passing in a null alias!
+        System.out.println("FOLLOWING REQUEST: ");
+        System.out.println("PASSED IN: " + userAlias);
+
         List<User> followingList = new ArrayList<>();
 
         QuerySpec querySpec = new QuerySpec()
@@ -302,6 +308,9 @@ public class FollowDAO {
         QuerySpec querySpec = new QuerySpec()
                 .withKeyConditionExpression(partitionKey + " = :aliasVal")
                 .withValueMap(new ValueMap().withString(":aliasVal", userAlias));
+
+//        Index index = followTable.getIndex(indexName2);
+//        ItemCollection<QueryOutcome> items = index.query(querySpec);
 
         ItemCollection<QueryOutcome> items = followTable.query(querySpec);
 

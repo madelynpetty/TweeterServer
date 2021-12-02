@@ -295,11 +295,7 @@ public class FollowersFragment extends Fragment implements FollowerPresenter.Vie
 
             if ((visibleItemCount + firstVisibleItemPosition) >=
                     totalItemCount && firstVisibleItemPosition >= 0) {
-                try {
-                    presenter.loadMoreItems();
-                } catch (MalformedURLException e) {
-                    e.printStackTrace();
-                }
+                loadMoreItems();
             }
         }
     }

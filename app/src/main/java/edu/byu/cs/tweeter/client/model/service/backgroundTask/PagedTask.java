@@ -10,7 +10,6 @@ import java.util.List;
 import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.User;
 import edu.byu.cs.tweeter.model.net.response.PagedResponse;
-import edu.byu.cs.tweeter.model.util.Pair;
 
 public abstract class PagedTask<T> extends AuthenticatedTask {
     public static final String ITEMS_KEY = "items";

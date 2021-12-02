@@ -25,6 +25,7 @@ public class GetFollowerHandler implements RequestHandler<FollowerRequest, Follo
      */
     @Override
     public FollowerResponse handleRequest(FollowerRequest request, Context context) {
+        System.out.println("REQUEST INSIDE LAMBDA HANDLER: " + request.getFollowerAlias());
         FollowService service = new FollowService();
         return service.getFollowers(request);
     }

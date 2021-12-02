@@ -68,8 +68,7 @@ public class UserDAO {
     }
 
     public LogoutResponse logout(LogoutRequest request) {
-        //todo validate request.authtoken
-
+        AuthTokenDAO.removeAuthToken(request.getAuthToken().getIdentifier());
         getAuthTokenDAO().checkValidAuthTokens();
         return new LogoutResponse(true);
     }
@@ -107,7 +106,7 @@ public class UserDAO {
     }
 
     public GetUserResponse getUser(GetUserRequest request) {
-        return new GetUserResponse(true);
+        return new GetUserResponse(true, UserDAO.getUserFromAlias(request.getAlias()));
     }
 
     private AuthTokenDAO getAuthTokenDAO() {

@@ -11,6 +11,7 @@ import edu.byu.cs.tweeter.model.domain.User;
 import edu.byu.cs.tweeter.model.net.TweeterRemoteException;
 import edu.byu.cs.tweeter.model.net.request.GetUserRequest;
 import edu.byu.cs.tweeter.model.net.response.AuthenticatedResponse;
+import edu.byu.cs.tweeter.model.net.response.GetUserResponse;
 import edu.byu.cs.tweeter.model.util.FakeData;
 
 /**
@@ -21,7 +22,6 @@ public class GetUserTask extends AuthenticatedTask {
     public static final String USER_KEY = "user";
     private static final String URL_PATH = "/getuser";
 
-    private User user;
     private GetUserRequest request;
     private AuthenticatedResponse response;
 
@@ -32,7 +32,6 @@ public class GetUserTask extends AuthenticatedTask {
 
     @Override
     protected AuthenticatedResponse runAuthenticationTask() {
-        user = getUser();
         try {
             response = new FollowService().getServerFacade().getUser(request, URL_PATH);
         } catch (IOException | TweeterRemoteException e) {
@@ -44,12 +43,8 @@ public class GetUserTask extends AuthenticatedTask {
 
     @Override
     protected void loadSuccessBundle(Bundle msgBundle) {
+        User user = response.getUser();
+        BackgroundTaskUtils.loadImage(user);
         msgBundle.putSerializable(USER_KEY, user);
-    }
-
-    private User getUser() {
-        //TODO this should be fixed with real implementation in M4
-        FakeData fakeData = new FakeData();
-        return fakeData.findUserByAlias(request.getAlias());
     }
 }

@@ -9,8 +9,6 @@ import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.User;
 import edu.byu.cs.tweeter.model.net.request.AuthenticateRequest;
 import edu.byu.cs.tweeter.model.net.response.AuthenticateResponse;
-import edu.byu.cs.tweeter.model.net.response.LoginResponse;
-import edu.byu.cs.tweeter.model.util.Pair;
 
 public abstract class AuthenticateTask extends BackgroundTask {
     private static final String LOG_TAG = "AuthenticateTask";

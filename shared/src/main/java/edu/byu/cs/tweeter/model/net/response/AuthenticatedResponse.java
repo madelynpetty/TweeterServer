@@ -1,5 +1,7 @@
 package edu.byu.cs.tweeter.model.net.response;
 
+import edu.byu.cs.tweeter.model.domain.User;
+
 public class AuthenticatedResponse extends Response {
     /**
      * Creates a response indicating that the corresponding request was unsuccessful.
@@ -19,6 +21,21 @@ public class AuthenticatedResponse extends Response {
 
     public AuthenticatedResponse(Boolean success) {
         super(success, null);
+    }
+
+
+    private User user;
+    public AuthenticatedResponse(boolean success, User user) {
+        super(success);
+        this.user = user;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 
 }

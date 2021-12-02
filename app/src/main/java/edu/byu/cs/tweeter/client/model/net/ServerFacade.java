@@ -27,6 +27,7 @@ import edu.byu.cs.tweeter.model.net.response.FollowerCountResponse;
 import edu.byu.cs.tweeter.model.net.response.FollowerResponse;
 import edu.byu.cs.tweeter.model.net.response.FollowingCountResponse;
 import edu.byu.cs.tweeter.model.net.response.FollowingResponse;
+import edu.byu.cs.tweeter.model.net.response.GetUserResponse;
 import edu.byu.cs.tweeter.model.net.response.IsFollowerResponse;
 import edu.byu.cs.tweeter.model.net.response.LoginResponse;
 import edu.byu.cs.tweeter.model.net.response.LogoutResponse;
@@ -190,8 +191,8 @@ public class ServerFacade {
         }
     }
 
-    public AuthenticatedResponse getUser(GetUserRequest request, String urlPath) throws IOException, TweeterRemoteException {
-        AuthenticatedResponse response = clientCommunicator.doPost(urlPath, request, null, IsFollowerResponse.class);
+    public GetUserResponse getUser(GetUserRequest request, String urlPath) throws IOException, TweeterRemoteException {
+        GetUserResponse response = clientCommunicator.doPost(urlPath, request, null, GetUserResponse.class);
 
         if(response.isSuccess()) {
             return response;
