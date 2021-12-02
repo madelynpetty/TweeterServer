@@ -10,10 +10,9 @@ import edu.byu.cs.tweeter.model.domain.User;
 public class FollowerRequest {
 
     private AuthToken authToken;
-    private User follower;
+    private String followerAlias;
     private int limit;
-    private User lastFollower;
-    private User lastItem;
+    private String lastFollowerAlias;
 
     /**
      * Allows construction of the object from Json. Private so it won't be called in normal code.
@@ -23,17 +22,17 @@ public class FollowerRequest {
     /**
      * Creates an instance.
      *
-     * @param follower the user whose followers are to be returned.
+     * @param followerAlias the user whose followers are to be returned.
      * @param limit the maximum number of follower to return.
-     * @param lastFollower the last follower that was returned in the previous request (null if
+     * @param lastFollowerAlias the last follower that was returned in the previous request (null if
      *                     there was no previous request or if no followers were returned in the
      *                     previous request).
      */
-    public FollowerRequest(AuthToken authToken, User follower, int limit, User lastFollower) {
+    public FollowerRequest(AuthToken authToken, String followerAlias, int limit, String lastFollowerAlias) {
         this.authToken = authToken;
-        this.follower = follower;
+        this.followerAlias = followerAlias;
         this.limit = limit;
-        this.lastFollower = lastFollower;
+        this.lastFollowerAlias = lastFollowerAlias;
     }
 
     /**
@@ -59,8 +58,8 @@ public class FollowerRequest {
      *
      * @return the follower.
      */
-    public User getFollower() {
-        return follower;
+    public String getFollowerAlias() {
+        return followerAlias;
     }
 
     /**
@@ -68,8 +67,8 @@ public class FollowerRequest {
      *
      * @param follower the follower.
      */
-    public void setFollower(User follower) {
-        this.follower = follower;
+    public void setFollowerAlias(String follower) {
+        this.followerAlias = followerAlias;
     }
 
     /**
@@ -96,24 +95,16 @@ public class FollowerRequest {
      *
      * @return the last follower.
      */
-    public User getLastFollower() {
-        return lastFollower;
+    public String getLastFollowerAlias() {
+        return lastFollowerAlias;
     }
 
     /**
      * Sets the last follower.
      *
-     * @param lastFollower the last follower.
+     * @param lastFollowerAlias the last follower.
      */
-    public void setLastFollower(User lastFollower) {
-        this.lastFollower = lastFollower;
-    }
-
-    public User getLastItem() {
-        return lastItem;
-    }
-
-    public void setLastItem(User lastItem) {
-        this.lastItem = lastItem;
+    public void setLastFollowerAlias(String lastFollowerAlias) {
+        this.lastFollowerAlias = lastFollowerAlias;
     }
 }

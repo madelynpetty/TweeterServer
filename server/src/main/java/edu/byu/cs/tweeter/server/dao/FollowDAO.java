@@ -333,11 +333,10 @@ public class FollowDAO {
      */
     public FollowerResponse getFollowers(FollowerRequest request) {
         assert request.getLimit() > 0;
-        assert request.getFollower() != null;
-        assert request.getFollower().getAlias() != null;
-        System.out.println("Alias sent in: " + request.getFollower().getAlias());
+        assert request.getFollowerAlias() != null;
+        System.out.println("Alias sent in: " + request.getFollowerAlias());
 
-        List<User> allFollowers = getFollowersList(request.getFollower().getAlias());
+        List<User> allFollowers = getFollowersList(request.getFollowerAlias());
         List<User> responseFollowers = new ArrayList<>(request.getLimit());
 
         boolean hasMorePages = false;
@@ -345,7 +344,7 @@ public class FollowDAO {
 
         if(request.getLimit() > 0) {
             if (allFollowers != null) {
-                int followeesIndex = getFollowStartingIndex(request.getLastFollower().getAlias(), allFollowers);
+                int followeesIndex = getFollowStartingIndex(request.getLastFollowerAlias(), allFollowers);
 
                 for(int limitCounter = 0; followeesIndex < allFollowers.size() && limitCounter < request.getLimit(); followeesIndex++, limitCounter++) {
                     responseFollowers.add(allFollowers.get(followeesIndex));
@@ -353,7 +352,7 @@ public class FollowDAO {
 
                 hasMorePages = followeesIndex < allFollowers.size();
                 lastFollower = allFollowers.get(followeesIndex - 1);
-                request.setLastFollower(lastFollower);
+                request.setLastFollowerAlias(lastFollower.getAlias());
             }
         }
 

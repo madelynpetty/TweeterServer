@@ -16,7 +16,7 @@ public class Main {
         AuthToken authToken = new AuthToken();
         User lsatFollower = new User("m", "m", "@m", "");
         User follower = new User("maddie", "petty", "@mp", "");
-        FollowerRequest request = new FollowerRequest(authToken, follower, 10, lsatFollower);
+        FollowerRequest request = new FollowerRequest(authToken, follower.getAlias(), 10, lsatFollower.getAlias());
         FollowerResponse response = handler.handleRequest(request, new FakeContext());
         System.out.println(response.getLastItem());
 

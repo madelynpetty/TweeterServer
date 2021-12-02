@@ -103,11 +103,11 @@ public class FollowService {
         FollowerRequest followerRequest;
         if (lastFollower == null) {
             followerRequest = new FollowerRequest(Cache.getInstance().getCurrUserAuthToken(),
-                    user, PAGE_SIZE, null);
+                    user.getAlias(), PAGE_SIZE, null);
         }
         else {
             followerRequest = new FollowerRequest(Cache.getInstance().getCurrUserAuthToken(),
-                    user, PAGE_SIZE, lastFollower);
+                    user.getAlias(), PAGE_SIZE, lastFollower.getAlias());
         }
 
         GetFollowersTask getFollowersTask = new GetFollowersTask(followerRequest, user,

@@ -13,7 +13,6 @@ public class FollowingRequest {
     private String loggedInUserAlias;
     private int limit;
     private String lastFolloweeAlias;
-    private User lastItem;
 
     /**
      * Allows construction of the object from Json. Private so it won't be called in normal code.
@@ -107,13 +106,5 @@ public class FollowingRequest {
      */
     public void setLastFolloweeAlias(String lastFolloweeAlias) {
         this.lastFolloweeAlias = lastFolloweeAlias;
-    }
-
-    public User getLastItem() {
-        return lastItem;
-    }
-
-    public void setLastItem(User lastItem) {
-        this.lastItem = lastItem;
     }
 }
