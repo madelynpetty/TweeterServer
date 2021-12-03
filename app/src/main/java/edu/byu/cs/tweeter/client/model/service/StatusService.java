@@ -38,11 +38,11 @@ public class StatusService {
         void statusSucceeded(List<Status> statuses, boolean hasMorePages, Status lastStatus) throws MalformedURLException;
     }
 
-    public static void getFeed(FeedObserver observer, User user, Status lastStatus,
+    public static void getFeed(FeedObserver observer, User currUser, Status lastStatus,
                                boolean hasMorePages) {
         FeedRequest feedRequest = new FeedRequest(Cache.getInstance().getCurrUserAuthToken(),
-                user.getAlias(), PAGE_SIZE, lastStatus);
-        GetFeedTask getFeedTask = new GetFeedTask(feedRequest, user, lastStatus,
+                currUser.getAlias(), PAGE_SIZE, lastStatus);
+        GetFeedTask getFeedTask = new GetFeedTask(feedRequest, currUser, lastStatus,
                 hasMorePages, new GetFeedHandler(observer));
         new ExecuteTask<>(getFeedTask);
     }

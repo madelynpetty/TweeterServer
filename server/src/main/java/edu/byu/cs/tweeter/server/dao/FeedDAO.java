@@ -110,7 +110,7 @@ public class FeedDAO {
 
         if (items != null) {
             for (Map<String, AttributeValue> item : items) {
-                String userAlias = item.get(partitionKey).getS();
+                String userAlias = item.get("senderAlias").getS();
                 User user = UserDAO.getUserFromAlias(userAlias);
 
                 String post = item.get("post").getS();
