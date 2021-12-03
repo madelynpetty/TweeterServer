@@ -96,7 +96,7 @@ public class MainActivity extends AppCompatActivity implements StatusDialogFragm
             followButton.setVisibility(View.GONE);
         } else {
             followButton.setVisibility(View.VISIBLE);
-            presenter.isFollower();
+            presenter.isFollower(selectedUser);
         }
 
         followButton.setOnClickListener(new View.OnClickListener() {

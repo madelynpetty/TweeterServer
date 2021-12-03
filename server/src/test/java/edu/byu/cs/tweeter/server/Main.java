@@ -4,21 +4,24 @@ import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.User;
 import edu.byu.cs.tweeter.model.net.request.FollowerRequest;
 import edu.byu.cs.tweeter.model.net.request.FollowingRequest;
+import edu.byu.cs.tweeter.model.net.request.IsFollowerRequest;
 import edu.byu.cs.tweeter.model.net.response.FollowerResponse;
 import edu.byu.cs.tweeter.model.net.response.FollowingResponse;
+import edu.byu.cs.tweeter.model.net.response.IsFollowerResponse;
 import edu.byu.cs.tweeter.server.lambda.GetFollowerHandler;
 import edu.byu.cs.tweeter.server.lambda.GetFollowingHandler;
+import edu.byu.cs.tweeter.server.lambda.IsFollowerHandler;
 
 public class Main {
     public static void main(String[] args) {
 
-        GetFollowerHandler handler = new GetFollowerHandler();
-        AuthToken authToken = new AuthToken();
-        User lsatFollower = new User("m", "m", "@m", "");
-        User follower = new User("maddie", "petty", "@mp", "");
-        FollowerRequest request = new FollowerRequest(authToken, follower.getAlias(), 10, lsatFollower.getAlias());
-        FollowerResponse response = handler.handleRequest(request, new FakeContext());
-        System.out.println(response.getLastItem());
+//        GetFollowerHandler handler = new GetFollowerHandler();
+//        AuthToken authToken = new AuthToken();
+//        User lsatFollower = new User("m", "m", "@m", "");
+//        User follower = new User("maddie", "petty", "@mp", "");
+//        FollowerRequest request = new FollowerRequest(authToken, follower.getAlias(), 10, lsatFollower.getAlias());
+//        FollowerResponse response = handler.handleRequest(request, new FakeContext());
+//        System.out.println(response.getLastItem());
 
 
 //        GetFollowingHandler handler = new GetFollowingHandler();
@@ -26,5 +29,15 @@ public class Main {
 //        FollowingRequest request = new FollowingRequest(authToken, "@mp", 10, "@m");
 //        FollowingResponse response = handler.handleRequest(request, new FakeContext());
 //        System.out.println(response.getLastItem());
+
+
+        User currUser = new User("m", "p", "@mp", "https://maddiepettytweeterbucket.s3.us-west-2.amazonaws.com/%40mp");
+        User followee = new User("m", "m", "@m", "https://maddiepettytweeterbucket.s3.us-west-2.amazonaws.com/%40m");
+        AuthToken authToken = new AuthToken();
+        authToken.identifier = "70f43a00-8e56-4439-bf48-4bce52021eea";
+        IsFollowerRequest request = new IsFollowerRequest(authToken, currUser, followee);
+        IsFollowerHandler handler = new IsFollowerHandler();
+        IsFollowerResponse response = handler.handleRequest(request, new FakeContext());
+        System.out.println(response.isFollower());
     }
 }

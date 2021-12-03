@@ -62,8 +62,8 @@ public class MainPresenter implements StatusService.PostStatusObserver,
         new FollowService().unfollow(this, user);
     }
 
-    public void isFollower() {
-        new FollowService().isFollower(this);
+    public void isFollower(User selectedUser) {
+        new FollowService().isFollower(this, selectedUser);
     }
 
     @Override

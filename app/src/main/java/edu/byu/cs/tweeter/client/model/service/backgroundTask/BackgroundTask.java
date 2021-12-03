@@ -7,9 +7,7 @@ import android.util.Log;
 
 import java.io.IOException;
 
-import edu.byu.cs.tweeter.model.util.FakeData;
-
-public abstract class BackgroundTask implements Runnable{
+public abstract class BackgroundTask implements Runnable {
     private static final String LOG_TAG = "BackgroundTask";
 
     public static final String SUCCESS_KEY = "success";

@@ -9,7 +9,7 @@ import edu.byu.cs.tweeter.model.domain.User;
 public class IsFollowerRequest {
 
     private AuthToken authToken;
-    private User follower;
+    private User currUser;
     private User followee;
 
     /**
@@ -20,11 +20,12 @@ public class IsFollowerRequest {
     /**
      * Creates an instance.
      *
-     * @param follower the alleged follower.
+     * @param currUser the alleged follower.
      * @param followee the alleged followee.
      */
-    public IsFollowerRequest(AuthToken authToken, User follower, User followee) {
-        this.follower = follower;
+    public IsFollowerRequest(AuthToken authToken, User currUser, User followee) {
+        this.authToken = authToken;
+        this.currUser = currUser;
         this.followee = followee;
     }
 
@@ -51,17 +52,17 @@ public class IsFollowerRequest {
      *
      * @return the follower.
      */
-    public User getFollower() {
-        return follower;
+    public User getCurrUser() {
+        return currUser;
     }
 
     /**
      * Sets the alleged follower in this request.
      *
-     * @param follower the follower.
+     * @param currUser the follower.
      */
-    public void setFollower(User follower) {
-        this.follower = follower;
+    public void setCurrUser(User currUser) {
+        this.currUser = currUser;
     }
 
     /**

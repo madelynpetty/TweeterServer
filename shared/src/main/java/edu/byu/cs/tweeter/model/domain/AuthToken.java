@@ -7,7 +7,7 @@ import java.util.UUID;
  * Represents an auth token in the system.
  */
 public class AuthToken implements Serializable {
-    String identifier;
+    public String identifier;
 
     public AuthToken() {
         this.identifier = UUID.randomUUID().toString();

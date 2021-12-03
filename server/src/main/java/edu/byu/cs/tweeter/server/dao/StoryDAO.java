@@ -150,6 +150,7 @@ public class StoryDAO {
 
             storyTable.putItem(item);
             FeedDAO.postedStatus(request.getPost().getPost(), request.getCurrUserAlias());
+            //todo maybe call endpoint again?
         }
         catch (DuplicateItemException e) {
             System.out.println("Duplicate Item Exception: " + e.getMessage());

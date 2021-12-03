@@ -268,11 +268,11 @@ public class FollowService {
         void setIsNotFollowerButton();
     }
 
-    public void isFollower(IsFollowerObserver observer) {
+    public void isFollower(IsFollowerObserver observer, User user) {
         IsFollowerRequest request = new IsFollowerRequest(Cache.getInstance().getCurrUserAuthToken(),
-                Cache.getInstance().getCurrUser(), selectedUser);
+                Cache.getInstance().getCurrUser(), user);
         IsFollowerTask isFollowerTask = new IsFollowerTask(request, Cache.getInstance().getCurrUserAuthToken(),
-                Cache.getInstance().getCurrUser(), selectedUser, new IsFollowerHandler(observer));
+                new IsFollowerHandler(observer));
         new ExecuteTask<>(isFollowerTask);
     }
 

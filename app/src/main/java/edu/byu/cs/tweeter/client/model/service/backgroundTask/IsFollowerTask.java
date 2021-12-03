@@ -25,7 +25,7 @@ public class IsFollowerTask extends AuthenticatedTask {
     private IsFollowerRequest request;
     private AuthenticatedResponse response;
 
-    public IsFollowerTask(IsFollowerRequest request, AuthToken authToken, User follower, User followee, Handler messageHandler) {
+    public IsFollowerTask(IsFollowerRequest request, AuthToken authToken, Handler messageHandler) {
         super(authToken, messageHandler);
         this.request = request;
     }
@@ -36,6 +36,8 @@ public class IsFollowerTask extends AuthenticatedTask {
         // eventually access the database from here when we aren't using dummy data.
         try {
             response = new FollowService().getServerFacade().isFollower(request, URL_PATH);
+            // for some reason the response is giving me follower of false, even though it's printing
+            // as true. it should be true. Why?
         } catch (IOException | TweeterRemoteException e) {
             e.printStackTrace();
         }
@@ -45,6 +47,6 @@ public class IsFollowerTask extends AuthenticatedTask {
 
     @Override
     protected void loadSuccessBundle(Bundle msgBundle) {
-        msgBundle.putBoolean(IS_FOLLOWER_KEY, response.isSuccess());
+        msgBundle.putBoolean(IS_FOLLOWER_KEY, response.getIsFollower());
     }
 }

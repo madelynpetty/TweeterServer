@@ -24,6 +24,7 @@ public class AuthenticatedResponse extends Response {
     }
 
 
+
     private User user;
     public AuthenticatedResponse(boolean success, User user) {
         super(success);
@@ -38,4 +39,19 @@ public class AuthenticatedResponse extends Response {
         this.user = user;
     }
 
+
+
+    private boolean isFollower;
+    public AuthenticatedResponse(boolean success, boolean isFollower) {
+        super(success);
+        this.isFollower = isFollower;
+    }
+
+    public boolean getIsFollower() {
+        return isFollower;
+    }
+
+    public void setIsFollower(boolean isFollower) {
+        this.isFollower = isFollower;
+    }
 }

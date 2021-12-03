@@ -21,7 +21,7 @@ public abstract class AuthenticatedTask extends BackgroundTask {
 
     @Override
     protected boolean runTask() throws IOException {
-        AuthenticatedResponse response = runAuthenticationTask();
+        runAuthenticationTask();
         return true;
     }
 

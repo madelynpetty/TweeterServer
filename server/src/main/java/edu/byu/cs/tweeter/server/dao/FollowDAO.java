@@ -153,42 +153,32 @@ public class FollowDAO {
     public IsFollowerResponse isFollower(IsFollowerRequest request) {
         assert request.getFollowee() != null;
         assert request.getFollowee().getAlias() != null;
-        assert request.getFollower() != null;
-        assert request.getFollower().getAlias() != null;
+        assert request.getCurrUser() != null;
+        assert request.getCurrUser().getAlias() != null;
 
-        if ((request.getFollowee() != null) && (request.getFollowee().getAlias() != null)
-                && (request.getFollower() != null) && (request.getFollower().getAlias() != null)) {
+        Map<String, String> attrNames = new HashMap<>();
+        attrNames.put("#aliasName", partitionKey);
+        attrNames.put("#currUser", sortKey);
 
-            Map<String, String> attrNames = new HashMap<>();
-            attrNames.put("#aliasName", partitionKey);
-            attrNames.put("#followerName", sortKey);
+        Map<String, AttributeValue> attrValues = new HashMap<>();
+        attrValues.put(":" + partitionKey, new AttributeValue().withS(request.getFollowee().getAlias()));
+        attrValues.put(":" + sortKey, new AttributeValue().withS(request.getCurrUser().getAlias()));
 
-            Map<String, AttributeValue> attrValues = new HashMap<>();
-            if (request.getFollowee() != null) {
-                System.out.println("Please don't be null! Followee alias: " + request.getFollowee().getAlias());
-            } else {
-                System.out.println("it's null");
-            }
-            attrValues.put(":" + partitionKey, new AttributeValue().withS(request.getFollowee().getAlias()));
-            attrValues.put(":" + sortKey, new AttributeValue().withS(request.getFollower().getAlias()));
+        QueryRequest queryRequest = new QueryRequest()
+                .withTableName(tableName)
+                .withIndexName(indexName)
+                .withKeyConditionExpression("#aliasName = :" + partitionKey +
+                        " AND #currUser = :" + sortKey)
+                .withExpressionAttributeNames(attrNames)
+                .withExpressionAttributeValues(attrValues);
 
-            QueryRequest queryRequest = new QueryRequest()
-                    .withTableName(tableName)
-                    .withIndexName(indexName)
-                    .withKeyConditionExpression("#aliasName = :" + partitionKey +
-                            "#followerName = :" + sortKey)
-                    .withExpressionAttributeNames(attrNames)
-                    .withExpressionAttributeValues(attrValues);
+        QueryResult queryResult = amazonDynamoDB.query(queryRequest);
+        List<Map<String, AttributeValue>> items = queryResult.getItems();
 
-            QueryResult queryResult = amazonDynamoDB.query(queryRequest);
-            List<Map<String, AttributeValue>> items = queryResult.getItems();
+        boolean isFollower = false;
+        if(!items.isEmpty()) isFollower = true;
 
-            boolean isFollower = false;
-            if (!items.isEmpty()) isFollower = true;
-
-            return new IsFollowerResponse(isFollower);
-        }
-        throw new RuntimeException("Somethings null and it shouldn't be");
+        return new IsFollowerResponse(true, isFollower);
     }
 
     /**
