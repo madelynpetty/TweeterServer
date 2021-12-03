@@ -10,7 +10,7 @@ import edu.byu.cs.tweeter.model.domain.User;
 public class FollowerRequest {
 
     private AuthToken authToken;
-    private String followerAlias;
+    private String loggedInUserAlias;
     private int limit;
     private String lastFollowerAlias;
 
@@ -22,15 +22,15 @@ public class FollowerRequest {
     /**
      * Creates an instance.
      *
-     * @param followerAlias the user whose followers are to be returned.
+     * @param loggedInUserAlias the user whose followers are to be returned.
      * @param limit the maximum number of follower to return.
      * @param lastFollowerAlias the last follower that was returned in the previous request (null if
      *                     there was no previous request or if no followers were returned in the
      *                     previous request).
      */
-    public FollowerRequest(AuthToken authToken, String followerAlias, int limit, String lastFollowerAlias) {
+    public FollowerRequest(AuthToken authToken, String loggedInUserAlias, int limit, String lastFollowerAlias) {
         this.authToken = authToken;
-        this.followerAlias = followerAlias;
+        this.loggedInUserAlias = loggedInUserAlias;
         this.limit = limit;
         this.lastFollowerAlias = lastFollowerAlias;
     }
@@ -58,17 +58,17 @@ public class FollowerRequest {
      *
      * @return the follower.
      */
-    public String getFollowerAlias() {
-        return followerAlias;
+    public String getLoggedInUserAlias() {
+        return loggedInUserAlias;
     }
 
     /**
      * Sets the follower.
      *
-     * @param follower the follower.
+     * @param loggedInUserAlias the follower.
      */
-    public void setFollowerAlias(String follower) {
-        this.followerAlias = followerAlias;
+    public void setLoggedInUserAlias(String loggedInUserAlias) {
+        this.loggedInUserAlias = loggedInUserAlias;
     }
 
     /**

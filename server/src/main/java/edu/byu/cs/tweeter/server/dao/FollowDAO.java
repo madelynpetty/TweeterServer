@@ -199,7 +199,6 @@ public class FollowDAO {
         assert request.getLimit() > 0;
         assert request.getLoggedInUserAlias() != null;
 
-        // todo request.getLoggedInUser is null
         List<User> allFollowees = getFollowingList(request.getLoggedInUserAlias());
         List<User> responseFollowees = new ArrayList<>(request.getLimit());
 
@@ -256,7 +255,6 @@ public class FollowDAO {
     // people that I follow
     // logged in user is in the sort key
     List<User> getFollowingList(String userAlias) {
-        // todo passing in a null alias!
         System.out.println("FOLLOWING REQUEST: ");
         System.out.println("PASSED IN: " + userAlias);
 
@@ -290,8 +288,8 @@ public class FollowDAO {
 
     // people that are following me
     // logged in user is in the primary key
-    List<User> getFollowersList(String userAlias) {
-        System.out.println("Passed in alias: " + userAlias);
+    List<User> getFollowersList(String currUserAlias) {
+        System.out.println("Passed in alias: " + currUserAlias);
 //        Map<String, String> attrNames = new HashMap<>();
 //        attrNames.put("#aliasName", partitionKey);
 //        attrNames.put("#followerName", sortKey);
@@ -309,10 +307,11 @@ public class FollowDAO {
 //
 //        QueryResult queryResult = amazonDynamoDB.query(queryRequest);
 //        List<Map<String, AttributeValue>> items = queryResult.getItems();
+
         List<User> followerList = new ArrayList<>();
         QuerySpec querySpec = new QuerySpec()
                 .withKeyConditionExpression(partitionKey + " = :aliasVal")
-                .withValueMap(new ValueMap().withString(":aliasVal", userAlias));
+                .withValueMap(new ValueMap().withString(":aliasVal", currUserAlias));
 
 //        Index index = followTable.getIndex(indexName2);
 //        ItemCollection<QueryOutcome> items = index.query(querySpec);
@@ -347,10 +346,11 @@ public class FollowDAO {
      */
     public FollowerResponse getFollowers(FollowerRequest request) {
         assert request.getLimit() > 0;
-        assert request.getFollowerAlias() != null;
-        System.out.println("Alias sent in: " + request.getFollowerAlias());
+        assert request.getLoggedInUserAlias() != null;
 
-        List<User> allFollowers = getFollowersList(request.getFollowerAlias());
+        System.out.println("Alias sent in: " + request.getLoggedInUserAlias());
+
+        List<User> allFollowers = getFollowersList(request.getLoggedInUserAlias());
         List<User> responseFollowers = new ArrayList<>(request.getLimit());
 
         boolean hasMorePages = false;
@@ -366,7 +366,12 @@ public class FollowDAO {
 
                 hasMorePages = followeesIndex < allFollowers.size();
                 lastFollower = allFollowers.get(followeesIndex - 1);
-                request.setLastFollowerAlias(lastFollower.getAlias());
+                if (lastFollower != null) {
+                    request.setLastFollowerAlias(lastFollower.getAlias());
+                }
+                else {
+                    request.setLastFollowerAlias(null);
+                }
             }
         }
 
