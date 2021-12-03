@@ -63,19 +63,19 @@ public class UserDAO {
         }
 
 
-        getAuthTokenDAO().checkValidAuthTokens();
+//        getAuthTokenDAO().checkValidAuthTokens();
         return new LoginResponse(user, getAuthTokenDAO().getNewAuthToken(user.getAlias()));
     }
 
     public LogoutResponse logout(LogoutRequest request) {
-        AuthTokenDAO.removeAuthToken(request.getAuthToken().getIdentifier());
-        getAuthTokenDAO().checkValidAuthTokens();
+        if (request.getAuthToken() != null && request.getAuthToken().getIdentifier() != null) {
+            AuthTokenDAO.removeAuthToken(request.getAuthToken().getIdentifier());
+        }
+//        getAuthTokenDAO().checkValidAuthTokens();
         return new LogoutResponse(true);
     }
 
     public RegisterResponse register(RegisterRequest request) {
-        //todo can re-register user with same already registered alias
-
         String imageUrl = null;
         
         try {
