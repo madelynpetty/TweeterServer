@@ -21,6 +21,7 @@ import edu.byu.cs.tweeter.model.net.request.FollowerCountRequest;
 import edu.byu.cs.tweeter.model.net.request.FollowerRequest;
 import edu.byu.cs.tweeter.model.net.request.FollowingCountRequest;
 import edu.byu.cs.tweeter.model.net.request.FollowingRequest;
+import edu.byu.cs.tweeter.model.net.request.IsFollowerRequest;
 import edu.byu.cs.tweeter.model.net.request.UnfollowRequest;
 
 public class FollowService {
@@ -268,7 +269,9 @@ public class FollowService {
     }
 
     public void isFollower(IsFollowerObserver observer) {
-        IsFollowerTask isFollowerTask = new IsFollowerTask(Cache.getInstance().getCurrUserAuthToken(),
+        IsFollowerRequest request = new IsFollowerRequest(Cache.getInstance().getCurrUserAuthToken(),
+                Cache.getInstance().getCurrUser(), selectedUser);
+        IsFollowerTask isFollowerTask = new IsFollowerTask(request, Cache.getInstance().getCurrUserAuthToken(),
                 Cache.getInstance().getCurrUser(), selectedUser, new IsFollowerHandler(observer));
         new ExecuteTask<>(isFollowerTask);
     }

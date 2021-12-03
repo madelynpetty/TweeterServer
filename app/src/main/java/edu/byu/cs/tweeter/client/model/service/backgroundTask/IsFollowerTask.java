@@ -19,22 +19,21 @@ import edu.byu.cs.tweeter.model.net.response.IsFollowerResponse;
  */
 public class IsFollowerTask extends AuthenticatedTask {
     public static final String IS_FOLLOWER_KEY = "is-follower";
-    private boolean isFollower;
     public static final String LOG_TAG = "IsFollowerTask";
     public static final String URL_PATH = "/isfollower";
 
     private IsFollowerRequest request;
     private AuthenticatedResponse response;
 
-    public IsFollowerTask(AuthToken authToken, User follower, User followee, Handler messageHandler) {
+    public IsFollowerTask(IsFollowerRequest request, AuthToken authToken, User follower, User followee, Handler messageHandler) {
         super(authToken, messageHandler);
+        this.request = request;
     }
 
     @Override
     protected AuthenticatedResponse runAuthenticationTask(){
         // We could do this from the presenter, without a task and handler, but we will
         // eventually access the database from here when we aren't using dummy data.
-        isFollower = new Random().nextInt() > 0;
         try {
             response = new FollowService().getServerFacade().isFollower(request, URL_PATH);
         } catch (IOException | TweeterRemoteException e) {
@@ -46,6 +45,6 @@ public class IsFollowerTask extends AuthenticatedTask {
 
     @Override
     protected void loadSuccessBundle(Bundle msgBundle) {
-        msgBundle.putBoolean(IS_FOLLOWER_KEY, isFollower);
+        msgBundle.putBoolean(IS_FOLLOWER_KEY, response.isSuccess());
     }
 }

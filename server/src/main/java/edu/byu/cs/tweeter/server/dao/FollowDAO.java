@@ -151,29 +151,44 @@ public class FollowDAO {
     }
 
     public IsFollowerResponse isFollower(IsFollowerRequest request) {
-        Map<String, String> attrNames = new HashMap<>();
-        attrNames.put("#aliasName", partitionKey);
-        attrNames.put("#followerName", sortKey);
+        assert request.getFollowee() != null;
+        assert request.getFollowee().getAlias() != null;
+        assert request.getFollower() != null;
+        assert request.getFollower().getAlias() != null;
 
-        Map<String, AttributeValue> attrValues = new HashMap<>();
-        attrValues.put(":" + partitionKey, new AttributeValue().withS(request.getFollowee().getAlias()));
-        attrValues.put(":" + sortKey, new AttributeValue().withS(request.getFollower().getAlias()));
+        if ((request.getFollowee() != null) && (request.getFollowee().getAlias() != null)
+                && (request.getFollower() != null) && (request.getFollower().getAlias() != null)) {
 
-        QueryRequest queryRequest = new QueryRequest()
-                .withTableName(tableName)
-                .withIndexName(indexName)
-                .withKeyConditionExpression("#aliasName = :" + partitionKey +
-                        "#followerName = :" + sortKey)
-                .withExpressionAttributeNames(attrNames)
-                .withExpressionAttributeValues(attrValues);
+            Map<String, String> attrNames = new HashMap<>();
+            attrNames.put("#aliasName", partitionKey);
+            attrNames.put("#followerName", sortKey);
 
-        QueryResult queryResult = amazonDynamoDB.query(queryRequest);
-        List<Map<String, AttributeValue>> items = queryResult.getItems();
-        boolean isFollower = false;
+            Map<String, AttributeValue> attrValues = new HashMap<>();
+            if (request.getFollowee() != null) {
+                System.out.println("Please don't be null! Followee alias: " + request.getFollowee().getAlias());
+            } else {
+                System.out.println("it's null");
+            }
+            attrValues.put(":" + partitionKey, new AttributeValue().withS(request.getFollowee().getAlias()));
+            attrValues.put(":" + sortKey, new AttributeValue().withS(request.getFollower().getAlias()));
 
-        if(!items.isEmpty()) isFollower = true;
+            QueryRequest queryRequest = new QueryRequest()
+                    .withTableName(tableName)
+                    .withIndexName(indexName)
+                    .withKeyConditionExpression("#aliasName = :" + partitionKey +
+                            "#followerName = :" + sortKey)
+                    .withExpressionAttributeNames(attrNames)
+                    .withExpressionAttributeValues(attrValues);
 
-        return new IsFollowerResponse(isFollower);
+            QueryResult queryResult = amazonDynamoDB.query(queryRequest);
+            List<Map<String, AttributeValue>> items = queryResult.getItems();
+
+            boolean isFollower = false;
+            if (!items.isEmpty()) isFollower = true;
+
+            return new IsFollowerResponse(isFollower);
+        }
+        throw new RuntimeException("Somethings null and it shouldn't be");
     }
 
     /**
