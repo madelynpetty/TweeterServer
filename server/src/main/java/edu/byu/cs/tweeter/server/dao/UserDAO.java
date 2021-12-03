@@ -46,7 +46,8 @@ public class UserDAO {
         User user = null;
 
         if (item == null) {
-            throw new RuntimeException("Username does not exist");
+            return new LoginResponse("Username does not exist");
+//            throw new RuntimeException("Username does not exist");
         }
         else {
             String password = item.getString("password");
@@ -59,7 +60,8 @@ public class UserDAO {
         }
 
         if (user == null) {
-            throw new RuntimeException("Username and password combination do not match");
+//            throw new RuntimeException("Username and password combination do not match");
+            return new LoginResponse("Username and password combination do not match");
         }
 
 

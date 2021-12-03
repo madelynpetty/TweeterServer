@@ -29,6 +29,11 @@ public class LoginResponse extends AuthenticateResponse {
         System.out.println("---------------");
     }
 
+    // unsuccessful
+    public LoginResponse(String message) {
+        super(message);
+    }
+
     public LoginResponse() {
         super();
     }
