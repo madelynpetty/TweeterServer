@@ -25,13 +25,11 @@ public class UnfollowTask extends AuthenticatedTask {
 
     public UnfollowTask(UnfollowRequest unfollowRequest, Handler messageHandler) {
         super(unfollowRequest.getAuthToken(), messageHandler);
-        this.request = request;
+        this.request = unfollowRequest;
     }
 
     @Override
-    protected AuthenticatedResponse runAuthenticationTask(){
-        // We could do this from the presenter, without a task and handler, but we will
-        // eventually access the database from here when we aren't using dummy data.
+    protected AuthenticatedResponse runAuthenticationTask() {
         try {
             response = new FollowService().getServerFacade().unfollowUser(request, URL_PATH);
         } catch (IOException | TweeterRemoteException e) {

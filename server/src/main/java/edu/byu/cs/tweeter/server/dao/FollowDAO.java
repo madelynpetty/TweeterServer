@@ -22,6 +22,8 @@ import com.amazonaws.services.dynamodbv2.xspec.S;
 
 import org.w3c.dom.Attr;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -29,6 +31,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import edu.byu.cs.tweeter.model.domain.Status;
 import edu.byu.cs.tweeter.model.domain.User;
 import edu.byu.cs.tweeter.model.net.request.FollowRequest;
 import edu.byu.cs.tweeter.model.net.request.FollowerRequest;
@@ -51,7 +54,6 @@ public class FollowDAO {
     private static DynamoDB dynamoDB = UserDAO.getDynamoDB();
     private static final String tableName = "follow";
     private final String indexName = "follower-userAlias-index";
-    private final String indexName2 = "userAlias-follower-index";
     private static Table followTable = dynamoDB.getTable(tableName);
     private static final String partitionKey = "userAlias";
     private static final String sortKey = "follower";
@@ -66,63 +68,39 @@ public class FollowDAO {
     }
 
     public UnfollowResponse unfollow(UnfollowRequest request) {
-//        Map<String, String> attrNames = new HashMap<String, String>();
-//        attrNames.put("#aliasName", partitionKey);
-//        attrNames.put("#followerName", secondColumnKey);
-//
-//        Map<String, AttributeValue> attrValues = new HashMap<>();
-//        attrValues.put(":" + partitionKey,
-//                new AttributeValue().withS(request.getUser().getAlias()));
-//        attrValues.put(":" + secondColumnKey,
-//                new AttributeValue().withS(request.getCurrUser().getAlias()));
-//
-//        QueryRequest queryRequest = new QueryRequest()
-//                .withTableName(tableName)
-//                .withIndexName(indexName)
-//                .withKeyConditionExpression("#aliasName = :" + partitionKey +
-//                        " AND #followerName = :" + secondColumnKey)
-//                .withExpressionAttributeNames(attrNames)
-//                .withExpressionAttributeValues(attrValues);
-//
-//
-//        QueryResult queryResult = amazonDynamoDB.query(queryRequest);
-//        List<Map<String, AttributeValue>> items = queryResult.getItems();
-//
-//        for (Map<String, AttributeValue> item : items) {
-//            Set<String> partitionSet = item.keySet();
-//            for (String s : partitionSet) {
-//                String partition = s;
-//                AttributeValue secondColumn = item.get(partition);
-//                followTable.deleteItem(partition, secondColumn);
-//            }
-//        }
+        Map<String, String> attrNames = new HashMap<String, String>();
+        attrNames.put("#aliasName", partitionKey);
+        attrNames.put("#currUserName", sortKey);
 
-        ScanSpec scanSpec = new ScanSpec()
-                .withProjectionExpression("#aliasName, " + sortKey)
-                .withFilterExpression("#aliasName = :aliasVal AND " + sortKey + " = :followerVal")
-                .withNameMap(new NameMap().with("#aliasName", partitionKey))
-                .withValueMap(new ValueMap().withString(":aliasVal",
-                        request.getUser().getAlias()))
-                .withValueMap(new ValueMap().withString(":followerVal",
-                        request.getCurrUser().getAlias()));
+        Map<String, AttributeValue> attrValues = new HashMap<>();
+        attrValues.put(":" + partitionKey, new AttributeValue().withS(request.getUser().getAlias()));
+        attrValues.put(":" + sortKey, new AttributeValue().withS(request.getCurrUser().getAlias()));
 
-        try {
-            ItemCollection<ScanOutcome> items = followTable.scan(scanSpec);
+        QueryRequest queryRequest = new QueryRequest()
+                .withTableName(tableName)
+                .withIndexName(indexName)
+                .withKeyConditionExpression("#aliasName = :" + partitionKey +
+                        " AND #currUserName = :" + sortKey)
+                .withExpressionAttributeNames(attrNames)
+                .withExpressionAttributeValues(attrValues);
 
-            Iterator<Item> iter = items.iterator();
-            while (iter.hasNext()) {
-                Item item = iter.next();
-                String aliasVal = item.getString(partitionKey);
-                String followerVal = item.getString(sortKey);
+        QueryResult queryResult = amazonDynamoDB.query(queryRequest);
+        List<Map<String, AttributeValue>> items = queryResult.getItems();
+
+        if (items != null) {
+            for (Map<String, AttributeValue> item : items) {
+                String userAlias = item.get(partitionKey).getS();
+                String currUserAlias = item.get(sortKey).getS();
 
                 DeleteItemSpec deleteItemSpec = new DeleteItemSpec().withPrimaryKey(
-                        new PrimaryKey(partitionKey, aliasVal, sortKey, followerVal));
+                        new PrimaryKey(partitionKey, userAlias, sortKey, currUserAlias));
                 followTable.deleteItem(deleteItemSpec);
             }
         }
-        catch (Exception e) {
-            throw new RuntimeException("Unable to scan the follow table: " + e.getMessage());
+        else {
+            throw new RuntimeException("Unfollow failed, try again.");
         }
+
         return new UnfollowResponse(true);
     }
 
@@ -290,31 +268,11 @@ public class FollowDAO {
     // logged in user is in the primary key
     List<User> getFollowersList(String currUserAlias) {
         System.out.println("Passed in alias: " + currUserAlias);
-//        Map<String, String> attrNames = new HashMap<>();
-//        attrNames.put("#aliasName", partitionKey);
-//        attrNames.put("#followerName", sortKey);
-//
-//        Map<String, AttributeValue> attrValues = new HashMap<>();
-//        attrValues.put(":" + partitionKey, new AttributeValue().withS(userAlias));
-//        attrValues.put(":" + sortKey, new AttributeValue().withS());
-//
-//        QueryRequest queryRequest = new QueryRequest()
-//                .withTableName(tableName)
-//                .withIndexName(indexName)
-//                .withKeyConditionExpression("#aliasName = :userAlias")
-//                .withExpressionAttributeNames(attrNames)
-//                .withExpressionAttributeValues(attrValues);
-//
-//        QueryResult queryResult = amazonDynamoDB.query(queryRequest);
-//        List<Map<String, AttributeValue>> items = queryResult.getItems();
 
         List<User> followerList = new ArrayList<>();
         QuerySpec querySpec = new QuerySpec()
                 .withKeyConditionExpression(partitionKey + " = :aliasVal")
                 .withValueMap(new ValueMap().withString(":aliasVal", currUserAlias));
-
-//        Index index = followTable.getIndex(indexName2);
-//        ItemCollection<QueryOutcome> items = index.query(querySpec);
 
         ItemCollection<QueryOutcome> items = followTable.query(querySpec);
 

@@ -36,8 +36,6 @@ public class IsFollowerTask extends AuthenticatedTask {
         // eventually access the database from here when we aren't using dummy data.
         try {
             response = new FollowService().getServerFacade().isFollower(request, URL_PATH);
-            // for some reason the response is giving me follower of false, even though it's printing
-            // as true. it should be true. Why?
         } catch (IOException | TweeterRemoteException e) {
             e.printStackTrace();
         }
