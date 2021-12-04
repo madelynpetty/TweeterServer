@@ -26,6 +26,9 @@ public class FollowService {
     FollowDAOInterface followDAOInterface = DAOFactory.getInstance().getFollowDAO();
 
     public FollowingResponse getFollowees(FollowingRequest request) {
+        assert request.getLoggedInUserAlias() != null;
+        assert request.getLastFolloweeAlias() != null;
+
         List<User> allFollowees = followDAOInterface.getFollowees(request.getLoggedInUserAlias(),
                 request.getLastFolloweeAlias(), request.getLimit());
         boolean hasMorePages = request.getLimit() < allFollowees.size();
@@ -64,6 +67,10 @@ public class FollowService {
     }
 
     public FollowResponse follow(FollowRequest request) {
+        assert request.getUser() != null;
+        assert request.getUser().getAlias() != null;
+        assert request.getCurrUser() != null;
+        assert request.getCurrUser().getAlias() != null;
         boolean isSuccess = followDAOInterface.follow(request.getUser().getAlias(),
                 request.getCurrUser().getAlias());
         return new FollowResponse(isSuccess);
@@ -71,6 +78,11 @@ public class FollowService {
 
     public UnfollowResponse unfollow(UnfollowRequest request) {
         try {
+            assert request.getUser() != null;
+            assert request.getUser().getAlias() != null;
+            assert request.getCurrUser() != null;
+            assert request.getCurrUser().getAlias() != null;
+
             boolean isSuccess = followDAOInterface.unfollow(request.getUser().getAlias(),
                     request.getCurrUser().getAlias());
             return new UnfollowResponse(isSuccess);

@@ -27,11 +27,11 @@ public class Main {
 //        System.out.println(response.getLastItem());
 
 
-//        GetFollowingHandler handler = new GetFollowingHandler();
-//        AuthToken authToken = new AuthToken();
-//        FollowingRequest request = new FollowingRequest(authToken, "@mp", 10, "@m");
-//        FollowingResponse response = handler.handleRequest(request, new FakeContext());
-//        System.out.println(response.getLastItem());
+        GetFollowingHandler handler = new GetFollowingHandler();
+        AuthToken authToken = new AuthToken();
+        FollowingRequest request = new FollowingRequest(authToken, "@mp", 10, "@m");
+        FollowingResponse response = handler.handleRequest(request, new FakeContext());
+        System.out.println(response.getLastItem());
 
 
 //        User currUser = new User("m", "p", "@mp", "https://maddiepettytweeterbucket.s3.us-west-2.amazonaws.com/%40mp");
@@ -41,7 +41,7 @@ public class Main {
 //        IsFollowerRequest request = new IsFollowerRequest(authToken, currUser, followee);
 //        IsFollowerHandler handler = new IsFollowerHandler();
 //        IsFollowerResponse response = handler.handleRequest(request, new FakeContext());
-//        System.out.println(response.isFollower());
+//        System.out.println();
 
 
 //        AuthToken authToken = new AuthToken();
@@ -52,13 +52,13 @@ public class Main {
 //        System.out.println(response.isSuccess());
 
 
-        AuthToken authToken = new AuthToken();
-        authToken.identifier = "70f43a00-8e56-4439-bf48-4bce52021eea";
-        User currUser = new User("m", "p", "@mp", "https://maddiepettytweeterbucket.s3.us-west-2.amazonaws.com/%40mp");
-        User followee = new User("m", "m", "@m", "https://maddiepettytweeterbucket.s3.us-west-2.amazonaws.com/%40m");
-        UnfollowRequest request = new UnfollowRequest(followee, currUser, authToken);
-        UnfollowHandler handler = new UnfollowHandler();
-        UnfollowResponse response = handler.handleRequest(request, new FakeContext());
-        System.out.println(response.isSuccess());
+//        AuthToken authToken = new AuthToken();
+//        authToken.identifier = "70f43a00-8e56-4439-bf48-4bce52021eea";
+//        User currUser = new User("m", "p", "@mp", "https://maddiepettytweeterbucket.s3.us-west-2.amazonaws.com/%40mp");
+//        User followee = new User("m", "m", "@m", "https://maddiepettytweeterbucket.s3.us-west-2.amazonaws.com/%40m");
+//        UnfollowRequest request = new UnfollowRequest(followee, currUser, authToken);
+//        UnfollowHandler handler = new UnfollowHandler();
+//        UnfollowResponse response = handler.handleRequest(request, new FakeContext());
+//        System.out.println(response.isSuccess());
     }
 }
