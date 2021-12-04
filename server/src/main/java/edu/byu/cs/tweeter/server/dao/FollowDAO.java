@@ -12,8 +12,6 @@ import com.amazonaws.services.dynamodbv2.document.ScanOutcome;
 import com.amazonaws.services.dynamodbv2.document.Table;
 import com.amazonaws.services.dynamodbv2.document.spec.DeleteItemSpec;
 import com.amazonaws.services.dynamodbv2.document.spec.QuerySpec;
-import com.amazonaws.services.dynamodbv2.document.spec.ScanSpec;
-import com.amazonaws.services.dynamodbv2.document.utils.NameMap;
 import com.amazonaws.services.dynamodbv2.document.utils.ValueMap;
 import com.amazonaws.services.dynamodbv2.model.AttributeValue;
 import com.amazonaws.services.dynamodbv2.model.QueryRequest;
@@ -49,32 +47,34 @@ import edu.byu.cs.tweeter.model.net.response.UnfollowResponse;
 /**
  * A DAO for accessing 'following' data from the database.
  */
-public class FollowDAO {
-    private static AmazonDynamoDB amazonDynamoDB = UserDAO.getAmazonDynamoDB();
-    private static DynamoDB dynamoDB = UserDAO.getDynamoDB();
+public class FollowDAO implements FollowDAOInterface {
     private static final String tableName = "follow";
     private final String indexName = "follower-userAlias-index";
-    private static Table followTable = dynamoDB.getTable(tableName);
+    private static Table followTable = DynamoDbFactory.getDynamoDB().getTable(tableName);
     private static final String partitionKey = "userAlias";
     private static final String sortKey = "follower";
 
-    public FollowResponse follow(FollowRequest request) {
+    public FollowDAO() {}
+
+    @Override
+    public boolean follow(String userAlias, String currUserAlias) {
         Item item = new Item()
-                .withPrimaryKey(partitionKey, request.getUser().getAlias())
-                .withString(sortKey, request.getCurrUser().getAlias());
+                .withPrimaryKey(partitionKey, userAlias)
+                .withString(sortKey, currUserAlias);
 
         followTable.putItem(item);
-        return new FollowResponse(true);
+        return true;
     }
 
-    public UnfollowResponse unfollow(UnfollowRequest request) {
+    @Override
+    public boolean unfollow(String userAlias, String currUserAlias) {
         Map<String, String> attrNames = new HashMap<String, String>();
         attrNames.put("#aliasName", partitionKey);
         attrNames.put("#currUserName", sortKey);
 
         Map<String, AttributeValue> attrValues = new HashMap<>();
-        attrValues.put(":" + partitionKey, new AttributeValue().withS(request.getUser().getAlias()));
-        attrValues.put(":" + sortKey, new AttributeValue().withS(request.getCurrUser().getAlias()));
+        attrValues.put(":" + partitionKey, new AttributeValue().withS(userAlias));
+        attrValues.put(":" + sortKey, new AttributeValue().withS(currUserAlias));
 
         QueryRequest queryRequest = new QueryRequest()
                 .withTableName(tableName)
@@ -84,16 +84,16 @@ public class FollowDAO {
                 .withExpressionAttributeNames(attrNames)
                 .withExpressionAttributeValues(attrValues);
 
-        QueryResult queryResult = amazonDynamoDB.query(queryRequest);
+        QueryResult queryResult = DynamoDbFactory.getAmazonDynamoDB().query(queryRequest);
         List<Map<String, AttributeValue>> items = queryResult.getItems();
 
         if (items != null) {
             for (Map<String, AttributeValue> item : items) {
-                String userAlias = item.get(partitionKey).getS();
-                String currUserAlias = item.get(sortKey).getS();
+                String user = item.get(partitionKey).getS();
+                String currUser = item.get(sortKey).getS();
 
                 DeleteItemSpec deleteItemSpec = new DeleteItemSpec().withPrimaryKey(
-                        new PrimaryKey(partitionKey, userAlias, sortKey, currUserAlias));
+                        new PrimaryKey(partitionKey, user, sortKey, currUser));
                 followTable.deleteItem(deleteItemSpec);
             }
         }
@@ -101,46 +101,44 @@ public class FollowDAO {
             throw new RuntimeException("Unfollow failed, try again.");
         }
 
-        return new UnfollowResponse(true);
+        return true;
     }
 
-    public FollowerCountResponse getFollowerCount(User follower) {
+    @Override
+    public int getFollowerCount(User follower) {
         //how many people are following me, the current user
         assert follower != null;
         List<User> followerList = getFollowersList(follower.getAlias());
         if (followerList != null) {
-            return new FollowerCountResponse(followerList.size());
+            return followerList.size();
         }
         else {
-            return new FollowerCountResponse(0);
+            return 0;
         }
     }
 
-    public FollowingCountResponse getFollowingCount(User followee) {
+    @Override
+    public int getFollowingCount(User followee) {
         // how many people the logged in user is following
         assert followee != null;
         List<User> followeeList = getFollowingList(followee.getAlias());
         if (followeeList != null) {
-            return new FollowingCountResponse(followeeList.size());
+            return followeeList.size();
         }
         else {
-            return new FollowingCountResponse(0);
+            return 0;
         }
     }
 
-    public IsFollowerResponse isFollower(IsFollowerRequest request) {
-        assert request.getFollowee() != null;
-        assert request.getFollowee().getAlias() != null;
-        assert request.getCurrUser() != null;
-        assert request.getCurrUser().getAlias() != null;
-
+    @Override
+    public boolean isFollower(String followeeAlias, String currUserAlias) {
         Map<String, String> attrNames = new HashMap<>();
         attrNames.put("#aliasName", partitionKey);
         attrNames.put("#currUser", sortKey);
 
         Map<String, AttributeValue> attrValues = new HashMap<>();
-        attrValues.put(":" + partitionKey, new AttributeValue().withS(request.getFollowee().getAlias()));
-        attrValues.put(":" + sortKey, new AttributeValue().withS(request.getCurrUser().getAlias()));
+        attrValues.put(":" + partitionKey, new AttributeValue().withS(followeeAlias));
+        attrValues.put(":" + sortKey, new AttributeValue().withS(currUserAlias));
 
         QueryRequest queryRequest = new QueryRequest()
                 .withTableName(tableName)
@@ -150,13 +148,13 @@ public class FollowDAO {
                 .withExpressionAttributeNames(attrNames)
                 .withExpressionAttributeValues(attrValues);
 
-        QueryResult queryResult = amazonDynamoDB.query(queryRequest);
+        QueryResult queryResult = DynamoDbFactory.getAmazonDynamoDB().query(queryRequest);
         List<Map<String, AttributeValue>> items = queryResult.getItems();
 
         boolean isFollower = false;
         if(!items.isEmpty()) isFollower = true;
 
-        return new IsFollowerResponse(true, isFollower);
+        return isFollower;
     }
 
     /**
@@ -165,39 +163,29 @@ public class FollowDAO {
      * next set of followees after any that were returned in a previous request. The current
      * implementation returns generated data and doesn't actually access a database.
      *
-     * @param request contains information about the user whose followees are to be returned and any
+     * @param  userAlias contains information about the user whose followees are to be returned and any
      *                other information required to satisfy the request.
      * @return the followees.
      */
-    public FollowingResponse getFollowees(FollowingRequest request) {
-        System.out.println("FOLLOWER REQUEST: ");
-        System.out.println("FOLLOWER: " + request.getLoggedInUserAlias());
-        System.out.println("LAST FOLLOWER: " + request.getLastFolloweeAlias());
+    @Override
+    public List<User> getFollowees(String userAlias, String lastFolloweeAlias, int limit) {
+        assert limit > 0;
+        assert lastFolloweeAlias != null;
 
-        assert request.getLimit() > 0;
-        assert request.getLoggedInUserAlias() != null;
+        List<User> allFollowees = getFollowingList(lastFolloweeAlias);
+        List<User> responseFollowees = new ArrayList<>(limit);
 
-        List<User> allFollowees = getFollowingList(request.getLoggedInUserAlias());
-        List<User> responseFollowees = new ArrayList<>(request.getLimit());
-
-        boolean hasMorePages = false;
-        User lastFollowee = null;
-
-        if(request.getLimit() > 0) {
+        if(limit > 0) {
             if (allFollowees != null) {
-                int followeesIndex = getFollowStartingIndex(request.getLastFolloweeAlias(), allFollowees);
+                int followeesIndex = getFollowStartingIndex(lastFolloweeAlias, allFollowees);
 
-                for(int limitCounter = 0; followeesIndex < allFollowees.size() && limitCounter < request.getLimit(); followeesIndex++, limitCounter++) {
+                for(int limitCounter = 0; followeesIndex < allFollowees.size() && limitCounter < limit; followeesIndex++, limitCounter++) {
                     responseFollowees.add(allFollowees.get(followeesIndex));
                 }
-
-                hasMorePages = followeesIndex < allFollowees.size();
-                lastFollowee = allFollowees.get(followeesIndex - 1);
-                request.setLastFolloweeAlias(lastFollowee.getAlias());
             }
         }
 
-        return new FollowingResponse(responseFollowees, lastFollowee, hasMorePages);
+        return responseFollowees;
     }
 
     /**
@@ -232,7 +220,8 @@ public class FollowDAO {
 
     // people that I follow
     // logged in user is in the sort key
-    List<User> getFollowingList(String userAlias) {
+    @Override
+    public List<User> getFollowingList(String userAlias) {
         System.out.println("FOLLOWING REQUEST: ");
         System.out.println("PASSED IN: " + userAlias);
 
@@ -266,7 +255,8 @@ public class FollowDAO {
 
     // people that are following me
     // logged in user is in the primary key
-    List<User> getFollowersList(String currUserAlias) {
+    @Override
+    public List<User> getFollowersList(String currUserAlias) {
         System.out.println("Passed in alias: " + currUserAlias);
 
         List<User> followerList = new ArrayList<>();
@@ -298,41 +288,25 @@ public class FollowDAO {
      * next set of followees after any that were returned in a previous request. The current
      * implementation returns generated data and doesn't actually access a database.
      *
-     * @param request contains information about the user whose followees are to be returned and any
+     * @param currUserAlias contains information about the user whose followees are to be returned and any
      *                other information required to satisfy the request.
      * @return the followees.
      */
-    public FollowerResponse getFollowers(FollowerRequest request) {
-        assert request.getLimit() > 0;
-        assert request.getLoggedInUserAlias() != null;
+    @Override
+    public List<User> getFollowers(String currUserAlias, String lastFollowerAlias, int limit) {
+        List<User> allFollowers = getFollowersList(currUserAlias);
+        List<User> responseFollowers = new ArrayList<>(limit);
 
-        System.out.println("Alias sent in: " + request.getLoggedInUserAlias());
-
-        List<User> allFollowers = getFollowersList(request.getLoggedInUserAlias());
-        List<User> responseFollowers = new ArrayList<>(request.getLimit());
-
-        boolean hasMorePages = false;
-        User lastFollower = null;
-
-        if(request.getLimit() > 0) {
+        if(limit > 0) {
             if (allFollowers != null) {
-                int followeesIndex = getFollowStartingIndex(request.getLastFollowerAlias(), allFollowers);
+                int followeesIndex = getFollowStartingIndex(lastFollowerAlias, allFollowers);
 
-                for(int limitCounter = 0; followeesIndex < allFollowers.size() && limitCounter < request.getLimit(); followeesIndex++, limitCounter++) {
+                for(int limitCounter = 0; followeesIndex < allFollowers.size() && limitCounter < limit; followeesIndex++, limitCounter++) {
                     responseFollowers.add(allFollowers.get(followeesIndex));
-                }
-
-                hasMorePages = followeesIndex < allFollowers.size();
-                lastFollower = allFollowers.get(followeesIndex - 1);
-                if (lastFollower != null) {
-                    request.setLastFollowerAlias(lastFollower.getAlias());
-                }
-                else {
-                    request.setLastFollowerAlias(null);
                 }
             }
         }
 
-        return new FollowerResponse(responseFollowers, lastFollower, hasMorePages);
+        return responseFollowers;
     }
 }

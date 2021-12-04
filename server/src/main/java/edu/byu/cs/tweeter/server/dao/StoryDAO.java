@@ -19,6 +19,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.Status;
 import edu.byu.cs.tweeter.model.domain.User;
 import edu.byu.cs.tweeter.model.net.request.PostStatusRequest;
@@ -29,37 +30,34 @@ import edu.byu.cs.tweeter.model.net.response.StoryResponse;
 /**
  * A DAO for accessing 'following' data from the database.
  */
-public class StoryDAO {
-    private static AmazonDynamoDB amazonDynamoDB = UserDAO.getAmazonDynamoDB();
-    private static DynamoDB dynamoDB = UserDAO.getDynamoDB();
+public class StoryDAO implements StoryDAOInterface {
     private final String tableName = "story";
     private final String indexName = "senderAlias-storytime-index";
-    private Table storyTable = dynamoDB.getTable(tableName);
+    private Table storyTable = DynamoDbFactory.getDynamoDB().getTable(tableName);
     private static final String partitionKey = "senderAlias";
     private static final String sortKey = "storytime";
 
-    public StoryResponse getStory(StoryRequest request) {
-        assert request.getLimit() > 0;
-        assert request.getUserAlias() != null;
+    public StoryDAO() {}
 
-        List<Status> allStatuses = getFollowsStatuses(request);
-        List<Status> responseStatuses = new ArrayList<>(request.getLimit());
+    @Override
+    public List<Status> getStory(int limit, String userAlias) {
+        assert limit > 0;
+        assert userAlias != null;
 
-        boolean hasMorePages = false;
+        List<Status> allStatuses = getFollowsStatuses(userAlias);
+        List<Status> responseStatuses = new ArrayList<>(limit);
 
-        if(request.getLimit() > 0) {
+        if(limit > 0) {
             if (allStatuses != null) {
-                int statusesIndex = getStoryStartingIndex(request.getUserAlias(), allStatuses);
+                int statusesIndex = getStoryStartingIndex(userAlias, allStatuses);
 
-                for(int limitCounter = 0; statusesIndex < allStatuses.size() && limitCounter < request.getLimit(); statusesIndex++, limitCounter++) {
+                for(int limitCounter = 0; statusesIndex < allStatuses.size() && limitCounter < limit; statusesIndex++, limitCounter++) {
                     responseStatuses.add(allStatuses.get(statusesIndex));
                 }
-
-                hasMorePages = statusesIndex < allStatuses.size();
             }
         }
 
-        return new StoryResponse(responseStatuses, request.getLastStatus(), hasMorePages);
+        return responseStatuses;
     }
 
     private int getStoryStartingIndex(String lastStatus, List<Status> allStatuses) {
@@ -82,11 +80,8 @@ public class StoryDAO {
         return statusIndex;
     }
 
-    List<Status> getFollowsStatuses(StoryRequest request) {
-        System.out.println("alias: " + request.getUserAlias());
-        System.out.println("limit: " + request.getLimit());
-        System.out.println("authtoken: " + request.getAuthToken());
-        System.out.println("last status: " + request.getLastStatus());
+    @Override
+    public List<Status> getFollowsStatuses(String alias) {
 
         Map<String, String> attrNames = new HashMap<String, String>();
         attrNames.put("#aliasName", partitionKey);
@@ -96,7 +91,7 @@ public class StoryDAO {
         LocalDateTime now = LocalDateTime.now();
 
         Map<String, AttributeValue> attrValues = new HashMap<>();
-        attrValues.put(":" + partitionKey, new AttributeValue().withS(request.getUserAlias()));
+        attrValues.put(":" + partitionKey, new AttributeValue().withS(alias));
         attrValues.put(":" + sortKey, new AttributeValue().withS(dtf.format(now)));
 
         QueryRequest queryRequest = new QueryRequest()
@@ -109,7 +104,7 @@ public class StoryDAO {
 
         queryRequest.setScanIndexForward(true);
 
-        QueryResult queryResult = amazonDynamoDB.query(queryRequest);
+        QueryResult queryResult = DynamoDbFactory.getAmazonDynamoDB().query(queryRequest);
         List<Map<String, AttributeValue>> items = queryResult.getItems();
 
         Status status = null;
@@ -138,25 +133,26 @@ public class StoryDAO {
         return statuses;
     }
 
-    public PostStatusResponse postStatus(PostStatusRequest request) {
+    @Override
+    public boolean postStatus(String currUserAlias, String post) {
         try {
             DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
             LocalDateTime now = LocalDateTime.now();
 
             Item item = new Item()
-                    .withPrimaryKey(partitionKey, request.getCurrUserAlias())
-                    .withString("post", request.getPost().getPost())
+                    .withPrimaryKey(partitionKey, currUserAlias)
+                    .withString("post", post)
                     .withString(sortKey, dtf.format(now));
 
             storyTable.putItem(item);
-            FeedDAO.postedStatus(request.getPost().getPost(), request.getCurrUserAlias());
-            //todo maybe call endpoint again?
+
         }
         catch (DuplicateItemException e) {
             System.out.println("Duplicate Item Exception: " + e.getMessage());
-            return new PostStatusResponse("Duplicate Item Exception:" + e.getMessage());
+            throw new RuntimeException("Duplicate Item Exception:" + e.getMessage());
         }
-        return new PostStatusResponse(true);
+
+        return true;
     }
 
     private static final Pattern urlPattern = Pattern.compile(

@@ -1,5 +1,7 @@
 package edu.byu.cs.tweeter.server.service;
 
+import edu.byu.cs.tweeter.model.domain.AuthToken;
+import edu.byu.cs.tweeter.model.domain.User;
 import edu.byu.cs.tweeter.model.net.request.GetUserRequest;
 import edu.byu.cs.tweeter.model.net.request.LoginRequest;
 import edu.byu.cs.tweeter.model.net.request.LogoutRequest;
@@ -8,27 +10,50 @@ import edu.byu.cs.tweeter.model.net.response.GetUserResponse;
 import edu.byu.cs.tweeter.model.net.response.LoginResponse;
 import edu.byu.cs.tweeter.model.net.response.LogoutResponse;
 import edu.byu.cs.tweeter.model.net.response.RegisterResponse;
+import edu.byu.cs.tweeter.server.dao.AuthTokenDAO;
+import edu.byu.cs.tweeter.server.dao.AuthTokenDAOInterface;
+import edu.byu.cs.tweeter.server.dao.DAOFactory;
+import edu.byu.cs.tweeter.server.dao.DynamoDbFactory;
+import edu.byu.cs.tweeter.server.dao.S3DAO;
 import edu.byu.cs.tweeter.server.dao.UserDAO;
+import edu.byu.cs.tweeter.server.dao.UserDAOInterface;
 
 public class UserService {
+    UserDAOInterface userDAOInterface = DAOFactory.getInstance().getUserDAO();
+    AuthTokenDAOInterface authTokenDAOInterface = DAOFactory.getInstance().getAuthTokenDAO();
+    S3DAO s3DAO = DAOFactory.getInstance().getS3DAO();
 
     public LoginResponse login(LoginRequest request) {
-        return getUserDAO().login(request);
+        try {
+            User user = userDAOInterface.login(request.getAlias(), request.getPassword());
+            AuthToken authToken = authTokenDAOInterface.getNewAuthToken(request.getAlias());
+            return new LoginResponse(user, authToken);
+        }
+        catch (RuntimeException e) {
+            return new LoginResponse(e.getMessage());
+        }
     }
 
     public RegisterResponse register(RegisterRequest request) {
-        return getUserDAO().register(request);
+        s3DAO.putUrl(request.getAlias(), request.getImageUrl());
+        String imageUrl = s3DAO.getUrl(request.getAlias());
+        User user = userDAOInterface.register(request.getAlias(), request.getImageUrl(),
+                request.getFirstName(), request.getLastName(), request.getPassword());
+        user.setImageUrl(imageUrl);
+        AuthToken authToken = authTokenDAOInterface.getNewAuthToken(request.getAlias());
+        return new RegisterResponse(user, authToken);
     }
 
     public LogoutResponse logout(LogoutRequest request) {
-        return getUserDAO().logout(request);
+        if (request.getAuthToken() != null && request.getAuthToken().getIdentifier() != null) {
+            authTokenDAOInterface.removeAuthToken(request.getAuthToken().getIdentifier());
+        }
+        boolean isSuccess = userDAOInterface.logout(request.getAuthToken());
+        return new LogoutResponse(isSuccess);
     }
 
     public GetUserResponse getUser(GetUserRequest request) {
-        return getUserDAO().getUser(request);
-    }
-
-    UserDAO getUserDAO() {
-        return new UserDAO();
+        User user = userDAOInterface.getUser(request.getAlias());
+        return new GetUserResponse(true, user);
     }
 }

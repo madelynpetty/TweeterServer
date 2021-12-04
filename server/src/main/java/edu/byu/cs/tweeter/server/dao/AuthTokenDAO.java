@@ -16,14 +16,16 @@ import java.time.format.DateTimeFormatter;
 
 import edu.byu.cs.tweeter.model.domain.AuthToken;
 
-public class AuthTokenDAO {
-    private static DynamoDB dynamoDB = UserDAO.getDynamoDB();
+public class AuthTokenDAO implements AuthTokenDAOInterface {
     private static final String tableName = "authTokenTable";
     private final String indexName = "authTokenTimeStamp-authToken-index";
-    private static Table authTokenTable = dynamoDB.getTable(tableName);
+    private static Table authTokenTable = DynamoDbFactory.getDynamoDB().getTable(tableName);
     private static final String partitionKey = "authToken";
     private static final String sortKey = "authTokenTimeStamp";
 
+    public AuthTokenDAO() {}
+
+    @Override
     public AuthToken getNewAuthToken(String userAlias) {
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
         LocalDateTime now = LocalDateTime.now();
@@ -38,6 +40,7 @@ public class AuthTokenDAO {
         return authToken;
     }
 
+    @Override
     public void checkValidAuthTokens() {
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
         LocalDateTime cutOff = LocalDateTime.now().minusMinutes(30);
@@ -69,7 +72,8 @@ public class AuthTokenDAO {
         }
     }
 
-    public static void removeAuthToken(String authTokenIdentifier) {
+    @Override
+    public void removeAuthToken(String authTokenIdentifier) {
 
         QuerySpec querySpec = new QuerySpec()
                 .withKeyConditionExpression(partitionKey + " = :authToken")

@@ -11,6 +11,8 @@ import java.io.InputStream;
 import java.util.Base64;
 
 public class S3DAO {
+
+    public S3DAO() {}
     private static final AmazonS3 s3 = AmazonS3ClientBuilder.standard().withRegion("us-west-2").build();
 
     public static void putUrl(String alias, String imageUrl) {

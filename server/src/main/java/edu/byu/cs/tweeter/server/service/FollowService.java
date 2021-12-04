@@ -1,5 +1,8 @@
 package edu.byu.cs.tweeter.server.service;
 
+import java.util.List;
+
+import edu.byu.cs.tweeter.model.domain.User;
 import edu.byu.cs.tweeter.model.net.request.FollowRequest;
 import edu.byu.cs.tweeter.model.net.request.FollowerCountRequest;
 import edu.byu.cs.tweeter.model.net.request.FollowerRequest;
@@ -14,43 +17,77 @@ import edu.byu.cs.tweeter.model.net.response.FollowingCountResponse;
 import edu.byu.cs.tweeter.model.net.response.FollowingResponse;
 import edu.byu.cs.tweeter.model.net.response.IsFollowerResponse;
 import edu.byu.cs.tweeter.model.net.response.UnfollowResponse;
+import edu.byu.cs.tweeter.server.dao.DAOFactory;
 import edu.byu.cs.tweeter.server.dao.FollowDAO;
+import edu.byu.cs.tweeter.server.dao.FollowDAOInterface;
 
 public class FollowService {
 
-    public FollowingResponse getFollowees(FollowingRequest request) {
-        return getFollowingDAO().getFollowees(request);
-    }
+    FollowDAOInterface followDAOInterface = DAOFactory.getInstance().getFollowDAO();
 
-    FollowDAO getFollowingDAO() {
-        return new FollowDAO();
+    public FollowingResponse getFollowees(FollowingRequest request) {
+        List<User> allFollowees = followDAOInterface.getFollowees(request.getLoggedInUserAlias(),
+                request.getLastFolloweeAlias(), request.getLimit());
+        boolean hasMorePages = request.getLimit() < allFollowees.size();
+        User lastFollowee = allFollowees.get(allFollowees.size() - 1);
+        request.setLastFolloweeAlias(lastFollowee.getAlias());
+
+        return new FollowingResponse(allFollowees, lastFollowee, hasMorePages);
     }
 
     public FollowerResponse getFollowers(FollowerRequest request) {
-        return getFollowerDAO().getFollowers(request);
-    }
+        assert request.getLimit() > 0;
+        assert request.getLoggedInUserAlias() != null;
 
-    FollowDAO getFollowerDAO() {
-        return new FollowDAO();
+        List<User> allFollowers = followDAOInterface.getFollowers(request.getLoggedInUserAlias(),
+                request.getLastFollowerAlias(), request.getLimit());
+        boolean hasMorePages = request.getLimit() <= allFollowers.size();
+        User lastFollower = allFollowers.get(allFollowers.size() - 1);
+        if (lastFollower != null) {
+            request.setLastFollowerAlias(lastFollower.getAlias());
+        }
+        else {
+            request.setLastFollowerAlias(null);
+        }
+
+        return new FollowerResponse(allFollowers, lastFollower, hasMorePages);
     }
 
     public FollowerCountResponse getFollowerCount(FollowerCountRequest request) {
-        return getFollowerDAO().getFollowerCount(request.getTargetUser());
+        int count = followDAOInterface.getFollowerCount(request.getTargetUser());
+        return new FollowerCountResponse(count);
     }
 
     public FollowingCountResponse getFollowingCount(FollowingCountRequest request) {
-        return getFollowerDAO().getFollowingCount(request.getTargetUser());
+        int count = followDAOInterface.getFollowingCount(request.getTargetUser());
+        return new FollowingCountResponse(count);
     }
 
     public FollowResponse follow(FollowRequest request) {
-        return getFollowerDAO().follow(request);
+        boolean isSuccess = followDAOInterface.follow(request.getUser().getAlias(),
+                request.getCurrUser().getAlias());
+        return new FollowResponse(isSuccess);
     }
 
     public UnfollowResponse unfollow(UnfollowRequest request) {
-        return getFollowerDAO().unfollow(request);
+        try {
+            boolean isSuccess = followDAOInterface.unfollow(request.getUser().getAlias(),
+                    request.getCurrUser().getAlias());
+            return new UnfollowResponse(isSuccess);
+        }
+        catch (RuntimeException e) {
+            return new UnfollowResponse("Unfollow failed, try again.");
+        }
     }
 
     public IsFollowerResponse isFollower(IsFollowerRequest request) {
-        return getFollowerDAO().isFollower(request);
+        assert request.getFollowee() != null;
+        assert request.getFollowee().getAlias() != null;
+        assert request.getCurrUser() != null;
+        assert request.getCurrUser().getAlias() != null;
+
+        boolean isFollower = followDAOInterface.isFollower(request.getFollowee().getAlias(),
+                request.getCurrUser().getAlias());
+        return new IsFollowerResponse(true, isFollower);
     }
 }

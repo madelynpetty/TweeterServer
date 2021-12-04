@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.User;
 import edu.byu.cs.tweeter.model.net.request.GetUserRequest;
 import edu.byu.cs.tweeter.model.net.request.LoginRequest;
@@ -25,77 +26,59 @@ import edu.byu.cs.tweeter.model.net.response.LoginResponse;
 import edu.byu.cs.tweeter.model.net.response.LogoutResponse;
 import edu.byu.cs.tweeter.model.net.response.RegisterResponse;
 
-public class UserDAO {
-    private static AmazonDynamoDB amazonDynamoDB = AmazonDynamoDBClientBuilder
-            .standard().withRegion("us-west-2").build();
-    private static DynamoDB dynamoDB = new DynamoDB(amazonDynamoDB);
-    private static final String tableName = "user";
-    private final String indexName = "alias-index";
-    private static final Table userTable = dynamoDB.getTable(tableName);
+public class UserDAO implements UserDAOInterface {
+    private final String tableName = "user";
+    private final Table userTable = DynamoDbFactory.getDynamoDB().getTable(tableName);
 
-    public static AmazonDynamoDB getAmazonDynamoDB() {
-        return amazonDynamoDB;
-    }
+    public UserDAO() {}
 
-    public static DynamoDB getDynamoDB() {
-        return dynamoDB;
-    }
-
-    public LoginResponse login(LoginRequest request) {
-        Item item = userTable.getItem("alias", request.getAlias());
+    @Override
+    public User login(String alias, String password) {
+        Item item = userTable.getItem("alias", alias);
         User user = null;
 
         if (item == null) {
-            return new LoginResponse("Username does not exist");
-//            throw new RuntimeException("Username does not exist");
+            throw new RuntimeException("Username does not exist");
         }
         else {
-            String password = item.getString("password");
-            if (password.equals(request.getPassword())) {
+            String pass = item.getString("password");
+            if (password.equals(pass)) {
                 String firstName = item.getString("firstName");
                 String lastName = item.getString("lastName");
                 String imageUrl = item.getString("image");
-                user = new User(firstName, lastName, request.getAlias(), imageUrl);
+                user = new User(firstName, lastName, alias, imageUrl);
             }
         }
 
         if (user == null) {
-//            throw new RuntimeException("Username and password combination do not match");
-            return new LoginResponse("Username and password combination do not match");
+            throw new RuntimeException("Username and password combination do not match");
         }
 
-
-//        getAuthTokenDAO().checkValidAuthTokens();
-        return new LoginResponse(user, getAuthTokenDAO().getNewAuthToken(user.getAlias()));
+        return user;
     }
 
-    public LogoutResponse logout(LogoutRequest request) {
-        if (request.getAuthToken() != null && request.getAuthToken().getIdentifier() != null) {
-            AuthTokenDAO.removeAuthToken(request.getAuthToken().getIdentifier());
-        }
-//        getAuthTokenDAO().checkValidAuthTokens();
-        return new LogoutResponse(true);
+    @Override
+    public boolean logout(AuthToken authToken) {
+        return true;
     }
 
-    public RegisterResponse register(RegisterRequest request) {
-        String imageUrl = null;
+    @Override
+    public User register(String alias, String imageUrl, String firstName, String lastName, String password) {
+        String image = null;
         
         try {
             Map<String, String> attrNames = new HashMap<String, String>();
             attrNames.put("#alias", ":val");
 
             Map<String, AttributeValue> attrValues = new HashMap<>();
-            attrValues.put(":val", new AttributeValue().withS(request.getAlias()));
-
-            S3DAO.putUrl(request.getAlias(), request.getImageUrl());
-            imageUrl = S3DAO.getUrl(request.getAlias());
+            attrValues.put(":val", new AttributeValue().withS(alias));
 
             Item item = new Item()
-                    .withPrimaryKey("alias", request.getAlias())
-                    .withString("firstName", request.getFirstName())
-                    .withString("lastName", request.getLastName())
+                    .withPrimaryKey("alias", alias)
+                    .withString("firstName", firstName)
+                    .withString("lastName", lastName)
                     .withString("image", imageUrl)
-                    .withString("password", request.getPassword());
+                    .withString("password", password);
 
             userTable.putItem(item);
         }
@@ -103,16 +86,13 @@ public class UserDAO {
             throw new RuntimeException("Duplicate Item Exception: " + e.getMessage());
         }
 
-        User user = new User(request.getFirstName(), request.getLastName(), request.getAlias(), imageUrl);
-        return new RegisterResponse(user, getAuthTokenDAO().getNewAuthToken(user.getAlias()));
+        User user = new User(firstName, lastName, alias);
+        return user;
     }
 
-    public GetUserResponse getUser(GetUserRequest request) {
-        return new GetUserResponse(true, UserDAO.getUserFromAlias(request.getAlias()));
-    }
-
-    private AuthTokenDAO getAuthTokenDAO() {
-        return new AuthTokenDAO();
+    @Override
+    public User getUser(String alias) {
+        return getUserFromAlias(alias);
     }
 
     public static User getUserFromAlias(String alias) {
@@ -123,12 +103,12 @@ public class UserDAO {
         attrValues.put(":alias", new AttributeValue().withS(alias));
 
         QueryRequest queryRequest = new QueryRequest()
-                .withTableName(tableName)
+                .withTableName("user")
                 .withKeyConditionExpression("#aliasName = :alias")
                 .withExpressionAttributeNames(attrNames)
                 .withExpressionAttributeValues(attrValues);
 
-        QueryResult queryResult = amazonDynamoDB.query(queryRequest);
+        QueryResult queryResult = DynamoDbFactory.getAmazonDynamoDB().query(queryRequest);
         List<Map<String, AttributeValue>> items = queryResult.getItems();
 
         if (items != null) {

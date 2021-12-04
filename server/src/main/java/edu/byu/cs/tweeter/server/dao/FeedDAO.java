@@ -27,37 +27,34 @@ import edu.byu.cs.tweeter.model.net.response.FeedResponse;
 /**
  * A DAO for accessing 'following' data from the database.
  */
-public class FeedDAO {
-    private static AmazonDynamoDB amazonDynamoDB = UserDAO.getAmazonDynamoDB();
-    private static DynamoDB dynamoDB = UserDAO.getDynamoDB();
+public class FeedDAO implements FeedDAOInterface {
     private static final String tableName = "feed";
     private final String indexName = "receiverAlias-feedtime-index";
-    private static Table feedTable = dynamoDB.getTable(tableName);
+    private static Table feedTable = DynamoDbFactory.getDynamoDB().getTable(tableName);
     private static final String partitionKey = "receiverAlias";
     private static final String sortKey = "feedtime";
 
-    public FeedResponse getFeed(FeedRequest request) {
-        assert request.getLimit() > 0;
-        assert request.getUserAlias() != null;
+    public FeedDAO() {}
 
-        List<Status> allStatuses = getFollowsStatuses(request);
-        List<Status> responseStatuses = new ArrayList<>(request.getLimit());
+    @Override
+    public List<Status> getFeed(int limit, String alias, Status lastStatus) {
+        assert limit > 0;
+        assert alias != null;
 
-        boolean hasMorePages = false;
+        List<Status> responseStatuses = new ArrayList<>(limit);
+        List<Status> allStatuses = getFollowsStatuses(alias);
 
-        if (request.getLimit() > 0) {
+        if (limit > 0) {
             if (allStatuses != null) {
-                int statusesIndex = getFeedStartingIndex(request.getUserAlias(), allStatuses);
+                int statusesIndex = getFeedStartingIndex(alias, allStatuses);
 
-                for (int limitCounter = 0; statusesIndex < allStatuses.size() && limitCounter < request.getLimit(); statusesIndex++, limitCounter++) {
+                for (int limitCounter = 0; statusesIndex < allStatuses.size() && limitCounter < limit; statusesIndex++, limitCounter++) {
                     responseStatuses.add(allStatuses.get(statusesIndex));
                 }
-
-                hasMorePages = statusesIndex < allStatuses.size();
             }
         }
 
-        return new FeedResponse(responseStatuses, request.getLastStatus(), hasMorePages);
+        return responseStatuses;
     }
 
     private int getFeedStartingIndex(String lastStatus, List<Status> allStatuses) {
@@ -80,7 +77,8 @@ public class FeedDAO {
         return statusIndex;
     }
 
-    List<Status> getFollowsStatuses(FeedRequest request) {
+    @Override
+    public List<Status> getFollowsStatuses(String userAlias) {
         Map<String, String> attrNames = new HashMap<String, String>();
         attrNames.put("#aliasName", partitionKey);
         attrNames.put("#timeName", sortKey);
@@ -89,7 +87,7 @@ public class FeedDAO {
         LocalDateTime now = LocalDateTime.now();
 
         Map<String, AttributeValue> attrValues = new HashMap<>();
-        attrValues.put(":" + partitionKey, new AttributeValue().withS(request.getUserAlias()));
+        attrValues.put(":" + partitionKey, new AttributeValue().withS(userAlias));
         attrValues.put(":" + sortKey, new AttributeValue().withS(dtf.format(now)));
 
         QueryRequest queryRequest = new QueryRequest()
@@ -102,7 +100,7 @@ public class FeedDAO {
 
         queryRequest.setScanIndexForward(true);
 
-        QueryResult queryResult = amazonDynamoDB.query(queryRequest);
+        QueryResult queryResult = DynamoDbFactory.getAmazonDynamoDB().query(queryRequest);
         List<Map<String, AttributeValue>> items = queryResult.getItems();
 
         Status status = null;
@@ -110,8 +108,8 @@ public class FeedDAO {
 
         if (items != null) {
             for (Map<String, AttributeValue> item : items) {
-                String userAlias = item.get("senderAlias").getS();
-                User user = UserDAO.getUserFromAlias(userAlias);
+                String alias = item.get("senderAlias").getS();
+                User user = UserDAO.getUserFromAlias(alias);
 
                 String post = item.get("post").getS();
                 String datetime = item.get(sortKey).getS();
@@ -131,11 +129,10 @@ public class FeedDAO {
         return statuses;
     }
 
-    public static void postedStatus(String post, String senderAlias) {
+    @Override
+    public void postStatus(String post, String senderAlias, List<User> currUserFolloweeList) {
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
         LocalDateTime now = LocalDateTime.now();
-
-        List<User> currUserFolloweeList = getFollowDAO().getFollowingList(senderAlias);
 
         for (User user : currUserFolloweeList) {
             Item item = new Item()
@@ -187,13 +184,5 @@ public class FeedDAO {
         }
 
         return mentions;
-    }
-
-    private static FollowDAO followDAO;
-    private static FollowDAO getFollowDAO() {
-        if (followDAO != null) {
-            return followDAO;
-        }
-        return new FollowDAO();
     }
 }
