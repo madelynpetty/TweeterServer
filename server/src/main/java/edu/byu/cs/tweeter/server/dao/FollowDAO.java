@@ -148,7 +148,7 @@ public class FollowDAO implements FollowDAOInterface {
         assert limit > 0;
         assert lastFolloweeAlias != null;
 
-        List<User> allFollowees = getFollowingList(lastFolloweeAlias);
+        List<User> allFollowees = getFollowingList(userAlias);
         List<User> responseFollowees = new ArrayList<>(limit);
 
         if(limit > 0) {
