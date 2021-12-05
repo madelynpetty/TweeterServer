@@ -10,6 +10,7 @@ import edu.byu.cs.tweeter.model.net.request.FollowingCountRequest;
 import edu.byu.cs.tweeter.model.net.request.FollowingRequest;
 import edu.byu.cs.tweeter.model.net.request.IsFollowerRequest;
 import edu.byu.cs.tweeter.model.net.request.UnfollowRequest;
+import edu.byu.cs.tweeter.model.net.response.FeedResponse;
 import edu.byu.cs.tweeter.model.net.response.FollowResponse;
 import edu.byu.cs.tweeter.model.net.response.FollowerCountResponse;
 import edu.byu.cs.tweeter.model.net.response.FollowerResponse;
@@ -17,6 +18,7 @@ import edu.byu.cs.tweeter.model.net.response.FollowingCountResponse;
 import edu.byu.cs.tweeter.model.net.response.FollowingResponse;
 import edu.byu.cs.tweeter.model.net.response.IsFollowerResponse;
 import edu.byu.cs.tweeter.model.net.response.UnfollowResponse;
+import edu.byu.cs.tweeter.server.dao.AuthTokenDAOInterface;
 import edu.byu.cs.tweeter.server.dao.DAOFactory;
 import edu.byu.cs.tweeter.server.dao.FollowDAO;
 import edu.byu.cs.tweeter.server.dao.FollowDAOInterface;
@@ -24,10 +26,17 @@ import edu.byu.cs.tweeter.server.dao.FollowDAOInterface;
 public class FollowService {
 
     FollowDAOInterface followDAOInterface = DAOFactory.getInstance().getFollowDAO();
+    AuthTokenDAOInterface authTokenDAOInterface = DAOFactory.getInstance().getAuthTokenDAO();
 
     public FollowingResponse getFollowees(FollowingRequest request) {
         assert request.getLoggedInUserAlias() != null;
         assert request.getLastFolloweeAlias() != null;
+        assert request.getAuthToken() != null;
+
+        if (!authTokenDAOInterface.validateUser(request.getAuthToken().getIdentifier(),
+                request.getLoggedInUserAlias())) {
+            return new FollowingResponse("AuthToken is no longer valid.");
+        }
 
         List<User> allFollowees = followDAOInterface.getFollowees(request.getLoggedInUserAlias(),
                 request.getLastFolloweeAlias(), request.getLimit());
@@ -41,6 +50,12 @@ public class FollowService {
     public FollowerResponse getFollowers(FollowerRequest request) {
         assert request.getLimit() > 0;
         assert request.getLoggedInUserAlias() != null;
+        assert request.getAuthToken() != null;
+
+        if (!authTokenDAOInterface.validateUser(request.getAuthToken().getIdentifier(),
+                request.getLoggedInUserAlias())) {
+            return new FollowerResponse("AuthToken is no longer valid.");
+        }
 
         List<User> allFollowers = followDAOInterface.getFollowers(request.getLoggedInUserAlias(),
                 request.getLastFollowerAlias(), request.getLimit());
@@ -57,11 +72,29 @@ public class FollowService {
     }
 
     public FollowerCountResponse getFollowerCount(FollowerCountRequest request) {
+        assert request.getAuthToken() != null;
+        assert request.getTargetUser() != null;
+        assert request.getTargetUser().getAlias() != null;
+
+        if (!authTokenDAOInterface.validateUser(request.getAuthToken().getIdentifier(),
+                request.getTargetUser().getAlias())) {
+            return new FollowerCountResponse("AuthToken is no longer valid.");
+        }
+
         int count = followDAOInterface.getFollowerCount(request.getTargetUser());
         return new FollowerCountResponse(count);
     }
 
     public FollowingCountResponse getFollowingCount(FollowingCountRequest request) {
+        assert request.getAuthToken() != null;
+        assert request.getTargetUser() != null;
+        assert request.getTargetUser().getAlias() != null;
+
+        if (!authTokenDAOInterface.validateUser(request.getAuthToken().getIdentifier(),
+                request.getTargetUser().getAlias())) {
+            return new FollowingCountResponse("AuthToken is no longer valid.");
+        }
+
         int count = followDAOInterface.getFollowingCount(request.getTargetUser());
         return new FollowingCountResponse(count);
     }
@@ -71,6 +104,13 @@ public class FollowService {
         assert request.getUser().getAlias() != null;
         assert request.getCurrUser() != null;
         assert request.getCurrUser().getAlias() != null;
+        assert request.getAuthToken() != null;
+
+        if (!authTokenDAOInterface.validateUser(request.getAuthToken().getIdentifier(),
+                request.getCurrUser().getAlias())) {
+            return new FollowResponse("AuthToken is no longer valid.");
+        }
+
         boolean isSuccess = followDAOInterface.follow(request.getUser().getAlias(),
                 request.getCurrUser().getAlias());
         return new FollowResponse(isSuccess);
@@ -82,6 +122,12 @@ public class FollowService {
             assert request.getUser().getAlias() != null;
             assert request.getCurrUser() != null;
             assert request.getCurrUser().getAlias() != null;
+            assert request.getAuthToken() != null;
+
+            if (!authTokenDAOInterface.validateUser(request.getAuthToken().getIdentifier(),
+                    request.getCurrUser().getAlias())) {
+                return new UnfollowResponse("AuthToken is no longer valid.");
+            }
 
             boolean isSuccess = followDAOInterface.unfollow(request.getUser().getAlias(),
                     request.getCurrUser().getAlias());
@@ -97,6 +143,12 @@ public class FollowService {
         assert request.getFollowee().getAlias() != null;
         assert request.getCurrUser() != null;
         assert request.getCurrUser().getAlias() != null;
+        assert request.getAuthToken() != null;
+
+        if (!authTokenDAOInterface.validateUser(request.getAuthToken().getIdentifier(),
+                request.getCurrUser().getAlias())) {
+            return new IsFollowerResponse("AuthToken is no longer valid.");
+        }
 
         boolean isFollower = followDAOInterface.isFollower(request.getFollowee().getAlias(),
                 request.getCurrUser().getAlias());

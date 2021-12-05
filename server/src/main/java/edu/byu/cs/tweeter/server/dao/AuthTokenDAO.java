@@ -32,7 +32,7 @@ public class AuthTokenDAO implements AuthTokenDAOInterface {
         LocalDateTime now = LocalDateTime.now();
         AuthToken authToken = new AuthToken();
         Date date = new Date();
-        long ttl = date.getTime() + 10000;
+        long ttl = date.getTime() + 3600000; // 1 hour
 
         Item item = new Item()
                 .withPrimaryKey(partitionKey, authToken.getIdentifier())
@@ -72,7 +72,7 @@ public class AuthTokenDAO implements AuthTokenDAOInterface {
             }
         }
         catch (Exception e) {
-            throw new RuntimeException("Unable to scan authtoken table: " + e.getMessage());
+            throw new RuntimeException("Unable to scan authToken table: " + e.getMessage());
         }
     }
 
@@ -95,5 +95,27 @@ public class AuthTokenDAO implements AuthTokenDAOInterface {
                 authTokenTable.deleteItem(deleteItemSpec);
             }
         }
+    }
+
+    @Override
+    public boolean validateUser(String authTokenIdentifier, String userAlias) {
+        QuerySpec querySpec = new QuerySpec()
+                .withKeyConditionExpression(partitionKey + " = :authToken")
+                .withValueMap(new ValueMap().withString(":authToken", authTokenIdentifier));
+
+        ItemCollection<QueryOutcome> items = authTokenTable.query(querySpec);
+
+        if (items != null) {
+            for (Item item : items) {
+                String aliasFromDB = item.getString("userAlias");
+//                String timestamp = item.getString(sortKey);
+
+                if (userAlias.equals(aliasFromDB)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 }

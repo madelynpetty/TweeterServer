@@ -6,4 +6,5 @@ public interface AuthTokenDAOInterface {
      AuthToken getNewAuthToken(String userAlias);
      void checkValidAuthTokens();
      void removeAuthToken(String authTokenIdentifier);
+     boolean validateUser(String authToken, String userAlias);
 }

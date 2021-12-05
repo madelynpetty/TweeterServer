@@ -6,6 +6,7 @@ import edu.byu.cs.tweeter.model.net.request.GetUserRequest;
 import edu.byu.cs.tweeter.model.net.request.LoginRequest;
 import edu.byu.cs.tweeter.model.net.request.LogoutRequest;
 import edu.byu.cs.tweeter.model.net.request.RegisterRequest;
+import edu.byu.cs.tweeter.model.net.response.FollowingResponse;
 import edu.byu.cs.tweeter.model.net.response.GetUserResponse;
 import edu.byu.cs.tweeter.model.net.response.LoginResponse;
 import edu.byu.cs.tweeter.model.net.response.LogoutResponse;
@@ -36,7 +37,7 @@ public class UserService {
         return new RegisterResponse(user, authToken);
     }
 
-    public static String getImageUrl(String alias, String url) {
+    public static String getImageUrl(String alias, String url) { //used in register
         DAOFactory.getInstance().getS3DAO().putUrl(alias, url);
         return DAOFactory.getInstance().getS3DAO().getUrl(alias);
     }
