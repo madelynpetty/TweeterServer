@@ -90,6 +90,7 @@ public class UserService {
         protected void handleSuccessMessage(Message msg) {
             User registeredUser = (User) msg.getData().getSerializable(RegisterTask.USER_KEY);
             AuthToken authToken = (AuthToken) msg.getData().getSerializable(RegisterTask.AUTH_TOKEN_KEY);
+            authToken.setCurrUserAlias(registeredUser.getAlias());
 
             Cache.getInstance().setCurrUser(registeredUser);
             Cache.getInstance().setCurrUserAuthToken(authToken);
@@ -124,6 +125,7 @@ public class UserService {
         protected void handleSuccessMessage(Message msg) {
             User loggedInUser = (User) msg.getData().getSerializable(LoginTask.USER_KEY);
             AuthToken authToken = (AuthToken) msg.getData().getSerializable(LoginTask.AUTH_TOKEN_KEY);
+            authToken.setCurrUserAlias(loggedInUser.getAlias());
 
             // Cache user session information
             Cache.getInstance().setCurrUser(loggedInUser);

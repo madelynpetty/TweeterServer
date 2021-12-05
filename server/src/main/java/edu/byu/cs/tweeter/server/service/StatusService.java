@@ -29,9 +29,11 @@ public class StatusService {
 
     public StoryResponse getStory(StoryRequest request) {
         assert request.getAuthToken() != null;
+        assert request.getAuthToken().getCurrUserAlias() != null;
         assert request.getUserAlias() != null;
 
-        if (!authTokenDAOInterface.validateUser(request.getAuthToken().getIdentifier(), request.getUserAlias())) {
+        if (!authTokenDAOInterface.validateUser(request.getAuthToken().getIdentifier(),
+                request.getAuthToken().getCurrUserAlias())) {
             return new StoryResponse("AuthToken is no longer valid.");
         }
 
@@ -42,9 +44,11 @@ public class StatusService {
 
     public PostStatusResponse postStatus(PostStatusRequest request) {
         assert request.getAuthToken() != null;
+        assert request.getAuthToken().getCurrUserAlias() != null;
         assert request.getCurrUserAlias() != null;
 
-        if (!authTokenDAOInterface.validateUser(request.getAuthToken().getIdentifier(), request.getCurrUserAlias())) {
+        if (!authTokenDAOInterface.validateUser(request.getAuthToken().getIdentifier(),
+                request.getAuthToken().getCurrUserAlias())) {
             return new PostStatusResponse("AuthToken is no longer valid.");
         }
 
@@ -56,9 +60,11 @@ public class StatusService {
 
     public FeedResponse getFeed(FeedRequest request) {
         assert request.getAuthToken() != null;
+        assert request.getAuthToken().getCurrUserAlias() != null;
         assert request.getUserAlias() != null;
 
-        if (!authTokenDAOInterface.validateUser(request.getAuthToken().getIdentifier(), request.getUserAlias())) {
+        if (!authTokenDAOInterface.validateUser(request.getAuthToken().getIdentifier(),
+                request.getAuthToken().getCurrUserAlias())) {
             return new FeedResponse("AuthToken is no longer valid.");
         }
 

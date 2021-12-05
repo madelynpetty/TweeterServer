@@ -61,5 +61,6 @@ public class AuthenticateResponse extends Response {
 
     public void setAuthToken(AuthToken authToken) {
         this.authToken = authToken;
+        this.authToken.setCurrUserAlias(user.getAlias());
     }
 }

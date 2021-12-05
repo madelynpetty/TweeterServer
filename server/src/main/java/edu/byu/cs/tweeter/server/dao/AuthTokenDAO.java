@@ -30,7 +30,7 @@ public class AuthTokenDAO implements AuthTokenDAOInterface {
     public AuthToken getNewAuthToken(String userAlias) {
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
         LocalDateTime now = LocalDateTime.now();
-        AuthToken authToken = new AuthToken();
+        AuthToken authToken = new AuthToken(userAlias);
         Date date = new Date();
         long ttl = date.getTime() + 3600000; // 1 hour
 
