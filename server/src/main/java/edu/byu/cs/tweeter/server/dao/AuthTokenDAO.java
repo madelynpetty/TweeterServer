@@ -13,6 +13,7 @@ import com.amazonaws.services.dynamodbv2.document.utils.ValueMap;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Date;
 
 import edu.byu.cs.tweeter.model.domain.AuthToken;
 
@@ -30,11 +31,14 @@ public class AuthTokenDAO implements AuthTokenDAOInterface {
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
         LocalDateTime now = LocalDateTime.now();
         AuthToken authToken = new AuthToken();
+        Date date = new Date();
+        long ttl = date.getTime() + 10000;
 
         Item item = new Item()
                 .withPrimaryKey(partitionKey, authToken.getIdentifier())
                 .withString("userAlias", userAlias)
-                .withString(sortKey, dtf.format(now));
+                .withString(sortKey, dtf.format(now))
+                .withNumber("ttl", ttl);
 
         authTokenTable.putItem(item);
         return authToken;

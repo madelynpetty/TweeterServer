@@ -98,7 +98,7 @@ public class FeedDAO implements FeedDAOInterface {
                 .withExpressionAttributeNames(attrNames)
                 .withExpressionAttributeValues(attrValues);
 
-        queryRequest.setScanIndexForward(true);
+        queryRequest.setScanIndexForward(false);
 
         QueryResult queryResult = DynamoDbFactory.getAmazonDynamoDB().query(queryRequest);
         List<Map<String, AttributeValue>> items = queryResult.getItems();
