@@ -10,18 +10,13 @@ import edu.byu.cs.tweeter.model.net.response.GetUserResponse;
 import edu.byu.cs.tweeter.model.net.response.LoginResponse;
 import edu.byu.cs.tweeter.model.net.response.LogoutResponse;
 import edu.byu.cs.tweeter.model.net.response.RegisterResponse;
-import edu.byu.cs.tweeter.server.dao.AuthTokenDAO;
 import edu.byu.cs.tweeter.server.dao.AuthTokenDAOInterface;
 import edu.byu.cs.tweeter.server.dao.DAOFactory;
-import edu.byu.cs.tweeter.server.dao.DynamoDbFactory;
-import edu.byu.cs.tweeter.server.dao.S3DAO;
-import edu.byu.cs.tweeter.server.dao.UserDAO;
 import edu.byu.cs.tweeter.server.dao.UserDAOInterface;
 
 public class UserService {
     UserDAOInterface userDAOInterface = DAOFactory.getInstance().getUserDAO();
     AuthTokenDAOInterface authTokenDAOInterface = DAOFactory.getInstance().getAuthTokenDAO();
-    S3DAO s3DAO = DAOFactory.getInstance().getS3DAO();
 
     public LoginResponse login(LoginRequest request) {
         try {
@@ -35,13 +30,15 @@ public class UserService {
     }
 
     public RegisterResponse register(RegisterRequest request) {
-        s3DAO.putUrl(request.getAlias(), request.getImageUrl());
-        String imageUrl = s3DAO.getUrl(request.getAlias());
-        User user = userDAOInterface.register(request.getAlias(), request.getImageUrl(),
-                request.getFirstName(), request.getLastName(), request.getPassword());
-        user.setImageUrl(imageUrl);
+        User user = userDAOInterface.register(request.getAlias(), request.getFirstName(),
+                request.getLastName(), request.getPassword(), request.getImageUrl());
         AuthToken authToken = authTokenDAOInterface.getNewAuthToken(request.getAlias());
         return new RegisterResponse(user, authToken);
+    }
+
+    public static String getImageUrl(String alias, String url) {
+        DAOFactory.getInstance().getS3DAO().putUrl(alias, url);
+        return DAOFactory.getInstance().getS3DAO().getUrl(alias);
     }
 
     public LogoutResponse logout(LogoutRequest request) {
