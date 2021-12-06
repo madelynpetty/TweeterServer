@@ -41,9 +41,15 @@ public class FollowService {
 
         List<User> allFollowees = followDAOInterface.getFollowees(request.getLoggedInUserAlias(),
                 request.getLastFolloweeAlias(), request.getLimit());
-        boolean hasMorePages = request.getLimit() < allFollowees.size();
-        User lastFollowee = allFollowees.get(allFollowees.size() - 1);
-        request.setLastFolloweeAlias(lastFollowee.getAlias());
+        boolean hasMorePages = request.getLimit() <= allFollowees.size();
+        User lastFollowee = null;
+        if (allFollowees != null && !allFollowees.isEmpty()) {
+            lastFollowee = allFollowees.get(allFollowees.size() - 1);
+            request.setLastFolloweeAlias(lastFollowee.getAlias());
+        }
+        else {
+            request.setLastFolloweeAlias(null);
+        }
 
         return new FollowingResponse(allFollowees, lastFollowee, hasMorePages);
     }
@@ -62,8 +68,9 @@ public class FollowService {
         List<User> allFollowers = followDAOInterface.getFollowers(request.getLoggedInUserAlias(),
                 request.getLastFollowerAlias(), request.getLimit());
         boolean hasMorePages = request.getLimit() <= allFollowers.size();
-        User lastFollower = allFollowers.get(allFollowers.size() - 1);
-        if (lastFollower != null) {
+        User lastFollower = null;
+        if (!allFollowers.isEmpty()) {
+            lastFollower = allFollowers.get(allFollowers.size() - 1);
             request.setLastFollowerAlias(lastFollower.getAlias());
         }
         else {
