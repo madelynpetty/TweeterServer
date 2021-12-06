@@ -6,10 +6,7 @@ import com.amazonaws.services.dynamodbv2.model.AttributeValue;
 import com.amazonaws.services.dynamodbv2.model.QueryRequest;
 import com.amazonaws.services.dynamodbv2.model.QueryResult;
 
-import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,12 +18,6 @@ import edu.byu.cs.tweeter.server.service.UserService;
 public class UserDAO implements UserDAOInterface {
     private final String tableName = "user";
     private final Table userTable = DynamoDbFactory.getDynamoDB().getTable(tableName);
-    private final byte[] SALT_ARRAY = {
-        (byte) 0x52, (byte) 0x43, (byte) 0x68, (byte) 0x58,
-        (byte) 0x6D, (byte) 0x75, (byte) 0x5A, (byte) 0x79,
-        (byte) 0x52, (byte) 0x43, (byte) 0x68, (byte) 0x58,
-        (byte) 0x6D, (byte) 0x75, (byte) 0x5A, (byte) 0x79
-    };
 
     public UserDAO() {}
 
@@ -40,24 +31,9 @@ public class UserDAO implements UserDAOInterface {
         }
         else {
             String storedPassword = item.getString("password");
-//            String storedHashedPassword = item.getString("password");
-//            String salt = item.getString("salt");
-//
-//            MessageDigest md = null;
-//            String hashedPassword = null;
-//            try {
-//                md = MessageDigest.getInstance("SHA-512");
-//                md.update(SALT_ARRAY);
-//                byte[] hashedPasswordBytes = md.digest(password.getBytes(StandardCharsets.UTF_8));
-//                hashedPassword = new String(hashedPasswordBytes);
-//            } catch (NoSuchAlgorithmException e) {
-//                throw new RuntimeException("Exception while decrypting: " + e.getMessage());
-//            }
-//
-//            System.out.println("Hashed passowrd: " + hashedPassword);
-//            System.out.println("Salt: " + salt);
+            String hashedPassword = hashPassword(password);
 
-            if (storedPassword.equals(password)) {
+            if (storedPassword.equals(hashedPassword)) {
                 String firstName = item.getString("firstName");
                 String lastName = item.getString("lastName");
                 String imageUrl = item.getString("image");
@@ -88,19 +64,7 @@ public class UserDAO implements UserDAOInterface {
             Map<String, AttributeValue> attrValues = new HashMap<>();
             attrValues.put(":val", new AttributeValue().withS(alias));
 
-//            SecureRandom random = new SecureRandom();
-//            byte[] salt = new byte[16];
-//            random.nextBytes(salt);
-//
-//            MessageDigest md = MessageDigest.getInstance("SHA-512");
-//            md.update(SALT_ARRAY);
-//            String saltStr = new String(SALT_ARRAY, StandardCharsets.UTF_8);
-//
-//            byte[] hashedPasswordBytes = md.digest(password.getBytes(StandardCharsets.UTF_8));
-//            String hashedPassword = new String(hashedPasswordBytes);
-//
-//            System.out.println("Hashed passowrd: " + hashedPassword);
-//            System.out.println("Salt: " + saltStr);
+            String hashedPassword = hashPassword(password);
 
             url = UserService.getImageUrl(alias, imageUrl);
 
@@ -109,7 +73,7 @@ public class UserDAO implements UserDAOInterface {
                     .withString("firstName", firstName)
                     .withString("lastName", lastName)
                     .withString("image", url)
-                    .withString("password", password);
+                    .withString("password", hashedPassword);
 
             userTable.putItem(item);
         }
@@ -118,6 +82,22 @@ public class UserDAO implements UserDAOInterface {
         }
 
         return new User(firstName, lastName, alias, url);
+    }
+
+    private String hashPassword(String password) {
+        try {
+            MessageDigest md = MessageDigest.getInstance("MD5");
+            md.update(password.getBytes());
+            byte[] bytes = md.digest();
+            StringBuilder sb = new StringBuilder();
+            for (byte aByte : bytes) {
+                sb.append(Integer.toString((aByte & 0xff) + 0x100, 16).substring(1));
+            }
+            return sb.toString();
+        }
+        catch (Exception e) {
+            throw new RuntimeException("Unable to hash password: " + e.getMessage());
+        }
     }
 
     @Override
