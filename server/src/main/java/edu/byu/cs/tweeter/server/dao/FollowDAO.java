@@ -1,17 +1,20 @@
 package edu.byu.cs.tweeter.server.dao;
 
+import com.amazonaws.services.dynamodbv2.document.BatchWriteItemOutcome;
 import com.amazonaws.services.dynamodbv2.document.Index;
 import com.amazonaws.services.dynamodbv2.document.Item;
 import com.amazonaws.services.dynamodbv2.document.ItemCollection;
 import com.amazonaws.services.dynamodbv2.document.PrimaryKey;
 import com.amazonaws.services.dynamodbv2.document.QueryOutcome;
 import com.amazonaws.services.dynamodbv2.document.Table;
+import com.amazonaws.services.dynamodbv2.document.TableWriteItems;
 import com.amazonaws.services.dynamodbv2.document.spec.DeleteItemSpec;
 import com.amazonaws.services.dynamodbv2.document.spec.QuerySpec;
 import com.amazonaws.services.dynamodbv2.document.utils.ValueMap;
 import com.amazonaws.services.dynamodbv2.model.AttributeValue;
 import com.amazonaws.services.dynamodbv2.model.QueryRequest;
 import com.amazonaws.services.dynamodbv2.model.QueryResult;
+import com.amazonaws.services.dynamodbv2.model.WriteRequest;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -19,6 +22,8 @@ import java.util.List;
 import java.util.Map;
 
 import edu.byu.cs.tweeter.model.domain.User;
+import edu.byu.cs.tweeter.server.dao.DAOInterface.FollowDAOInterface;
+import edu.byu.cs.tweeter.server.dao.factory.DynamoDbFactory;
 
 /**
  * A DAO for accessing 'following' data from the database.
@@ -284,5 +289,39 @@ public class FollowDAO implements FollowDAOInterface {
         }
 
         return responseFollowers;
+    }
+
+    @Override
+    public void addFollowerBatch(List<User> users) {
+        TableWriteItems items = new TableWriteItems(tableName);
+
+        for (User user : users) {
+            Item item = new Item()
+                    .withPrimaryKey(partitionKey, "@maddiepetty")
+                    .withString("follower", "@" + user.getAlias());
+
+            items.addItemToPut(item);
+
+            if (items.getItemsToPut() != null && items.getItemsToPut().size() == 25) {
+                loopBatchWrite(items);
+                items = new TableWriteItems(tableName);
+            }
+        }
+
+        // Write any leftover items
+        if (items.getItemsToPut() != null && items.getItemsToPut().size() > 0) {
+            loopBatchWrite(items);
+        }
+    }
+
+    private void loopBatchWrite(TableWriteItems items) {
+        BatchWriteItemOutcome outcome = DynamoDbFactory.getDynamoDB().batchWriteItem(items);
+        System.out.println("Wrote User Batch");
+
+        while (outcome.getUnprocessedItems().size() > 0) {
+            Map<String, List<WriteRequest>> unprocessedItems = outcome.getUnprocessedItems();
+            outcome = DynamoDbFactory.getDynamoDB().batchWriteItemUnprocessed(unprocessedItems);
+            System.out.println("Wrote more Users");
+        }
     }
 }

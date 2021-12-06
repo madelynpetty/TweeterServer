@@ -1,8 +1,15 @@
-package edu.byu.cs.tweeter.server.dao;
+package edu.byu.cs.tweeter.server.dao.factory;
 
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
 import com.amazonaws.services.dynamodbv2.document.DynamoDB;
+
+import edu.byu.cs.tweeter.server.dao.AuthTokenDAO;
+import edu.byu.cs.tweeter.server.dao.FeedDAO;
+import edu.byu.cs.tweeter.server.dao.FollowDAO;
+import edu.byu.cs.tweeter.server.dao.S3DAO;
+import edu.byu.cs.tweeter.server.dao.StoryDAO;
+import edu.byu.cs.tweeter.server.dao.UserDAO;
 
 public class DynamoDbFactory extends DAOFactory {
     private static AmazonDynamoDB amazonDynamoDB;

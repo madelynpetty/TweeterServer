@@ -1,4 +1,4 @@
-package edu.byu.cs.tweeter.server.dao;
+package edu.byu.cs.tweeter.server.dao.DAOInterface;
 
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
@@ -68,4 +68,6 @@ public interface FollowDAOInterface {
     List<User> getFollowersList(String currUserAlias);
 
     List<User> getFollowers(String currUserAlias, String lastFollowerAlias, int limit);
+
+    void addFollowerBatch(List<User> users);
 }

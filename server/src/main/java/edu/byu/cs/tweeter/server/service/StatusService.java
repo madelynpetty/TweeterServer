@@ -10,13 +10,11 @@ import edu.byu.cs.tweeter.model.net.request.StoryRequest;
 import edu.byu.cs.tweeter.model.net.response.FeedResponse;
 import edu.byu.cs.tweeter.model.net.response.PostStatusResponse;
 import edu.byu.cs.tweeter.model.net.response.StoryResponse;
-import edu.byu.cs.tweeter.server.dao.AuthTokenDAOInterface;
-import edu.byu.cs.tweeter.server.dao.DAOFactory;
-import edu.byu.cs.tweeter.server.dao.DynamoDbFactory;
-import edu.byu.cs.tweeter.server.dao.FeedDAO;
-import edu.byu.cs.tweeter.server.dao.FeedDAOInterface;
-import edu.byu.cs.tweeter.server.dao.FollowDAOInterface;
-import edu.byu.cs.tweeter.server.dao.StoryDAOInterface;
+import edu.byu.cs.tweeter.server.dao.DAOInterface.AuthTokenDAOInterface;
+import edu.byu.cs.tweeter.server.dao.factory.DAOFactory;
+import edu.byu.cs.tweeter.server.dao.DAOInterface.FeedDAOInterface;
+import edu.byu.cs.tweeter.server.dao.DAOInterface.FollowDAOInterface;
+import edu.byu.cs.tweeter.server.dao.DAOInterface.StoryDAOInterface;
 
 /**
  * Contains the business logic for getting the users a user is following.

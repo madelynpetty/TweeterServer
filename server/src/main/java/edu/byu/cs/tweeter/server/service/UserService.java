@@ -6,14 +6,13 @@ import edu.byu.cs.tweeter.model.net.request.GetUserRequest;
 import edu.byu.cs.tweeter.model.net.request.LoginRequest;
 import edu.byu.cs.tweeter.model.net.request.LogoutRequest;
 import edu.byu.cs.tweeter.model.net.request.RegisterRequest;
-import edu.byu.cs.tweeter.model.net.response.FollowingResponse;
 import edu.byu.cs.tweeter.model.net.response.GetUserResponse;
 import edu.byu.cs.tweeter.model.net.response.LoginResponse;
 import edu.byu.cs.tweeter.model.net.response.LogoutResponse;
 import edu.byu.cs.tweeter.model.net.response.RegisterResponse;
-import edu.byu.cs.tweeter.server.dao.AuthTokenDAOInterface;
-import edu.byu.cs.tweeter.server.dao.DAOFactory;
-import edu.byu.cs.tweeter.server.dao.UserDAOInterface;
+import edu.byu.cs.tweeter.server.dao.DAOInterface.AuthTokenDAOInterface;
+import edu.byu.cs.tweeter.server.dao.factory.DAOFactory;
+import edu.byu.cs.tweeter.server.dao.DAOInterface.UserDAOInterface;
 
 public class UserService {
     UserDAOInterface userDAOInterface = DAOFactory.getInstance().getUserDAO();

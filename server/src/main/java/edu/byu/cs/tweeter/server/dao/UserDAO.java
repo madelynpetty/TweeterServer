@@ -1,10 +1,13 @@
 package edu.byu.cs.tweeter.server.dao;
 
+import com.amazonaws.services.dynamodbv2.document.BatchWriteItemOutcome;
 import com.amazonaws.services.dynamodbv2.document.Item;
 import com.amazonaws.services.dynamodbv2.document.Table;
+import com.amazonaws.services.dynamodbv2.document.TableWriteItems;
 import com.amazonaws.services.dynamodbv2.model.AttributeValue;
 import com.amazonaws.services.dynamodbv2.model.QueryRequest;
 import com.amazonaws.services.dynamodbv2.model.QueryResult;
+import com.amazonaws.services.dynamodbv2.model.WriteRequest;
 
 import java.security.MessageDigest;
 import java.util.HashMap;
@@ -13,6 +16,8 @@ import java.util.Map;
 
 import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.User;
+import edu.byu.cs.tweeter.server.dao.DAOInterface.UserDAOInterface;
+import edu.byu.cs.tweeter.server.dao.factory.DynamoDbFactory;
 import edu.byu.cs.tweeter.server.service.UserService;
 
 public class UserDAO implements UserDAOInterface {
@@ -130,5 +135,46 @@ public class UserDAO implements UserDAOInterface {
             }
         }
         return null;
+    }
+
+    @Override
+    public void addUserBatch(List<User> users) {
+        TableWriteItems items = new TableWriteItems(tableName);
+
+        for (User user : users) {
+            Item item = new Item()
+                    .withPrimaryKey("alias", "@" + user.getAlias())
+                    .withString("firstName", user.getFirstName())
+                    .withString("lastName", user.getLastName())
+                    .withString("image", "https://maddiepettytweeterbucket.s3.us-west-2.amazonaws.com/%40dad")
+                    .withString("password", "49f68a5c8493ec2c0bf489821c21fc3b");
+
+            items.addItemToPut(item);
+
+            if (items.getItemsToPut() != null && items.getItemsToPut().size() == 25) {
+                loopBatchWrite(items);
+                items = new TableWriteItems(tableName);
+            }
+        }
+
+        // Write any leftover items
+        if (items.getItemsToPut() != null && items.getItemsToPut().size() > 0) {
+            loopBatchWrite(items);
+        }
+    }
+
+    private void loopBatchWrite(TableWriteItems items) {
+
+        // The 'dynamoDB' object is of type DynamoDB and is declared statically in this example
+        BatchWriteItemOutcome outcome = DynamoDbFactory.getDynamoDB().batchWriteItem(items);
+        System.out.println("Wrote User Batch");
+
+        // Check the outcome for items that didn't make it onto the table
+        // If any were not added to the table, try again to write the batch
+        while (outcome.getUnprocessedItems().size() > 0) {
+            Map<String, List<WriteRequest>> unprocessedItems = outcome.getUnprocessedItems();
+            outcome = DynamoDbFactory.getDynamoDB().batchWriteItemUnprocessed(unprocessedItems);
+            System.out.println("Wrote more Users");
+        }
     }
 }

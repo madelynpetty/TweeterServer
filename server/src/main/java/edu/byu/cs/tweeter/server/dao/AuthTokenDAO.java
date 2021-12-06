@@ -1,6 +1,5 @@
 package edu.byu.cs.tweeter.server.dao;
 
-import com.amazonaws.services.dynamodbv2.document.DynamoDB;
 import com.amazonaws.services.dynamodbv2.document.Index;
 import com.amazonaws.services.dynamodbv2.document.Item;
 import com.amazonaws.services.dynamodbv2.document.ItemCollection;
@@ -16,6 +15,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.Date;
 
 import edu.byu.cs.tweeter.model.domain.AuthToken;
+import edu.byu.cs.tweeter.server.dao.DAOInterface.AuthTokenDAOInterface;
+import edu.byu.cs.tweeter.server.dao.factory.DynamoDbFactory;
 
 public class AuthTokenDAO implements AuthTokenDAOInterface {
     private static final String tableName = "authTokenTable";

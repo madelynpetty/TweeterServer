@@ -1,4 +1,11 @@
-package edu.byu.cs.tweeter.server.dao;
+package edu.byu.cs.tweeter.server.dao.factory;
+
+import edu.byu.cs.tweeter.server.dao.AuthTokenDAO;
+import edu.byu.cs.tweeter.server.dao.DAOInterface.FeedDAOInterface;
+import edu.byu.cs.tweeter.server.dao.DAOInterface.FollowDAOInterface;
+import edu.byu.cs.tweeter.server.dao.S3DAO;
+import edu.byu.cs.tweeter.server.dao.DAOInterface.StoryDAOInterface;
+import edu.byu.cs.tweeter.server.dao.DAOInterface.UserDAOInterface;
 
 public abstract class DAOFactory {
     private static DAOFactory daoFactory;
