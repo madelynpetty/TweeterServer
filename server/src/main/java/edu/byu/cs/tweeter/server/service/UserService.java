@@ -46,6 +46,7 @@ public class UserService {
             authTokenDAOInterface.removeAuthToken(request.getAuthToken().getIdentifier());
         }
         boolean isSuccess = userDAOInterface.logout(request.getAuthToken());
+//        authTokenDAOInterface.removeAuthToken(request.getAuthToken().getIdentifier());
         return new LogoutResponse(isSuccess);
     }
 

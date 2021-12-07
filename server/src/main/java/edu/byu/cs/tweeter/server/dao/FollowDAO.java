@@ -234,6 +234,33 @@ public class FollowDAO implements FollowDAOInterface {
         return followingList;
     }
 
+    @Override
+    public List<String> getFollowingAliasList(String userAlias) {
+        List<String> followingList = new ArrayList<>();
+
+        QuerySpec querySpec = new QuerySpec()
+                .withKeyConditionExpression(sortKey + " = :aliasVal")
+                .withValueMap(new ValueMap().withString(":aliasVal", userAlias));
+
+        try {
+            Index index = followTable.getIndex(indexName);
+            ItemCollection<QueryOutcome> items = index.query(querySpec);
+
+            for (Item item : items) {
+                String aliasVal = item.getString(partitionKey);
+                if (aliasVal != null) {
+                    followingList.add(aliasVal);
+                } else {
+                    System.out.println("USER IS NULL");
+                }
+            }
+        }
+        catch (Exception e) {
+            throw new RuntimeException("Unable to scan the follow table: " + e.getMessage());
+        }
+        return followingList;
+    }
+
     // people that are following me
     // logged in user is in the primary key
     @Override

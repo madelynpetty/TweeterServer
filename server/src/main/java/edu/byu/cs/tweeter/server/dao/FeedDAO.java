@@ -1,10 +1,14 @@
 package edu.byu.cs.tweeter.server.dao;
 
-import com.amazonaws.services.dynamodbv2.document.Item;
 import com.amazonaws.services.dynamodbv2.document.Table;
 import com.amazonaws.services.dynamodbv2.model.AttributeValue;
 import com.amazonaws.services.dynamodbv2.model.QueryRequest;
 import com.amazonaws.services.dynamodbv2.model.QueryResult;
+import com.amazonaws.services.sqs.AmazonSQS;
+import com.amazonaws.services.sqs.AmazonSQSClientBuilder;
+import com.amazonaws.services.sqs.model.SendMessageRequest;
+import com.amazonaws.services.sqs.model.SendMessageResult;
+import com.google.gson.Gson;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -125,19 +129,42 @@ public class FeedDAO implements FeedDAOInterface {
         return statuses;
     }
 
+//    @Override
+//    public void postStatus(String post, String senderAlias, List<User> currUserFolloweeList) {
+//        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
+//        LocalDateTime now = LocalDateTime.now();
+//
+//        for (User user : currUserFolloweeList) {
+//            Item item = new Item()
+//                    .withPrimaryKey(partitionKey, user.getAlias())
+//                    .withString("post", post)
+//                    .withString("senderAlias", senderAlias)
+//                    .withString(sortKey, dtf.format(now));
+//            feedTable.putItem(item);
+//        }
+//    }
+
     @Override
-    public void postStatus(String post, String senderAlias, List<User> currUserFolloweeList) {
+    public boolean sendFeedMessage(String post, User currUser) {
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
         LocalDateTime now = LocalDateTime.now();
 
-        for (User user : currUserFolloweeList) {
-            Item item = new Item()
-                    .withPrimaryKey(partitionKey, user.getAlias())
-                    .withString("post", post)
-                    .withString("senderAlias", senderAlias)
-                    .withString(sortKey, dtf.format(now));
-            feedTable.putItem(item);
-        }
+        Status status = new Status(post, currUser, dtf.format(now),
+                getUrlsInPost(post), getMentionsInPost(post));
+
+        String messageBody = (new Gson()).toJson(status);
+        String queueUrl = "https://sqs.us-west-2.amazonaws.com/851652515100/PostStatusQueue";
+
+        SendMessageRequest send_msg_request = new SendMessageRequest()
+                .withQueueUrl(queueUrl)
+                .withMessageBody(messageBody);
+
+        AmazonSQS sqs = AmazonSQSClientBuilder.defaultClient();
+        SendMessageResult send_msg_result = sqs.sendMessage(send_msg_request);
+
+        String msgId = send_msg_result.getMessageId();
+        System.out.println("Message ID: " + msgId);
+        return true;
     }
 
     private static final Pattern urlPattern = Pattern.compile(

@@ -30,5 +30,5 @@ import edu.byu.cs.tweeter.model.net.response.FeedResponse;
 public interface FeedDAOInterface {
     List<Status> getFeed(int limit, String alias, Status lastStatus);
     List<Status> getFollowsStatuses(String userAlias);
-    void postStatus(String post, String senderAlias, List<User> currUserFolloweeList);
+    boolean sendFeedMessage(String post, User currUser);
 }
