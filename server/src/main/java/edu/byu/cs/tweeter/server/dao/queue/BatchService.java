@@ -20,11 +20,12 @@ import edu.byu.cs.tweeter.server.dao.DAOInterface.UserDAOInterface;
 import edu.byu.cs.tweeter.server.dao.FeedDAO;
 import edu.byu.cs.tweeter.server.dao.FollowDAO;
 import edu.byu.cs.tweeter.server.dao.UserDAO;
+import edu.byu.cs.tweeter.server.dao.factory.DAOFactory;
 import edu.byu.cs.tweeter.server.dao.factory.DynamoDbFactory;
 
 public class BatchService {
     private final AmazonSQS sqs = AmazonSQSClientBuilder.defaultClient();
-    private final FollowDAOInterface followDAOInterface = new FollowDAO();
+    private final FollowDAOInterface followDAOInterface = DAOFactory.getInstance().getFollowDAO();
 
     private static final String feedTableName = "feed";
     private static final String feedPartitionKey = "receiverAlias";
@@ -37,10 +38,11 @@ public class BatchService {
         for (String follower : currUserFolloweeList) {
             batch.add(follower);
 
-            if (batch.size() == 25) {
+            if (batch.size() == 25) { //todo this might be able to do 100
                 PostUpdateFeedRequest request = new PostUpdateFeedRequest(batch, status);
-                // todo update url
-                sqs.sendMessage("TODO GET URL FROM AWS WHEN IT'S BACK", (new Gson()).toJson(request));
+                sqs.sendMessage(
+                        "https://sqs.us-west-2.amazonaws.com/851652515100/UpdateFeedQueue",
+                        (new Gson()).toJson(request));
                 batch.clear();
             }
         }
@@ -48,7 +50,7 @@ public class BatchService {
         // Write any leftover items
         if (batch.size() > 0) {
             PostUpdateFeedRequest request = new PostUpdateFeedRequest(batch, status);
-            sqs.sendMessage("TODO NEW URL", (new Gson()).toJson(request));
+            sqs.sendMessage("https://sqs.us-west-2.amazonaws.com/851652515100/UpdateFeedQueue", (new Gson()).toJson(request));
             batch.clear();
         }
     }
@@ -59,8 +61,9 @@ public class BatchService {
 
         for (String user : users) {
             Item item = new Item()
-                    .withPrimaryKey(feedPartitionKey, user) //todo check for correct user
+                    .withPrimaryKey(feedPartitionKey, user)
                     .withString(feedSortKey, request.getStatus().getDate())
+                    .withString("post", request.getStatus().getPost())
                     .withString("senderAlias", request.getStatus().getUser().getAlias());
 
             items.addItemToPut(item);

@@ -23,7 +23,6 @@ import edu.byu.cs.tweeter.server.dao.DAOInterface.StoryDAOInterface;
 public class StatusService {
     StoryDAOInterface storyDAOInterface = DAOFactory.getInstance().getStoryDAO();
     FeedDAOInterface feedDAOInterface = DAOFactory.getInstance().getFeedDAO();
-    FollowDAOInterface followDAOInterface = DAOFactory.getInstance().getFollowDAO();
     UserDAOInterface userDAOInterface = DAOFactory.getInstance().getUserDAO();
     AuthTokenDAOInterface authTokenDAOInterface = DAOFactory.getInstance().getAuthTokenDAO();
 
@@ -42,24 +41,6 @@ public class StatusService {
         return new StoryResponse(responseStatuses, request.getLastStatus(), hasMorePages);
     }
 
-    // TODO THIS IS CODE TO PASS OFF M4A
-//    public PostStatusResponse postStatus(PostStatusRequest request) {
-//        assert request.getAuthToken() != null;
-//        assert request.getAuthToken().getCurrUserAlias() != null;
-//        assert request.getCurrUserAlias() != null;
-//
-//        if (!authTokenDAOInterface.validateUser(request.getAuthToken().getIdentifier(),
-//                request.getAuthToken().getCurrUserAlias())) {
-//            return new PostStatusResponse("AuthToken is no longer valid.");
-//        }
-//
-//        List<User> currUserFolloweeList = followDAOInterface.getFollowingList(request.getCurrUserAlias());
-//        feedDAOInterface.postStatus(request.getPost().getPost(), request.getCurrUserAlias(), currUserFolloweeList);
-//        boolean success = storyDAOInterface.postStatus(request.getCurrUserAlias(), request.getPost().getPost());
-//        return new PostStatusResponse(success);
-//    }
-
-    // TODO THIS IS CODE ONLY FOR M4B
     public PostStatusResponse postStatus(PostStatusRequest request) {
         assert request.getAuthToken() != null;
         assert request.getAuthToken().getCurrUserAlias() != null;
@@ -70,11 +51,12 @@ public class StatusService {
             return new PostStatusResponse("AuthToken is no longer valid.");
         }
 
-        boolean success = storyDAOInterface.postStatus(request.getCurrUserAlias(),
+        boolean storySuccess = storyDAOInterface.postStatus(request.getCurrUserAlias(),
                 request.getPost().getPost());
         User currUser = userDAOInterface.getUser(request.getCurrUserAlias());
-        feedDAOInterface.sendFeedMessage(request.getPost().getPost(), currUser);
-        return new PostStatusResponse(success);
+        System.out.println("Sending feed message: " + currUser.getAlias());
+        boolean feedSuccess = feedDAOInterface.sendFeedMessage(request.getPost().getPost(), currUser);
+        return new PostStatusResponse(storySuccess && feedSuccess);
     }
 
     public FeedResponse getFeed(FeedRequest request) {
@@ -92,18 +74,4 @@ public class StatusService {
         boolean hasMorePages = request.getLimit() <= allStatuses.size();
         return new FeedResponse(allStatuses, request.getLastStatus(), hasMorePages);
     }
-
-//    public PostStatusResponse postUpdateFeedMessages(PostStatusRequest request) {
-//        assert request.getAuthToken() != null;
-//        assert request.getAuthToken().getCurrUserAlias() != null;
-//        assert request.getCurrUserAlias() != null;
-//
-//        if (!authTokenDAOInterface.validateUser(request.getAuthToken().getIdentifier(),
-//                request.getAuthToken().getCurrUserAlias())) {
-//            return new PostStatusResponse("AuthToken is no longer valid.");
-//        }
-//
-//        boolean success = feedDAOInterface.postUpdateFeedMessages(request.getPost().getPost(), request.getCurrUserAlias());
-//        return new PostStatusResponse(success);
-//    }
 }
