@@ -10,7 +10,7 @@ import edu.byu.cs.tweeter.server.dao.factory.DAOFactory;
 
 
 public class Filler {
-    private final static int NUM_USERS = 10000;
+    private final static int NUM_USERS = 50;
     private final static String FOLLOW_TARGET = "followed";
 
     public static void fillDatabase() {
@@ -18,7 +18,7 @@ public class Filler {
         FollowDAOInterface followDAO = DAOFactory.getInstance().getFollowDAO();
 
         List<User> followers = new ArrayList<>();
-        List<User> users = new ArrayList<>();
+//        List<User> users = new ArrayList<>();
 
         for (int i = 1; i <= NUM_USERS; i++) {
 
@@ -27,13 +27,13 @@ public class Filler {
             String lastName = i + "";
 
             User user = new User(firstName, lastName, alias, "https://maddiepettytweeterbucket.s3.us-west-2.amazonaws.com/%40dad");
-            users.add(user);
+//            users.add(user);
             followers.add(user);
         }
 
-        if (users.size() > 0) {
-            userDAO.addUserBatch(users);
-        }
+//        if (users.size() > 0) {
+//            userDAO.addUserBatch(users);
+//        }
         if (followers.size() > 0) {
             followDAO.addFollowerBatch(followers);
         }

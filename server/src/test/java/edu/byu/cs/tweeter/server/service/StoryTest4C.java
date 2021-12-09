@@ -19,7 +19,7 @@ import edu.byu.cs.tweeter.server.dao.DAOInterface.AuthTokenDAOInterface;
 import edu.byu.cs.tweeter.server.dao.DAOInterface.StoryDAOInterface;
 import edu.byu.cs.tweeter.server.dao.StoryDAO;
 
-class StoryTest {
+class StoryTest4C {
 
     private AuthToken testUserAuthToken = null;
     private final User user = new User("story", "test", "@storytest",

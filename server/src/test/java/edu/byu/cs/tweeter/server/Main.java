@@ -1,21 +1,25 @@
 package edu.byu.cs.tweeter.server;
 
 import edu.byu.cs.tweeter.model.domain.AuthToken;
+import edu.byu.cs.tweeter.model.domain.Status;
 import edu.byu.cs.tweeter.model.domain.User;
 import edu.byu.cs.tweeter.model.net.request.FollowerRequest;
 import edu.byu.cs.tweeter.model.net.request.FollowingRequest;
 import edu.byu.cs.tweeter.model.net.request.IsFollowerRequest;
 import edu.byu.cs.tweeter.model.net.request.LoginRequest;
+import edu.byu.cs.tweeter.model.net.request.PostStatusRequest;
 import edu.byu.cs.tweeter.model.net.request.UnfollowRequest;
 import edu.byu.cs.tweeter.model.net.response.FollowerResponse;
 import edu.byu.cs.tweeter.model.net.response.FollowingResponse;
 import edu.byu.cs.tweeter.model.net.response.IsFollowerResponse;
 import edu.byu.cs.tweeter.model.net.response.LoginResponse;
+import edu.byu.cs.tweeter.model.net.response.PostStatusResponse;
 import edu.byu.cs.tweeter.model.net.response.UnfollowResponse;
 import edu.byu.cs.tweeter.server.lambda.GetFollowerHandler;
 import edu.byu.cs.tweeter.server.lambda.GetFollowingHandler;
 import edu.byu.cs.tweeter.server.lambda.IsFollowerHandler;
 import edu.byu.cs.tweeter.server.lambda.LoginHandler;
+import edu.byu.cs.tweeter.server.lambda.PostStatusHandler;
 import edu.byu.cs.tweeter.server.lambda.UnfollowHandler;
 
 public class Main {
@@ -64,9 +68,18 @@ public class Main {
 //        UnfollowResponse response = handler.handleRequest(request, new FakeContext());
 //        System.out.println(response.isSuccess());
 
-        LoginRequest request = new LoginRequest("@mom", "mom");
-        LoginHandler handler = new LoginHandler();
-        LoginResponse response = handler.handleRequest(request, new FakeContext());
-        System.out.println(response.isSuccess());
+//        LoginRequest request = new LoginRequest("@mom", "mom");
+//        LoginHandler handler = new LoginHandler();
+//        LoginResponse response = handler.handleRequest(request, new FakeContext());
+//        System.out.println(response.isSuccess());
+
+        AuthToken authToken = new AuthToken("@50");
+        User user = new User("50", "followers", "@50", null);
+        Status status = new Status("hello people", user, "date", null, null);
+        PostStatusRequest request = new PostStatusRequest(status, "@50", authToken);
+        PostStatusHandler handler = new PostStatusHandler();
+        PostStatusResponse response = handler.handleRequest(request, new FakeContext());
+        System.out.println();
+
     }
 }

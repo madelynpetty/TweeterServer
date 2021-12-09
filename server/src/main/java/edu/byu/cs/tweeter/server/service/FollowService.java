@@ -30,6 +30,7 @@ public class FollowService {
         assert request.getLoggedInUserAlias() != null;
         assert request.getLastFolloweeAlias() != null;
         assert request.getAuthToken() != null;
+        assert request.getAuthToken().getIdentifier() != null;
         assert request.getAuthToken().getCurrUserAlias() != null;
 
         if (!authTokenDAOInterface.validateUser(request.getAuthToken().getIdentifier(),
@@ -56,6 +57,7 @@ public class FollowService {
         assert request.getLimit() > 0;
         assert request.getLoggedInUserAlias() != null;
         assert request.getAuthToken() != null;
+        assert request.getAuthToken().getIdentifier() != null;
         assert request.getAuthToken().getCurrUserAlias() != null;
 
         if (!authTokenDAOInterface.validateUser(request.getAuthToken().getIdentifier(),
@@ -79,10 +81,11 @@ public class FollowService {
     }
 
     public FollowerCountResponse getFollowerCount(FollowerCountRequest request) {
-        assert request.getAuthToken() != null;
         assert request.getTargetUser() != null;
         assert request.getTargetUser().getAlias() != null;
+        assert request.getAuthToken() != null;
         assert request.getAuthToken().getCurrUserAlias() != null;
+        assert request.getAuthToken().getIdentifier() != null;
 
         if (!authTokenDAOInterface.validateUser(request.getAuthToken().getIdentifier(),
                 request.getAuthToken().getCurrUserAlias())) {
@@ -94,10 +97,11 @@ public class FollowService {
     }
 
     public FollowingCountResponse getFollowingCount(FollowingCountRequest request) {
-        assert request.getAuthToken() != null;
         assert request.getTargetUser() != null;
         assert request.getTargetUser().getAlias() != null;
+        assert request.getAuthToken() != null;
         assert request.getAuthToken().getCurrUserAlias() != null;
+        assert request.getAuthToken().getIdentifier() != null;
 
         if (!authTokenDAOInterface.validateUser(request.getAuthToken().getIdentifier(),
                 request.getAuthToken().getCurrUserAlias())) {
@@ -115,6 +119,7 @@ public class FollowService {
         assert request.getCurrUser().getAlias() != null;
         assert request.getAuthToken() != null;
         assert request.getAuthToken().getCurrUserAlias() != null;
+        assert request.getAuthToken().getIdentifier() != null;
 
         if (!authTokenDAOInterface.validateUser(request.getAuthToken().getIdentifier(),
                 request.getAuthToken().getCurrUserAlias())) {
@@ -134,6 +139,7 @@ public class FollowService {
             assert request.getCurrUser().getAlias() != null;
             assert request.getAuthToken() != null;
             assert request.getAuthToken().getCurrUserAlias() != null;
+            assert request.getAuthToken().getIdentifier() != null;
 
             if (!authTokenDAOInterface.validateUser(request.getAuthToken().getIdentifier(),
                     request.getAuthToken().getCurrUserAlias())) {
@@ -156,6 +162,7 @@ public class FollowService {
         assert request.getCurrUser().getAlias() != null;
         assert request.getAuthToken() != null;
         assert request.getAuthToken().getCurrUserAlias() != null;
+        assert request.getAuthToken().getIdentifier() != null;
 
         if (!authTokenDAOInterface.validateUser(request.getAuthToken().getIdentifier(),
                 request.getAuthToken().getCurrUserAlias())) {

@@ -89,7 +89,7 @@ public class FollowDAO implements FollowDAOInterface {
     public int getFollowerCount(User follower) {
         //how many people are following me, the current user
         assert follower != null;
-        List<User> followerList = getFollowersList(follower.getAlias());
+        List<String> followerList = getFollowersAliasList(follower.getAlias());
         if (followerList != null) {
             return followerList.size();
         }
@@ -102,7 +102,7 @@ public class FollowDAO implements FollowDAOInterface {
     public int getFollowingCount(User followee) {
         // how many people the logged in user is following
         assert followee != null;
-        List<User> followeeList = getFollowingList(followee.getAlias());
+        List<String> followeeList = getFollowingAliasList(followee.getAlias());
         if (followeeList != null) {
             return followeeList.size();
         }
@@ -290,6 +290,29 @@ public class FollowDAO implements FollowDAOInterface {
         return followerList;
     }
 
+    @Override
+    public List<String> getFollowersAliasList(String currUserAlias) {
+        System.out.println("Passed in alias: " + currUserAlias);
+
+        List<String> followerList = new ArrayList<>();
+        QuerySpec querySpec = new QuerySpec()
+                .withKeyConditionExpression(partitionKey + " = :aliasVal")
+                .withValueMap(new ValueMap().withString(":aliasVal", currUserAlias));
+
+        ItemCollection<QueryOutcome> items = followTable.query(querySpec);
+
+        if (items != null) {
+            for (Item item : items) {
+                String userAlias = item.getString(sortKey);
+                if (userAlias != null) {
+                    followerList.add(userAlias);
+                }
+            }
+        }
+
+        return followerList;
+    }
+
     /**
      * Gets the users from the database that the user specified in the request is following. Uses
      * information in the request object to limit the number of followees returned and to return the
@@ -324,7 +347,7 @@ public class FollowDAO implements FollowDAOInterface {
 
         for (User user : users) {
             Item item = new Item()
-                    .withPrimaryKey(partitionKey, "@maddiepetty")
+                    .withPrimaryKey(partitionKey, "@50") //pass 1000k
                     .withString("follower", "@" + user.getAlias());
 
             items.addItemToPut(item);

@@ -154,7 +154,8 @@ public class FeedDAO implements FeedDAOInterface {
 
         SendMessageRequest send_msg_request = new SendMessageRequest()
                 .withQueueUrl("https://sqs.us-west-2.amazonaws.com/851652515100/PostStatusQueue")
-                .withMessageBody((new Gson()).toJson(status));
+                .withMessageBody((new Gson()).toJson(status))
+                .withDelaySeconds(5);
 
         AmazonSQS sqs = AmazonSQSClientBuilder.defaultClient();
         SendMessageResult send_msg_result = sqs.sendMessage(send_msg_request);

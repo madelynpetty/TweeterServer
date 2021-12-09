@@ -12,6 +12,9 @@ public class PostUpdateFeedMessages implements RequestHandler<SQSEvent, Void> {
 
     @Override
     public Void handleRequest(SQSEvent event, Context context) {
+        assert event != null;
+        assert event.getRecords() != null;
+
         for (SQSEvent.SQSMessage msg : event.getRecords()) {
             Status status = (new Gson()).fromJson(msg.getBody(), Status.class);
             BatchService batchService = new BatchService();

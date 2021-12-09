@@ -69,6 +69,8 @@ public interface FollowDAOInterface {
 
     List<User> getFollowersList(String currUserAlias);
 
+    List<String> getFollowersAliasList(String currUserAlias);
+
     List<User> getFollowers(String currUserAlias, String lastFollowerAlias, int limit);
 
     void addFollowerBatch(List<User> users);

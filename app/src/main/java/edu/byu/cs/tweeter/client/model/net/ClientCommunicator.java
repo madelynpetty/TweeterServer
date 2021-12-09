@@ -75,7 +75,8 @@ class ClientCommunicator {
         try {
             URL url = getUrl(urlPath);
             connection = (HttpURLConnection) url.openConnection();
-            connection.setReadTimeout(TIMEOUT_MILLIS);
+            if (urlPath.equals("/poststatus")) connection.setReadTimeout(120000);
+            else connection.setReadTimeout(TIMEOUT_MILLIS);
             requestStrategy.setRequestMethod(connection);
 
             if(headers != null) {
