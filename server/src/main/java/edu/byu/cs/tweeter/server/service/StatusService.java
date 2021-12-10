@@ -43,6 +43,7 @@ public class StatusService {
     }
 
     public PostStatusResponse postStatus(PostStatusRequest request) {
+        assert request != null;
         assert request.getAuthToken() != null;
         assert request.getAuthToken().getCurrUserAlias() != null;
         assert request.getAuthToken().getIdentifier() != null;
@@ -55,8 +56,7 @@ public class StatusService {
 //            return new PostStatusResponse("AuthToken is no longer valid.");
 //        }
 
-        boolean storySuccess = storyDAOInterface.postStatus(request.getCurrUserAlias(),
-                request.getPost().getPost());
+        boolean storySuccess = storyDAOInterface.postStatus(request.getCurrUserAlias(), request.getPost().getPost());
         User currUser = userDAOInterface.getUser(request.getCurrUserAlias());
         System.out.println("Sending feed message: " + currUser.getAlias());
         boolean feedSuccess = feedDAOInterface.sendFeedMessage(request.getPost().getPost(), currUser);

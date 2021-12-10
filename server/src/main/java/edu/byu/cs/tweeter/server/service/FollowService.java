@@ -33,10 +33,10 @@ public class FollowService {
         assert request.getAuthToken().getIdentifier() != null;
         assert request.getAuthToken().getCurrUserAlias() != null;
 
-        if (!authTokenDAOInterface.validateUser(request.getAuthToken().getIdentifier(),
-                request.getAuthToken().getCurrUserAlias())) {
-            return new FollowingResponse("AuthToken is no longer valid.");
-        }
+//        if (!authTokenDAOInterface.validateUser(request.getAuthToken().getIdentifier(),
+//                request.getAuthToken().getCurrUserAlias())) {
+//            return new FollowingResponse("AuthToken is no longer valid.");
+//        }
 
         List<User> allFollowees = followDAOInterface.getFollowees(request.getLoggedInUserAlias(),
                 request.getLastFolloweeAlias(), request.getLimit());

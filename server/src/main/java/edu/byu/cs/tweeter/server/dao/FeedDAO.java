@@ -28,7 +28,7 @@ import edu.byu.cs.tweeter.server.dao.factory.DynamoDbFactory;
  * A DAO for accessing 'following' data from the database.
  */
 public class FeedDAO implements FeedDAOInterface {
-    private static final String tableName = "feed";
+    private static final String tableName = "feed2";
     private final String indexName = "receiverAlias-feedtime-index";
     private static Table feedTable = DynamoDbFactory.getDynamoDB().getTable(tableName);
     private static final String partitionKey = "receiverAlias";
@@ -154,8 +154,7 @@ public class FeedDAO implements FeedDAOInterface {
 
         SendMessageRequest send_msg_request = new SendMessageRequest()
                 .withQueueUrl("https://sqs.us-west-2.amazonaws.com/851652515100/PostStatusQueue")
-                .withMessageBody((new Gson()).toJson(status))
-                .withDelaySeconds(5);
+                .withMessageBody((new Gson()).toJson(status));
 
         AmazonSQS sqs = AmazonSQSClientBuilder.defaultClient();
         SendMessageResult send_msg_result = sqs.sendMessage(send_msg_request);

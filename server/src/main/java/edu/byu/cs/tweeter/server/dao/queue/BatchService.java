@@ -11,6 +11,7 @@ import com.google.gson.Gson;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import edu.byu.cs.tweeter.model.domain.Status;
 import edu.byu.cs.tweeter.model.net.request.PostUpdateFeedRequest;
@@ -27,18 +28,18 @@ public class BatchService {
     private final AmazonSQS sqs = AmazonSQSClientBuilder.defaultClient();
     private final FollowDAOInterface followDAOInterface = DAOFactory.getInstance().getFollowDAO();
 
-    private static final String feedTableName = "feed";
+    private static final String feedTableName = "feed2";
     private static final String feedPartitionKey = "receiverAlias";
     private static final String feedSortKey = "feedtime";
 
     public void postUpdateFeed(Status status) {
-        List<String> currUserFolloweeList = followDAOInterface.getFollowingAliasList(status.user.getAlias());
+        List<String> currUserFolloweeList = followDAOInterface.getFollowersAliasList(status.user.getAlias());
         List<String> batch = new ArrayList<>();
 
         for (String follower : currUserFolloweeList) {
             batch.add(follower);
 
-            if (batch.size() == 25) { //todo this might be able to do 100
+            if (batch.size() == 25) {
                 PostUpdateFeedRequest request = new PostUpdateFeedRequest(batch, status);
                 sqs.sendMessage(
                         "https://sqs.us-west-2.amazonaws.com/851652515100/UpdateFeedQueue",
@@ -62,16 +63,16 @@ public class BatchService {
         for (String user : users) {
             Item item = new Item()
                     .withPrimaryKey(feedPartitionKey, user)
-                    .withString(feedSortKey, request.getStatus().getDate())
                     .withString("post", request.getStatus().getPost())
-                    .withString("senderAlias", request.getStatus().getUser().getAlias());
+                    .withString("senderAlias", request.getStatus().getUser().getAlias())
+                    .withString(feedSortKey, request.getStatus().getDate());
 
             items.addItemToPut(item);
 
-            if (items.getItemsToPut() != null && items.getItemsToPut().size() == 25) {
-                loopBatchWrite(items);
-                items = new TableWriteItems(feedTableName);
-            }
+//            if (items.getItemsToPut() != null && items.getItemsToPut().size() == 25) {
+//                loopBatchWrite(items);
+//                items = new TableWriteItems(feedTableName);
+//            }
         }
 
         // Write any leftover items
@@ -82,12 +83,10 @@ public class BatchService {
 
     private void loopBatchWrite(TableWriteItems items) {
         BatchWriteItemOutcome outcome = DynamoDbFactory.getDynamoDB().batchWriteItem(items);
-        System.out.println("Wrote Feed Batch");
 
         while (outcome.getUnprocessedItems().size() > 0) {
             Map<String, List<WriteRequest>> unprocessedItems = outcome.getUnprocessedItems();
             outcome = DynamoDbFactory.getDynamoDB().batchWriteItemUnprocessed(unprocessedItems);
-            System.out.println("Wrote more feeds");
         }
     }
 }
